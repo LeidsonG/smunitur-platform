@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model UsuarioAdmin {
+  id        Int      @id @default(autoincrement())
+  nome      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(150)
+  senha     String   @db.VarChar(255)
+  nivel     NivelAdmin @default(operador)
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  historicos OrcamentoStatusHistorico[]
+
+  @@map("usuarios_admin")
+}
+
+enum NivelAdmin {
+  super_admin
+  admin
+  operador
+}
+
+model Categoria {
+  id       Int       @id @default(autoincrement())
+  nome     String    @db.VarChar(100)
+  slug     String    @unique @db.VarChar(100)
+  ativo    Boolean   @default(true)
+  produtos Produto[]
+
+  @@map("categorias")
+}
+
+model Produto {
+  id          Int       @id @default(autoincrement())
+  categoriaId Int       @map("categoria_id")
+  nome        String    @db.VarChar(150)
+  descricao   String?   @db.Text
+  imagem      String?   @db.VarChar(255)
+  ativo       Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  categoria   Categoria @relation(fields: [categoriaId], references: [id])
+
+  @@map("produtos")
+}
+
+model Orcamento {
+  id               Int              @id @default(autoincrement())
+  numero           Int              @unique
+  nomeCliente      String           @map("nome_cliente")    @db.VarChar(100)
+  emailCliente     String           @map("email_cliente")   @db.VarChar(150)
+  telefoneCliente  String           @map("telefone_cliente") @db.VarChar(20)
+  cpfCnpj          String?          @map("cpf_cnpj")        @db.VarChar(20)
+  produtoDesejado  String           @map("produto_desejado") @db.VarChar(150)
+  quantidade       Int              @db.UnsignedInt
+  tamanhos         String?          @db.VarChar(255)
+  cores            String?          @db.VarChar(255)
+  detalhes         String?          @db.Text
+  observacoes      String?          @db.Text
+  imagemReferencia String?          @map("imagem_referencia") @db.VarChar(255)
+  status           StatusOrcamento  @default(recebido)
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  historicos OrcamentoStatusHistorico[]
+
+  @@map("orcamentos")
+}
+
+enum StatusOrcamento {
+  recebido
+  em_analise
+  aguardando_aprovacao
+  em_producao
+  finalizado
+  enviado
+  cancelado
+}
+
+model OrcamentoStatusHistorico {
+  id              Int      @id @default(autoincrement())
+  orcamentoId     Int      @map("orcamento_id")
+  statusAnterior  String?  @map("status_anterior") @db.VarChar(50)
+  statusNovo      String   @map("status_novo") @db.VarChar(50)
+  observacao      String?  @db.Text
+  usuarioId       Int?     @map("usuario_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  orcamento Orcamento    @relation(fields: [orcamentoId], references: [id], onDelete: Cascade)
+  usuario   UsuarioAdmin? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+
+  @@map("orcamento_status_historico")
+}
