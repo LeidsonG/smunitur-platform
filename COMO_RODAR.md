@@ -40,7 +40,13 @@ npm run dev
 
 API disponível em: `http://localhost:3001`
 
+```
+http://localhost:3001/api/health
+```
+
+
 ### Credenciais admin padrão
+
 - **E-mail:** `admin@smunitur.com.br`
 - **Senha:** `admin123`
 - **ATENÇÃO:** Altere a senha após o primeiro acesso!
@@ -69,36 +75,36 @@ Painel admin em: `http://localhost:3000/admin`
 
 ## Estrutura de rotas
 
-| Rota | Descrição |
-|------|-----------|
-| `/` | Landing page completa |
-| `/#orcamento` | Formulário de orçamento |
-| `/#acompanhar` | Acompanhamento de produção |
-| `/admin/login` | Login do painel |
-| `/admin/dashboard` | Dashboard admin |
-| `/admin/orcamentos` | Gestão de orçamentos |
-| `/admin/producao` | Painel de produção |
-| `/admin/produtos` | CRUD de produtos |
-| `/admin/usuarios` | Gestão de usuários |
+| Rota                  | Descrição                  |
+| --------------------- | ---------------------------- |
+| `/`                 | Landing page completa        |
+| `/#orcamento`       | Formulário de orçamento    |
+| `/#acompanhar`      | Acompanhamento de produção |
+| `/admin/login`      | Login do painel              |
+| `/admin/dashboard`  | Dashboard admin              |
+| `/admin/orcamentos` | Gestão de orçamentos       |
+| `/admin/producao`   | Painel de produção         |
+| `/admin/produtos`   | CRUD de produtos             |
+| `/admin/usuarios`   | Gestão de usuários         |
 
 ---
 
 ## API Endpoints
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/api/auth/login` | Login admin |
-| GET | `/api/orcamentos` | Listar orçamentos (auth) |
-| POST | `/api/orcamentos` | Criar orçamento (público) |
-| GET | `/api/orcamentos/acompanhar/:numero` | Consulta pública |
-| PATCH | `/api/orcamentos/:id/status` | Atualizar status (auth) |
-| GET | `/api/produtos` | Listar produtos (público) |
-| POST | `/api/produtos` | Criar produto (auth) |
-| GET | `/api/admin/dashboard` | Estatísticas (auth) |
-| GET | `/api/admin/usuarios` | Listar usuários (auth) |
-| POST | `/api/admin/usuarios` | Criar usuário (auth super_admin) |
-| GET | `/api/producao` | Orçamentos em produção (auth) |
-| PATCH | `/api/producao/:id/status` | Atualizar status produção (auth) |
+| Método | Rota                                   | Descrição                        |
+| ------- | -------------------------------------- | ---------------------------------- |
+| POST    | `/api/auth/login`                    | Login admin                        |
+| GET     | `/api/orcamentos`                    | Listar orçamentos (auth)          |
+| POST    | `/api/orcamentos`                    | Criar orçamento (público)        |
+| GET     | `/api/orcamentos/acompanhar/:numero` | Consulta pública                  |
+| PATCH   | `/api/orcamentos/:id/status`         | Atualizar status (auth)            |
+| GET     | `/api/produtos`                      | Listar produtos (público)         |
+| POST    | `/api/produtos`                      | Criar produto (auth)               |
+| GET     | `/api/admin/dashboard`               | Estatísticas (auth)               |
+| GET     | `/api/admin/usuarios`                | Listar usuários (auth)            |
+| POST    | `/api/admin/usuarios`                | Criar usuário (auth super_admin)  |
+| GET     | `/api/producao`                      | Orçamentos em produção (auth)   |
+| PATCH   | `/api/producao/:id/status`           | Atualizar status produção (auth) |
 
 ---
 
