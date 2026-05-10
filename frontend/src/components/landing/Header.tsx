@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 
 const navLinks = [
@@ -41,12 +42,16 @@ export default function Header() {
           {/* Logo */}
           <button
             onClick={() => handleLink('#inicio')}
-            className="flex items-center gap-2 focus:outline-none"
+            className="flex items-center focus:outline-none"
           >
-            <div className="flex items-center gap-1">
-              <span className="text-2xl font-black" style={{ color: '#005ED5' }}>SM</span>
-              <span className="text-2xl font-black" style={{ color: '#FF9400' }}>UNITUR</span>
-            </div>
+            <Image
+              src="/logo.png"
+              alt="SM Unitur"
+              width={140}
+              height={48}
+              className="h-10 lg:h-12 w-auto object-contain"
+              priority
+            />
           </button>
 
           {/* Nav Desktop */}

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { MessageCircle, Mail } from 'lucide-react';
 
 // ATENÇÃO: Número temporário para testes. Substituir pelo número oficial antes de ir para produção.
@@ -14,9 +15,14 @@ export default function Footer() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
           {/* Logo + desc */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-1 mb-3">
-              <span className="text-2xl font-black" style={{ color: '#005ED5' }}>SM</span>
-              <span className="text-2xl font-black" style={{ color: '#FF9400' }}>UNITUR</span>
+            <div className="mb-4">
+              <Image
+                src="/logo.png"
+                alt="SM Unitur"
+                width={140}
+                height={48}
+                className="h-10 w-auto object-contain brightness-0 invert"
+              />
             </div>
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
               Especialistas em confecção de uniformes, camisetas, moletons e jalecos personalizados
