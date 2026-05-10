@@ -56,7 +56,7 @@ export default function Produtos() {
           {produtos.map(({ icon: Icon, nome, desc, tags }) => (
             <div
               key={nome}
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-default border border-transparent hover:border-blue-100"
+              className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200"
             >
               {/* Ícone */}
               <div

@@ -6,22 +6,12 @@
   --color-brand-blue-dark: #004AAA;
   --color-brand-blue-light: #1A7AE8;
   --color-brand-orange-dark: #E07800;
-  --color-gray-50: #F8F9FA;
-  --color-gray-950: #0A0F1E;
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-
-  --animate-fade-in: fade-in 0.6s ease-out;
-  --animate-slide-up: slide-up 0.6s ease-out;
 }
 
-@keyframes fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(28px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -41,6 +31,22 @@ body {
   color: #1a1a1a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animação CSS do título do Hero — sem depender de JS */
+.hero-title {
+  animation: hero-in 0.8s ease-out both;
+}
+
+/* Scroll margin para todas as seções — compensa o header fixo (64px mobile / 80px desktop) */
+section[id] {
+  scroll-margin-top: 64px;
+}
+
+@media (min-width: 1024px) {
+  section[id] {
+    scroll-margin-top: 80px;
+  }
 }
 
 /* Scrollbar personalizada */

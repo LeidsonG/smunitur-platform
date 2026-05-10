@@ -61,7 +61,7 @@ export default function Servicos() {
           {servicos.map(({ icon: Icon, titulo, desc }, i) => (
             <div
               key={titulo}
-              className="relative p-6 rounded-2xl border border-gray-100 hover:border-transparent hover:shadow-xl transition-all duration-300 group overflow-hidden"
+              className="relative p-6 rounded-2xl border border-gray-200 hover:border-blue-200 hover:shadow-xl transition-all duration-300 group overflow-hidden bg-white"
             >
               {/* Gradiente no hover */}
               <div

@@ -72,7 +72,7 @@ export default function Sobre() {
             {diferenciais.map(({ icon: Icon, titulo, desc }) => (
               <div
                 key={titulo}
-                className="p-6 rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 group"
+                className="p-6 rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group bg-white"
               >
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200"
