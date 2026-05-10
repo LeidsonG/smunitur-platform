@@ -37,7 +37,7 @@ const servicos = [
 
 export default function Servicos() {
   return (
-    <section id="servicos" className="py-20 lg:py-32 bg-white">
+    <section id="servicos" className="py-12 lg:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
           <span

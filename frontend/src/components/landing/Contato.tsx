@@ -39,7 +39,7 @@ const contatos = [
 
 export default function Contato() {
   return (
-    <section id="contato" className="py-20 lg:py-32 bg-white">
+    <section id="contato" className="py-12 lg:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-14 items-center">
           {/* Info */}

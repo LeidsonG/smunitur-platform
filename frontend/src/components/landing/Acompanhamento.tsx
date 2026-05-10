@@ -97,7 +97,7 @@ export default function Acompanhamento() {
   const StatusIcon = statusInfo?.icon;
 
   return (
-    <section id="acompanhar" className="py-20 lg:py-32 bg-white">
+    <section id="acompanhar" className="py-12 lg:py-16 bg-white">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <span

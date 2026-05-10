@@ -78,6 +78,9 @@ export default function FormularioOrcamento() {
       setEstado('success');
       reset();
       setImagemFile(null);
+
+      // Abre o WhatsApp automaticamente após o envio bem-sucedido
+      window.open(link, '_blank');
     } catch {
       setEstado('error');
     }
@@ -85,7 +88,7 @@ export default function FormularioOrcamento() {
 
   if (estado === 'success' && resultado) {
     return (
-      <section id="orcamento" className="py-20 lg:py-32" style={{ background: '#F8F9FA' }}>
+      <section id="orcamento" className="py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
         <div className="max-w-xl mx-auto px-4 text-center">
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
@@ -140,7 +143,7 @@ export default function FormularioOrcamento() {
   }
 
   return (
-    <section id="orcamento" className="py-20 lg:py-32" style={{ background: '#F8F9FA' }}>
+    <section id="orcamento" className="py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <span

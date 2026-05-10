@@ -31,7 +31,7 @@ const produtos = [
 
 export default function Produtos() {
   return (
-    <section id="produtos" className="py-20 lg:py-32" style={{ background: '#F8F9FA' }}>
+    <section id="produtos" className="py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-14">
