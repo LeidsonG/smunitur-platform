@@ -55,10 +55,10 @@ export default function Sobre() {
               de uniformes ou roupas personalizadas com identidade própria.
             </p>
             <a
-              href="#orcamento"
+              href="#contato"
               onClick={(e) => {
                 e.preventDefault();
-                document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' });
+                document.querySelector('#contato')?.scrollIntoView({ behavior: 'smooth' });
               }}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-all duration-200 hover:scale-105"
               style={{ background: '#005ED5' }}

@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS orcamento_status_historico (
 INSERT INTO usuarios_admin (nome, email, senha, nivel) VALUES (
   'Administrador',
   'admin@smunitur.com.br',
-  '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+  '$2a$10$HcGbLHFXWQ/f1PZsPTWMPO2Q.MWpGRRLnvEEFj.UDdgiFCOCA1V0e',
   'super_admin'
 );
 -- ATENÇÃO: Altere a senha padrão imediatamente após o primeiro acesso!
