@@ -15,11 +15,9 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* Tailwind v4 usa @layer utilities internamente.
+   Estilos fora de @layer sempre vencem @layer, então
+   NÃO colocar resets de margin/padding aqui — o preflight do Tailwind já faz isso. */
 
 html {
   scroll-behavior: smooth;
@@ -27,18 +25,16 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: #ffffff;
-  color: #1a1a1a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Animação CSS do título do Hero — sem depender de JS */
+/* Animação CSS do título do Hero */
 .hero-title {
   animation: hero-in 0.8s ease-out both;
 }
 
-/* Scroll margin para todas as seções — compensa o header fixo (64px mobile / 80px desktop) */
+/* Scroll margin para todas as seções — compensa o header fixo */
 section[id] {
   scroll-margin-top: 64px;
 }
