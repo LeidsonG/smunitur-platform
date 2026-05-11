@@ -7,6 +7,7 @@ Sistema web completo para a empresa **SM Unitur**, focado em confecção de roup
 ## Objetivo do Projeto
 
 Plataforma web que permite:
+
 - Clientes conhecerem os produtos e serviços da SM Unitur
 - Solicitação de orçamentos personalizados via formulário
 - Acompanhamento do status de produção pelo número do orçamento
@@ -17,6 +18,7 @@ Plataforma web que permite:
 ## Tecnologias Utilizadas
 
 ### Frontend
+
 - **Next.js 14** (App Router, SSR/SSG)
 - **TypeScript**
 - **Tailwind CSS**
@@ -26,6 +28,7 @@ Plataforma web que permite:
 - **Lucide React** (ícones)
 
 ### Backend
+
 - **Node.js + Express**
 - **TypeScript**
 - **Prisma ORM**
@@ -35,6 +38,7 @@ Plataforma web que permite:
 - **Bcryptjs** (hash de senhas)
 
 ### Banco de Dados
+
 - **MySQL** via XAMPP (ambiente local)
 
 ---
@@ -63,55 +67,60 @@ systemweb-unitur/
 ## Estrutura do Banco de Dados
 
 ### `usuarios_admin`
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | INT PK AUTO_INCREMENT | Identificador |
-| nome | VARCHAR(100) | Nome do administrador |
-| email | VARCHAR(150) UNIQUE | E-mail de login |
-| senha | VARCHAR(255) | Senha criptografada (bcrypt) |
-| nivel | ENUM('super_admin','admin','operador') | Nível de permissão |
-| ativo | BOOLEAN | Status do usuário |
-| created_at | TIMESTAMP | Data de criação |
+
+| Campo      | Tipo                                   | Descrição                  |
+| ---------- | -------------------------------------- | ---------------------------- |
+| id         | INT PK AUTO_INCREMENT                  | Identificador                |
+| nome       | VARCHAR(100)                           | Nome do administrador        |
+| email      | VARCHAR(150) UNIQUE                    | E-mail de login              |
+| senha      | VARCHAR(255)                           | Senha criptografada (bcrypt) |
+| nivel      | ENUM('super_admin','admin','operador') | Nível de permissão         |
+| ativo      | BOOLEAN                                | Status do usuário           |
+| created_at | TIMESTAMP                              | Data de criação            |
 
 ### `categorias`
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | INT PK AUTO_INCREMENT | Identificador |
-| nome | VARCHAR(100) | Nome da categoria |
-| slug | VARCHAR(100) | Slug URL-friendly |
-| ativo | BOOLEAN | Status |
+
+| Campo | Tipo                  | Descrição       |
+| ----- | --------------------- | ----------------- |
+| id    | INT PK AUTO_INCREMENT | Identificador     |
+| nome  | VARCHAR(100)          | Nome da categoria |
+| slug  | VARCHAR(100)          | Slug URL-friendly |
+| ativo | BOOLEAN               | Status            |
 
 ### `produtos`
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | INT PK AUTO_INCREMENT | Identificador |
-| categoria_id | INT FK | Categoria do produto |
-| nome | VARCHAR(150) | Nome do produto |
-| descricao | TEXT | Descrição |
-| imagem | VARCHAR(255) | Caminho da imagem |
-| ativo | BOOLEAN | Status |
-| created_at | TIMESTAMP | Data de criação |
+
+| Campo        | Tipo                  | Descrição          |
+| ------------ | --------------------- | -------------------- |
+| id           | INT PK AUTO_INCREMENT | Identificador        |
+| categoria_id | INT FK                | Categoria do produto |
+| nome         | VARCHAR(150)          | Nome do produto      |
+| descricao    | TEXT                  | Descrição          |
+| imagem       | VARCHAR(255)          | Caminho da imagem    |
+| ativo        | BOOLEAN               | Status               |
+| created_at   | TIMESTAMP             | Data de criação    |
 
 ### `orcamentos`
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | INT PK AUTO_INCREMENT | Identificador |
-| numero | INT UNIQUE | Número do orçamento (início: 100) |
-| nome_cliente | VARCHAR(100) | Nome do cliente |
-| email_cliente | VARCHAR(150) | E-mail |
-| telefone_cliente | VARCHAR(20) | Telefone/WhatsApp |
-| cpf_cnpj | VARCHAR(20) | CPF ou CNPJ (opcional) |
-| produto_desejado | VARCHAR(150) | Produto solicitado |
-| quantidade | INT | Quantidade |
-| tamanhos | VARCHAR(255) | Tamanhos (ex: P,M,G,GG) |
-| cores | VARCHAR(255) | Cores desejadas |
-| detalhes | TEXT | Detalhes personalizados |
-| observacoes | TEXT | Observações adicionais |
-| imagem_referencia | VARCHAR(255) | Caminho da imagem de referência |
-| status | ENUM | Status atual da produção |
-| created_at | TIMESTAMP | Data de criação |
+
+| Campo             | Tipo                  | Descrição                          |
+| ----------------- | --------------------- | ------------------------------------ |
+| id                | INT PK AUTO_INCREMENT | Identificador                        |
+| numero            | INT UNIQUE            | Número do orçamento (início: 100) |
+| nome_cliente      | VARCHAR(100)          | Nome do cliente                      |
+| email_cliente     | VARCHAR(150)          | E-mail                               |
+| telefone_cliente  | VARCHAR(20)           | Telefone/WhatsApp                    |
+| cpf_cnpj          | VARCHAR(20)           | CPF ou CNPJ (opcional)               |
+| produto_desejado  | VARCHAR(150)          | Produto solicitado                   |
+| quantidade        | INT                   | Quantidade                           |
+| tamanhos          | VARCHAR(255)          | Tamanhos (ex: P,M,G,GG)              |
+| cores             | VARCHAR(255)          | Cores desejadas                      |
+| detalhes          | TEXT                  | Detalhes personalizados              |
+| observacoes       | TEXT                  | Observações adicionais             |
+| imagem_referencia | VARCHAR(255)          | Caminho da imagem de referência     |
+| status            | ENUM                  | Status atual da produção           |
+| created_at        | TIMESTAMP             | Data de criação                    |
 
 **Status possíveis do orçamento:**
+
 - `recebido` — Orçamento recebido, aguardando análise
 - `em_analise` — Sendo analisado pela equipe
 - `aguardando_aprovacao` — Orçamento enviado, aguardando aprovação do cliente
@@ -121,15 +130,16 @@ systemweb-unitur/
 - `cancelado` — Orçamento cancelado
 
 ### `orcamento_status_historico`
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | INT PK AUTO_INCREMENT | Identificador |
-| orcamento_id | INT FK | Orçamento relacionado |
-| status_anterior | VARCHAR(50) | Status anterior |
-| status_novo | VARCHAR(50) | Novo status |
-| observacao | TEXT | Observação da mudança |
-| usuario_id | INT FK | Admin responsável |
-| created_at | TIMESTAMP | Data/hora da mudança |
+
+| Campo           | Tipo                  | Descrição              |
+| --------------- | --------------------- | ------------------------ |
+| id              | INT PK AUTO_INCREMENT | Identificador            |
+| orcamento_id    | INT FK                | Orçamento relacionado   |
+| status_anterior | VARCHAR(50)           | Status anterior          |
+| status_novo     | VARCHAR(50)           | Novo status              |
+| observacao      | TEXT                  | Observação da mudança |
+| usuario_id      | INT FK                | Admin responsável       |
+| created_at      | TIMESTAMP             | Data/hora da mudança    |
 
 ---
 
@@ -188,8 +198,8 @@ systemweb-unitur/
 
 ## Histórico de Alterações
 
-| Data | Alteração | Descrição |
-|------|-----------|-----------|
+| Data       | Alteração        | Descrição                                         |
+| ---------- | ------------------ | --------------------------------------------------- |
 | 2026-05-10 | Início do projeto | Estrutura base, .gitignore, README, schema do banco |
 
 ---
@@ -200,3 +210,5 @@ systemweb-unitur/
 - [ ] Substituir número WhatsApp de teste pelo oficial
 - [ ] Deploy em hospedagem online
 - [ ] Configurar domínio e SSL
+- [ ] Colocar opção para alterar a senha do usuario no /admin
+- [ ] Verificar o envio pelo whatsapp e e-mail
