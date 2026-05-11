@@ -12,7 +12,11 @@
 
 1. Abra o XAMPP e inicie o **MySQL**
 2. Acesse o **phpMyAdmin** em `http://localhost/phpmyadmin`
-3. Execute o script `database/schema.sql` (cria o banco e as tabelas)
+3. Crie o banco vazio executando apenas:
+   ```sql
+   CREATE DATABASE smunitur CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+4. As tabelas serão criadas via Prisma Migrate no passo seguinte (não rode mais `database/schema.sql` manualmente — ele virou referência apenas)
 
 ---
 
@@ -28,11 +32,18 @@ npm install
 cp .env.example .env
 # Editar .env se necessário (banco, JWT, etc.)
 
+# Aplicar as migrations (cria todas as tabelas)
+npm run db:migrate:deploy
+
 # Gerar o cliente Prisma
 npm run db:generate
 
-# (Opcional) Sincronizar schema com o banco via Prisma
-npm run db:push
+# (Apenas se você já tinha o banco criado pelo schema.sql antigo)
+# Marca a migration inicial como já aplicada sem reexecutá-la:
+# npm run db:migrate:baseline
+
+# Popular dados iniciais (usuário admin padrão + categorias)
+npm run db:seed
 
 # Rodar em desenvolvimento
 npm run dev

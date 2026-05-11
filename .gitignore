@@ -36,8 +36,8 @@ Thumbs.db
 backend/uploads/*
 !backend/uploads/.gitkeep
 
-# Prisma
-backend/prisma/migrations/
+# Prisma — migrations DEVEM ser versionadas
+# (anteriormente ignoradas; agora fazem parte do controle de schema)
 
 # TypeScript
 *.tsbuildinfo
