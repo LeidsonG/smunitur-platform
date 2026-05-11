@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import prisma from '../utils/prisma';
-import { upload } from '../utils/upload';
+import { upload, validarMagicBytes } from '../utils/upload';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
@@ -37,6 +37,7 @@ router.post(
   '/',
   authMiddleware,
   upload.single('imagem'),
+  validarMagicBytes,
   [
     body('nome').trim().notEmpty().withMessage('Nome obrigatório'),
     body('categoria_id').isInt().withMessage('Categoria obrigatória'),
@@ -66,6 +67,7 @@ router.put(
   '/:id',
   authMiddleware,
   upload.single('imagem'),
+  validarMagicBytes,
   async (req: Request, res: Response) => {
     const { nome, descricao, categoria_id, ativo } = req.body;
     const data: Record<string, unknown> = {};

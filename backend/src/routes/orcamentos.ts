@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import prisma from '../utils/prisma';
-import { upload } from '../utils/upload';
+import { upload, validarMagicBytes } from '../utils/upload';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
@@ -19,6 +19,7 @@ async function gerarNumeroOrcamento(): Promise<number> {
 router.post(
   '/',
   upload.single('imagem_referencia'),
+  validarMagicBytes,
   [
     body('nome_cliente').trim().notEmpty().withMessage('Nome obrigatório'),
     body('email_cliente').isEmail().withMessage('E-mail inválido'),
