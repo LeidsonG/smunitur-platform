@@ -5,6 +5,14 @@ export interface AuthRequest extends Request {
   admin?: { id: number; email: string; nivel: string };
 }
 
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 16) {
+    throw new Error('JWT_SECRET não configurado corretamente (mínimo 16 caracteres).');
+  }
+  return secret;
+}
+
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
@@ -13,7 +21,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
 
   const token = authHeader.slice(7);
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as {
+    const decoded = jwt.verify(token, getJwtSecret()) as {
       id: number; email: string; nivel: string;
     };
     req.admin = decoded;
@@ -31,3 +39,5 @@ export function requireNivel(niveis: string[]) {
     return next();
   };
 }
+
+export { getJwtSecret };
