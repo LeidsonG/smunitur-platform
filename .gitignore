@@ -29,6 +29,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Local-only configuration
+.claude/
+
 # Uploads (manter pasta, ignorar arquivos)
 backend/uploads/*
 !backend/uploads/.gitkeep
