@@ -94,7 +94,7 @@ export default function Header() {
       {/* Menu Mobile */}
       <div
         className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          mobileOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+          mobileOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
         }`}
       >
         <div className="bg-white border-t border-gray-100 px-4 pb-4 pt-2">
