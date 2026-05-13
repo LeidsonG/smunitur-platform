@@ -18,8 +18,8 @@ export default function Hero() {
     >
       {/* Decorações de fundo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-10" style={{ background: '#FF9400' }} />
-        <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full opacity-10" style={{ background: '#FF9400' }} />
+        <div className="hidden sm:block absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-10" style={{ background: '#FF9400' }} />
+        <div className="hidden sm:block absolute -bottom-32 -left-16 w-80 h-80 rounded-full opacity-10" style={{ background: '#FF9400' }} />
         {[...Array(5)].map((_, i) => (
           <div key={i} className="absolute opacity-5" style={{
             top: `${10 + i * 20}%`, left: 0, right: 0, height: '1px',
