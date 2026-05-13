@@ -28,6 +28,31 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Toque responsivo: remove o delay de 300ms em mobile e impede gestos
+   indesejados (como double-tap-zoom) sobre elementos interativos. */
+button,
+a,
+[role="button"],
+input[type="button"],
+input[type="submit"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS Safari aplica zoom automaticamente quando um input/select/textarea
+   tem font-size < 16px no foco. Aumentamos para 16px no mobile e
+   preservamos o tamanho original no desktop. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* Animação CSS do título do Hero */
