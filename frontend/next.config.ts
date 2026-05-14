@@ -1,6 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Libera o dev server para acesso por IP local e túneis externos (ex.: ngrok).
+  // Sem isso, o Next.js 15+ bloqueia /_next/static/* vindo de origens diferentes
+  // de localhost, e a hidratação falha em qualquer dispositivo que não seja a
+  // máquina onde o dev server roda.
+  allowedDevOrigins: [
+    '192.168.0.106',
+    'localhost',
+    '*.ngrok-free.app',
+    '*.ngrok.app',
+    '*.ngrok.io',
+  ],
   images: {
     remotePatterns: [],
     localPatterns: [
