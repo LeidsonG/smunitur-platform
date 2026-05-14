@@ -21,16 +21,26 @@
 
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  width: 100%;
-  position: relative;
+  overflow-x: clip;
+  max-width: 100vw;
+  overscroll-behavior-x: none;
+}
+
+/* Fallback para navegadores antigos que não suportam overflow-x: clip
+   (overflow-x: hidden cria um stacking context que pode interferir em
+   position: sticky, mas é o mais compatível). */
+@supports not (overflow-x: clip) {
+  html, body {
+    overflow-x: hidden;
+  }
 }
 
 /* Toque responsivo: remove o delay de 300ms em mobile e impede gestos

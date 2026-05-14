@@ -116,21 +116,21 @@ export default function Acompanhamento() {
         </div>
 
         {/* Busca */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-6 mb-6">
-          <div className="flex gap-3">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-5 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={numero}
               onChange={(e) => setNumero(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && buscar()}
               placeholder="Digite o número do orçamento (ex: 100)"
-              className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-colors"
+              className="flex-1 px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-colors"
             />
             <button
               type="button"
               onClick={buscar}
               disabled={loading || !numero.trim()}
-              className="px-6 py-3 rounded-xl font-semibold text-white flex items-center gap-2 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: '#005ED5' }}
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
