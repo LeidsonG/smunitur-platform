@@ -82,7 +82,7 @@ systemweb-unitur/
 
 ## Integração WhatsApp
 
-- Número temporário para testes: **5517981322215** *(substituir pelo número oficial)*
+- Número temporário para testes.
 - Mensagem formatada com todos os dados do orçamento
 - Link gerado via `https://wa.me/{numero}?text={mensagem_codificada}`
 - Mensagem inclui número do orçamento, dados do cliente e detalhes do pedido
@@ -118,14 +118,6 @@ systemweb-unitur/
 - Email marketing
 - Sistema avançado de produção (linha de montagem, etapas)
 - Integrações externas (ERP, estoque)
-
----
-
-## Histórico de Alterações
-
-| Data       | Alteração        | Descrição                                         |
-| ---------- | ------------------ | --------------------------------------------------- |
-| 2026-05-10 | Início do projeto | Estrutura base, .gitignore, README, schema do banco |
 
 ---
 
