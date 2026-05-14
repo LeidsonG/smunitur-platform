@@ -51,7 +51,8 @@ export default function Header() {
               alt="SM Unitur"
               width={140}
               height={48}
-              className="h-10 lg:h-12 w-auto object-contain pointer-events-none"
+              className="h-10 lg:h-12 object-contain pointer-events-none"
+              style={{ width: 'auto' }}
               priority
             />
           </button>

@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     '192.168.0.106',
     'localhost',
     '*.ngrok-free.app',
+    '*.ngrok-free.dev',
     '*.ngrok.app',
     '*.ngrok.io',
   ],
