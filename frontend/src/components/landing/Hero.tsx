@@ -28,12 +28,12 @@ export default function Hero() {
         ))}
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 lg:py-40 w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-40 w-full">
         <div className="text-center">
 
           {/* Badge */}
           <div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 lg:mb-8 text-sm font-medium"
             style={{ background: 'rgba(255,148,0,0.15)', color: '#FF9400', border: '1px solid rgba(255,148,0,0.3)' }}
           >
             <Star size={14} fill="currentColor" />
@@ -42,7 +42,7 @@ export default function Hero() {
 
           {/* Título — CSS animation, sem opacity:0 via JS */}
           <h1
-            className="text-4xl sm:text-5xl lg:text-7xl font-black text-white mb-6 leading-tight hero-title"
+            className="text-4xl sm:text-5xl lg:text-7xl font-black text-white mb-5 lg:mb-6 leading-tight hero-title"
           >
             Uniformes e Roupas
             <span className="block" style={{ color: '#FF9400' }}>Personalizadas</span>
@@ -50,17 +50,17 @@ export default function Hero() {
           </h1>
 
           {/* Subtítulo */}
-          <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-base sm:text-xl text-blue-100 max-w-2xl mx-auto mb-8 lg:mb-10 leading-relaxed">
             Camisetas, moletons, jalecos e muito mais. Qualidade premium, prazo garantido
             e personalização completa para sua empresa ou equipe.
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-10 lg:mb-16">
             <a
               href="#orcamento"
               onClick={(e) => { e.preventDefault(); document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' }); }}
-              className="px-8 py-4 rounded-full text-lg font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-2xl"
+              className="px-7 sm:px-8 py-3.5 sm:py-4 rounded-full text-base sm:text-lg font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-2xl"
               style={{ background: '#FF9400' }}
             >
               Solicitar Orçamento Grátis
@@ -68,7 +68,7 @@ export default function Hero() {
             <a
               href="#produtos"
               onClick={(e) => { e.preventDefault(); document.querySelector('#produtos')?.scrollIntoView({ behavior: 'smooth' }); }}
-              className="px-8 py-4 rounded-full text-lg font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95"
+              className="px-7 sm:px-8 py-3.5 sm:py-4 rounded-full text-base sm:text-lg font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95"
               style={{ border: '2px solid rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.08)' }}
             >
               Ver Produtos
@@ -76,16 +76,16 @@ export default function Hero() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
             {stats.map(({ icon: Icon, label, value }) => (
               <div
                 key={label}
-                className="rounded-2xl p-5 text-center"
+                className="rounded-2xl p-4 sm:p-5 text-center"
                 style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
               >
-                <Icon size={24} className="mx-auto mb-2" style={{ color: '#FF9400' }} />
-                <div className="text-3xl font-black text-white">{value}</div>
-                <div className="text-xs text-blue-200 mt-1">{label}</div>
+                <Icon size={22} className="mx-auto mb-1.5 sm:mb-2" style={{ color: '#FF9400' }} />
+                <div className="text-2xl sm:text-3xl font-black text-white">{value}</div>
+                <div className="text-xs text-blue-200 mt-0.5 sm:mt-1">{label}</div>
               </div>
             ))}
           </div>

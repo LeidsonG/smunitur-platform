@@ -88,7 +88,7 @@ export default function FormularioOrcamento() {
 
   if (estado === 'success' && resultado) {
     return (
-      <section id="orcamento" className="py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
+      <section id="orcamento" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
         <div className="max-w-xl mx-auto px-4 text-center">
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
@@ -145,9 +145,9 @@ export default function FormularioOrcamento() {
   }
 
   return (
-    <section id="orcamento" className="py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
+    <section id="orcamento" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10 sm:mb-12">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
             style={{ background: 'rgba(255,148,0,0.1)', color: '#FF9400' }}
@@ -163,7 +163,7 @@ export default function FormularioOrcamento() {
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl p-8 lg:p-10">
+        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl p-6 sm:p-8 lg:p-10">
           {estado === 'error' && (
             <div className="flex items-center gap-3 p-4 rounded-xl mb-6 bg-red-50 border border-red-100">
               <AlertCircle size={18} className="text-red-500 flex-shrink-0" />

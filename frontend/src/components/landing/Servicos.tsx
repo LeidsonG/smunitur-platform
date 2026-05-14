@@ -37,9 +37,9 @@ const servicos = [
 
 export default function Servicos() {
   return (
-    <section id="servicos" className="py-12 lg:py-16 bg-white">
+    <section id="servicos" className="py-10 sm:py-12 lg:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14">
+        <div className="text-center mb-10 sm:mb-12 lg:mb-14">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
             style={{ background: 'rgba(0,94,213,0.1)', color: '#005ED5' }}

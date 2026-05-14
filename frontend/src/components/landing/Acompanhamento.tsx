@@ -97,9 +97,9 @@ export default function Acompanhamento() {
   const StatusIcon = statusInfo?.icon;
 
   return (
-    <section id="acompanhar" className="py-12 lg:py-16 bg-white">
+    <section id="acompanhar" className="py-10 sm:py-12 lg:py-16 bg-white">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10 sm:mb-12">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
             style={{ background: 'rgba(0,94,213,0.1)', color: '#005ED5' }}

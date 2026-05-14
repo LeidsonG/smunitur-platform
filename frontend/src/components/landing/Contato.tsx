@@ -39,9 +39,9 @@ const contatos = [
 
 export default function Contato() {
   return (
-    <section id="contato" className="py-12 lg:py-16 bg-white">
+    <section id="contato" className="py-10 sm:py-12 lg:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-14 items-center">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
           {/* Info */}
           <div>
             <span
@@ -96,7 +96,7 @@ export default function Contato() {
 
           {/* Card CTA */}
           <div
-            className="rounded-3xl p-8 lg:p-10 text-white text-center"
+            className="rounded-3xl p-6 sm:p-8 lg:p-10 text-white text-center"
             style={{ background: 'linear-gradient(135deg, #003A8C, #005ED5)' }}
           >
             <div className="text-5xl mb-4">💬</div>

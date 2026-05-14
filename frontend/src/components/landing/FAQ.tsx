@@ -45,9 +45,9 @@ export default function FAQ() {
   const [aberto, setAberto] = useState<number | null>(null);
 
   return (
-    <section id="faq" className="py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
+    <section id="faq" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10 sm:mb-12">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
             style={{ background: 'rgba(255,148,0,0.1)', color: '#FF9400' }}
