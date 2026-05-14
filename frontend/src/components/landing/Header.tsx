@@ -43,7 +43,8 @@ export default function Header() {
           <button
             type="button"
             onClick={() => handleLink('#inicio')}
-            className="flex items-center focus:outline-none"
+            aria-label="Voltar ao início"
+            className="flex items-center cursor-pointer focus:outline-none transition-transform duration-200 hover:scale-105 active:scale-95"
           >
             <Image
               src="/logo.png"
