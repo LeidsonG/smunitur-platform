@@ -73,7 +73,7 @@ export default function Sobre() {
             {diferenciais.map(({ icon: Icon, titulo, desc }, i) => (
               <Reveal
                 key={titulo}
-                delay={i * 0.08}
+                delay={i * 0.06}
                 className="p-6 rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group bg-white"
               >
                 <div

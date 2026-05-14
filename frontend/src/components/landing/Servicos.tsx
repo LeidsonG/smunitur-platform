@@ -62,7 +62,7 @@ export default function Servicos() {
           {servicos.map(({ icon: Icon, titulo, desc }, i) => (
             <Reveal
               key={titulo}
-              delay={i * 0.07}
+              delay={i * 0.05}
               className="relative p-6 rounded-2xl border border-gray-200 hover:border-blue-200 hover:shadow-xl transition-all duration-300 group overflow-hidden bg-white"
             >
               {/* Gradiente no hover */}

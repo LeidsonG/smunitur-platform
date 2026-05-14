@@ -57,7 +57,7 @@ export default function Produtos() {
           {produtos.map(({ icon: Icon, nome, desc, tags }, i) => (
             <Reveal
               key={nome}
-              delay={i * 0.08}
+              delay={i * 0.06}
               className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200"
             >
               {/* Ícone */}
