@@ -19,9 +19,10 @@ Plataforma web que permite:
 
 ### Frontend
 
-- **Next.js 14** (App Router, SSR/SSG)
+- **Next.js 16** (App Router, SSR/SSG, Turbopack)
+- **React 19**
 - **TypeScript**
-- **Tailwind CSS**
+- **Tailwind CSS v4**
 - **Framer Motion** (animações)
 - **React Hook Form + Zod** (formulários e validação)
 - **Axios** (HTTP client)
@@ -31,15 +32,18 @@ Plataforma web que permite:
 
 - **Node.js + Express**
 - **TypeScript**
-- **Prisma ORM**
+- **Prisma ORM** (migrations versionadas)
 - **MySQL** (via XAMPP local)
-- **Multer** (upload de arquivos)
+- **Multer** (upload de arquivos com validação por magic bytes)
 - **JWT** (autenticação)
 - **Bcryptjs** (hash de senhas)
+- **Helmet + express-rate-limit** (hardening de segurança)
+- **Pino** (logs estruturados)
 
 ### Banco de Dados
 
 - **MySQL** via XAMPP (ambiente local)
+- Schema gerenciado por **Prisma Migrate** (`backend/prisma/migrations/`)
 
 ---
 
@@ -61,85 +65,6 @@ systemweb-unitur/
 ├── database/          # Scripts SQL
 └── README.md
 ```
-
----
-
-## Estrutura do Banco de Dados
-
-### `usuarios_admin`
-
-| Campo      | Tipo                                   | Descrição                  |
-| ---------- | -------------------------------------- | ---------------------------- |
-| id         | INT PK AUTO_INCREMENT                  | Identificador                |
-| nome       | VARCHAR(100)                           | Nome do administrador        |
-| email      | VARCHAR(150) UNIQUE                    | E-mail de login              |
-| senha      | VARCHAR(255)                           | Senha criptografada (bcrypt) |
-| nivel      | ENUM('super_admin','admin','operador') | Nível de permissão         |
-| ativo      | BOOLEAN                                | Status do usuário           |
-| created_at | TIMESTAMP                              | Data de criação            |
-
-### `categorias`
-
-| Campo | Tipo                  | Descrição       |
-| ----- | --------------------- | ----------------- |
-| id    | INT PK AUTO_INCREMENT | Identificador     |
-| nome  | VARCHAR(100)          | Nome da categoria |
-| slug  | VARCHAR(100)          | Slug URL-friendly |
-| ativo | BOOLEAN               | Status            |
-
-### `produtos`
-
-| Campo        | Tipo                  | Descrição          |
-| ------------ | --------------------- | -------------------- |
-| id           | INT PK AUTO_INCREMENT | Identificador        |
-| categoria_id | INT FK                | Categoria do produto |
-| nome         | VARCHAR(150)          | Nome do produto      |
-| descricao    | TEXT                  | Descrição          |
-| imagem       | VARCHAR(255)          | Caminho da imagem    |
-| ativo        | BOOLEAN               | Status               |
-| created_at   | TIMESTAMP             | Data de criação    |
-
-### `orcamentos`
-
-| Campo             | Tipo                  | Descrição                          |
-| ----------------- | --------------------- | ------------------------------------ |
-| id                | INT PK AUTO_INCREMENT | Identificador                        |
-| numero            | INT UNIQUE            | Número do orçamento (início: 100) |
-| nome_cliente      | VARCHAR(100)          | Nome do cliente                      |
-| email_cliente     | VARCHAR(150)          | E-mail                               |
-| telefone_cliente  | VARCHAR(20)           | Telefone/WhatsApp                    |
-| cpf_cnpj          | VARCHAR(20)           | CPF ou CNPJ (opcional)               |
-| produto_desejado  | VARCHAR(150)          | Produto solicitado                   |
-| quantidade        | INT                   | Quantidade                           |
-| tamanhos          | VARCHAR(255)          | Tamanhos (ex: P,M,G,GG)              |
-| cores             | VARCHAR(255)          | Cores desejadas                      |
-| detalhes          | TEXT                  | Detalhes personalizados              |
-| observacoes       | TEXT                  | Observações adicionais             |
-| imagem_referencia | VARCHAR(255)          | Caminho da imagem de referência     |
-| status            | ENUM                  | Status atual da produção           |
-| created_at        | TIMESTAMP             | Data de criação                    |
-
-**Status possíveis do orçamento:**
-
-- `recebido` — Orçamento recebido, aguardando análise
-- `em_analise` — Sendo analisado pela equipe
-- `aguardando_aprovacao` — Orçamento enviado, aguardando aprovação do cliente
-- `em_producao` — Em processo de produção
-- `finalizado` — Produção concluída
-- `enviado` — Produto enviado ao cliente
-- `cancelado` — Orçamento cancelado
-
-### `orcamento_status_historico`
-
-| Campo           | Tipo                  | Descrição              |
-| --------------- | --------------------- | ------------------------ |
-| id              | INT PK AUTO_INCREMENT | Identificador            |
-| orcamento_id    | INT FK                | Orçamento relacionado   |
-| status_anterior | VARCHAR(50)           | Status anterior          |
-| status_novo     | VARCHAR(50)           | Novo status              |
-| observacao      | TEXT                  | Observação da mudança |
-| usuario_id      | INT FK                | Admin responsável       |
-| created_at      | TIMESTAMP             | Data/hora da mudança    |
 
 ---
 
@@ -206,9 +131,7 @@ systemweb-unitur/
 
 ## Pendências
 
-- [ ] Integração da logo oficial (será enviada posteriormente)
 - [ ] Substituir número WhatsApp de teste pelo oficial
 - [ ] Deploy em hospedagem online
 - [ ] Configurar domínio e SSL
-- [ ] Colocar opção para alterar a senha do usuario no /admin
 - [ ] Verificar o envio pelo whatsapp e e-mail
