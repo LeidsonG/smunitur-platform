@@ -88,6 +88,7 @@ export default function Produtos() {
         {/* CTA */}
         <div className="text-center mt-12">
           <button
+            type="button"
             onClick={() => document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' })}
             className="px-8 py-4 rounded-full text-white font-bold text-lg transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
             style={{ background: 'linear-gradient(135deg, #005ED5, #FF9400)' }}

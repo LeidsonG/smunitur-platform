@@ -121,8 +121,9 @@ export default function FormularioOrcamento() {
               💬 Confirmar pelo WhatsApp
             </a>
             <button
+              type="button"
               onClick={() => { setEstado('idle'); setResultado(null); }}
-              className="px-6 py-3 rounded-full font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all"
+              className="px-6 py-3 rounded-full font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all"
             >
               Novo Orçamento
             </button>
@@ -130,6 +131,7 @@ export default function FormularioOrcamento() {
           <p className="mt-6 text-sm text-gray-500">
             Acompanhe seu pedido na seção{' '}
             <button
+              type="button"
               onClick={() => document.querySelector('#acompanhar')?.scrollIntoView({ behavior: 'smooth' })}
               className="underline font-medium"
               style={{ color: '#005ED5' }}
@@ -243,26 +245,27 @@ export default function FormularioOrcamento() {
 
             {/* Upload de imagem */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label htmlFor="img-upload" className="block text-sm font-medium text-gray-700 mb-1.5">
                 Imagem de referência (opcional)
               </label>
-              <div
-                className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
-                style={{ borderColor: imagemFile ? '#005ED5' : '#D1D5DB' }}
+              <button
+                type="button"
                 onClick={() => document.getElementById('img-upload')?.click()}
+                className="w-full border-2 border-dashed rounded-xl p-6 text-center hover:border-blue-400 active:bg-gray-50 transition-colors"
+                style={{ borderColor: imagemFile ? '#005ED5' : '#D1D5DB' }}
               >
-                <Upload size={24} className="mx-auto mb-2 text-gray-400" />
+                <Upload size={24} className="mx-auto mb-2 text-gray-400 pointer-events-none" />
                 {imagemFile ? (
-                  <p className="text-sm font-medium" style={{ color: '#005ED5' }}>
+                  <p className="text-sm font-medium pointer-events-none" style={{ color: '#005ED5' }}>
                     {imagemFile.name}
                   </p>
                 ) : (
-                  <>
-                    <p className="text-sm text-gray-600">Clique para enviar ou arraste aqui</p>
+                  <div className="pointer-events-none">
+                    <p className="text-sm text-gray-600">Toque para enviar ou arraste aqui</p>
                     <p className="text-xs text-gray-400 mt-1">PNG, JPG, WebP — máx. 5MB</p>
-                  </>
+                  </div>
                 )}
-              </div>
+              </button>
               <input
                 id="img-upload"
                 type="file"

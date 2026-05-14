@@ -62,36 +62,47 @@ export default function FAQ() {
         </div>
 
         <div className="space-y-3">
-          {faqs.map((faq, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-blue-100 transition-colors duration-200"
-            >
-              <button
-                onClick={() => setAberto(aberto === i ? null : i)}
-                className="w-full text-left px-6 py-5 flex items-center justify-between gap-4 group"
-              >
-                <span className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
-                  {faq.pergunta}
-                </span>
-                <ChevronDown
-                  size={20}
-                  className={`flex-shrink-0 transition-transform duration-300 ${
-                    aberto === i ? 'rotate-180' : ''
-                  }`}
-                  style={{ color: '#005ED5' }}
-                />
-              </button>
-
+          {faqs.map((faq, i) => {
+            const isOpen = aberto === i;
+            return (
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  aberto === i ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
-                }`}
+                key={i}
+                className="bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-blue-100 transition-colors duration-200"
               >
-                <p className="px-6 pb-5 text-gray-600 leading-relaxed text-sm">{faq.resposta}</p>
+                <button
+                  type="button"
+                  onClick={() => setAberto(isOpen ? null : i)}
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-resposta-${i}`}
+                  className="w-full text-left px-5 sm:px-6 py-5 flex items-center justify-between gap-4 group active:bg-gray-50 transition-colors"
+                >
+                  <span className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors text-sm sm:text-base">
+                    {faq.pergunta}
+                  </span>
+                  <ChevronDown
+                    size={20}
+                    className={`pointer-events-none flex-shrink-0 transition-transform duration-300 ${
+                      isOpen ? 'rotate-180' : ''
+                    }`}
+                    style={{ color: '#005ED5' }}
+                  />
+                </button>
+
+                <div
+                  id={`faq-resposta-${i}`}
+                  className={`grid transition-all duration-300 ease-in-out ${
+                    isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <p className="px-5 sm:px-6 pb-5 text-gray-600 leading-relaxed text-sm">
+                      {faq.resposta}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
