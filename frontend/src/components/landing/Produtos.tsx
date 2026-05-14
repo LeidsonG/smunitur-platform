@@ -1,6 +1,7 @@
 'use client';
 
 import { Shirt, Wind, FlaskConical, Plus } from 'lucide-react';
+import Reveal from './Reveal';
 
 const produtos = [
   {
@@ -34,7 +35,7 @@ export default function Produtos() {
     <section id="produtos" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-10 sm:mb-12 lg:mb-14">
+        <Reveal className="text-center mb-10 sm:mb-12 lg:mb-14">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
             style={{ background: 'rgba(255,148,0,0.1)', color: '#FF9400' }}
@@ -49,13 +50,14 @@ export default function Produtos() {
           <p className="text-gray-600 text-lg max-w-xl mx-auto">
             Confeccionamos peças de qualidade premium, adaptadas à identidade visual da sua marca.
           </p>
-        </div>
+        </Reveal>
 
         {/* Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {produtos.map(({ icon: Icon, nome, desc, tags }) => (
-            <div
+          {produtos.map(({ icon: Icon, nome, desc, tags }, i) => (
+            <Reveal
               key={nome}
+              delay={i * 0.08}
               className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200"
             >
               {/* Ícone */}
@@ -81,12 +83,12 @@ export default function Produtos() {
                   </span>
                 ))}
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
 
         {/* CTA */}
-        <div className="text-center mt-10 sm:mt-12">
+        <Reveal className="text-center mt-10 sm:mt-12">
           <button
             type="button"
             onClick={() => document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' })}
@@ -95,7 +97,7 @@ export default function Produtos() {
           >
             Solicitar Orçamento Agora
           </button>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

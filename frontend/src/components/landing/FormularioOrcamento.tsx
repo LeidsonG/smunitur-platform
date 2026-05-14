@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Send, Upload, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import api from '@/lib/api';
 import { gerarLinkWhatsApp } from '@/lib/whatsapp';
+import Reveal from './Reveal';
 
 const schema = z.object({
   nome_cliente: z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
@@ -147,7 +148,7 @@ export default function FormularioOrcamento() {
   return (
     <section id="orcamento" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10 sm:mb-12">
+        <Reveal className="text-center mb-10 sm:mb-12">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
             style={{ background: 'rgba(255,148,0,0.1)', color: '#FF9400' }}
@@ -161,9 +162,9 @@ export default function FormularioOrcamento() {
           <p className="text-gray-600 text-lg max-w-xl mx-auto">
             Preencha o formulário e nossa equipe retornará em até 24h com o melhor valor para seu projeto.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl p-6 sm:p-8 lg:p-10">
+        <Reveal delay={0.1} className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl p-6 sm:p-8 lg:p-10">
           {estado === 'error' && (
             <div className="flex items-center gap-3 p-4 rounded-xl mb-6 bg-red-50 border border-red-100">
               <AlertCircle size={18} className="text-red-500 flex-shrink-0" />
@@ -298,7 +299,7 @@ export default function FormularioOrcamento() {
               Ao enviar, você concorda com nosso uso dos dados para fins de atendimento comercial.
             </p>
           </form>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

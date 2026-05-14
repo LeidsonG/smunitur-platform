@@ -1,6 +1,7 @@
 'use client';
 
 import { Paintbrush, Layers, Scissors, BarChart3, Package, Headphones } from 'lucide-react';
+import Reveal from './Reveal';
 
 const servicos = [
   {
@@ -39,7 +40,7 @@ export default function Servicos() {
   return (
     <section id="servicos" className="py-10 sm:py-12 lg:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10 sm:mb-12 lg:mb-14">
+        <Reveal className="text-center mb-10 sm:mb-12 lg:mb-14">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
             style={{ background: 'rgba(0,94,213,0.1)', color: '#005ED5' }}
@@ -55,12 +56,13 @@ export default function Servicos() {
           <p className="text-gray-600 text-lg max-w-xl mx-auto">
             Oferecemos serviços completos de confecção personalizada para atender qualquer demanda.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {servicos.map(({ icon: Icon, titulo, desc }, i) => (
-            <div
+            <Reveal
               key={titulo}
+              delay={i * 0.07}
               className="relative p-6 rounded-2xl border border-gray-200 hover:border-blue-200 hover:shadow-xl transition-all duration-300 group overflow-hidden bg-white"
             >
               {/* Gradiente no hover */}
@@ -79,7 +81,7 @@ export default function Servicos() {
                 <h3 className="font-bold text-gray-900 mb-2 text-lg">{titulo}</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">{desc}</p>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
