@@ -32,11 +32,11 @@ npm install
 cp .env.example .env
 # Editar .env se necessário (banco, JWT, etc.)
 
-# Aplicar as migrations (cria todas as tabelas)
-npm run db:migrate:deploy
-
 # Gerar o cliente Prisma
 npm run db:generate
+
+# Aplicar as migrations (cria todas as tabelas)
+npm run db:migrate:deploy
 
 # (Apenas se você já tinha o banco criado pelo schema.sql antigo)
 # Marca a migration inicial como já aplicada sem reexecutá-la:
