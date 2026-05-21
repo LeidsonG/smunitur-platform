@@ -8,13 +8,14 @@ datasource db {
 }
 
 model UsuarioAdmin {
-  id        Int      @id @default(autoincrement())
-  nome      String   @db.VarChar(100)
-  email     String   @unique @db.VarChar(150)
-  senha     String   @db.VarChar(255)
+  id        Int        @id @default(autoincrement())
+  nome      String     @db.VarChar(100)
+  email     String     @unique @db.VarChar(150)
+  senha     String     @db.VarChar(255)
   nivel     NivelAdmin @default(operador)
-  ativo     Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
+  foto      String?    @db.VarChar(255)
+  ativo     Boolean    @default(true)
+  createdAt DateTime   @default(now()) @map("created_at")
 
   historicos OrcamentoStatusHistorico[]
 
@@ -28,47 +29,107 @@ enum NivelAdmin {
 }
 
 model Categoria {
-  id        Int               @id @default(autoincrement())
-  nome      String            @db.VarChar(100)
-  slug      String            @unique @db.VarChar(100)
-  ativo     Boolean           @default(true)
-  produtos  Produto[]
-  atributos AtributoProduto[]
+  id       Int       @id @default(autoincrement())
+  nome     String    @unique @db.VarChar(100)
+  slug     String    @unique @db.VarChar(100)
+  ativo    Boolean   @default(true)
+  produtos Produto[]
 
   @@map("categorias")
 }
 
 model Produto {
-  id          Int       @id @default(autoincrement())
-  categoriaId Int       @map("categoria_id")
-  nome        String    @db.VarChar(150)
-  descricao   String?   @db.Text
-  imagem      String?   @db.VarChar(255)
-  ativo       Boolean   @default(true)
-  createdAt   DateTime  @default(now()) @map("created_at")
+  id          Int      @id @default(autoincrement())
+  categoriaId Int      @map("categoria_id")
+  nome        String   @db.VarChar(150)
+  descricao   String?  @db.Text
+  imagem      String?  @db.VarChar(255)
+  ativo       Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  categoria   Categoria @relation(fields: [categoriaId], references: [id])
+  categoria Categoria        @relation(fields: [categoriaId], references: [id])
+  atributos ProdutoAtributo[]
 
+  @@unique([categoriaId, nome])
   @@map("produtos")
 }
 
+// ─── Biblioteca global de atributos ──────────────────────────────────────────
+
+model Atributo {
+  id    Int    @id @default(autoincrement())
+  nome  String @unique @db.VarChar(100)
+  ordem Int    @default(0)
+
+  opcoes   OpcaoAtributo[]
+  produtos ProdutoAtributo[]
+
+  @@map("atributos")
+}
+
+model OpcaoAtributo {
+  id         Int    @id @default(autoincrement())
+  atributoId Int    @map("atributo_id")
+  valor      String @db.VarChar(100)
+  ordem      Int    @default(0)
+
+  atributo            Atributo               @relation(fields: [atributoId], references: [id], onDelete: Cascade)
+  produtosOpcoes      ProdutoAtributoOpcao[]
+  orcamentosAtributos OrcamentoAtributo[]
+
+  @@unique([atributoId, valor])
+  @@map("opcoes_atributo")
+}
+
+// ─── Atributos por produto ────────────────────────────────────────────────────
+
+model ProdutoAtributo {
+  id          Int     @id @default(autoincrement())
+  produtoId   Int     @map("produto_id")
+  atributoId  Int     @map("atributo_id")
+  obrigatorio Boolean @default(false)
+  ordem       Int     @default(0)
+
+  produto             Produto                @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  atributo            Atributo               @relation(fields: [atributoId], references: [id], onDelete: Cascade)
+  opcoes              ProdutoAtributoOpcao[]
+  orcamentosAtributos OrcamentoAtributo[]
+
+  @@unique([produtoId, atributoId])
+  @@map("produto_atributos")
+}
+
+model ProdutoAtributoOpcao {
+  id                Int @id @default(autoincrement())
+  produtoAtributoId Int @map("produto_atributo_id")
+  opcaoId           Int @map("opcao_id")
+
+  produtoAtributo ProdutoAtributo @relation(fields: [produtoAtributoId], references: [id], onDelete: Cascade)
+  opcao           OpcaoAtributo   @relation(fields: [opcaoId], references: [id], onDelete: Cascade)
+
+  @@unique([produtoAtributoId, opcaoId])
+  @@map("produto_atributo_opcoes")
+}
+
+// ─── Orçamentos ───────────────────────────────────────────────────────────────
+
 model Orcamento {
-  id               Int              @id @default(autoincrement())
-  numero           Int              @unique
-  nomeCliente      String           @map("nome_cliente")    @db.VarChar(100)
-  emailCliente     String           @map("email_cliente")   @db.VarChar(150)
-  telefoneCliente  String           @map("telefone_cliente") @db.VarChar(20)
-  cpfCnpj          String?          @map("cpf_cnpj")        @db.VarChar(20)
-  produtoDesejado  String           @map("produto_desejado") @db.VarChar(150)
-  quantidade       Int              @db.UnsignedInt
-  tamanhos         String?          @db.VarChar(255)
-  cores            String?          @db.VarChar(255)
-  detalhes         String?          @db.Text
-  observacoes      String?          @db.Text
-  imagemReferencia String?          @map("imagem_referencia") @db.VarChar(255)
-  status           StatusOrcamento  @default(recebido)
-  createdAt        DateTime         @default(now()) @map("created_at")
-  updatedAt        DateTime         @updatedAt @map("updated_at")
+  id               Int             @id @default(autoincrement())
+  numero           Int             @unique
+  nomeCliente      String          @map("nome_cliente") @db.VarChar(100)
+  emailCliente     String          @map("email_cliente") @db.VarChar(150)
+  telefoneCliente  String          @map("telefone_cliente") @db.VarChar(20)
+  cpfCnpj          String?         @map("cpf_cnpj") @db.VarChar(20)
+  produtoDesejado  String          @map("produto_desejado") @db.VarChar(150)
+  quantidade       Int             @db.UnsignedInt
+  tamanhos         String?         @db.VarChar(255)
+  cores            String?         @db.VarChar(255)
+  detalhes         String?         @db.Text
+  observacoes      String?         @db.Text
+  imagemReferencia String?         @map("imagem_referencia") @db.VarChar(255)
+  status           StatusOrcamento @default(recebido)
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
 
   historicos         OrcamentoStatusHistorico[]
   atributosOrcamento OrcamentoAtributo[]
@@ -86,58 +147,30 @@ enum StatusOrcamento {
   cancelado
 }
 
-model AtributoProduto {
-  id          Int     @id @default(autoincrement())
-  categoriaId Int     @map("categoria_id")
-  nome        String  @db.VarChar(100)
-  obrigatorio Boolean @default(false)
-  ordem       Int     @default(0)
-  ativo       Boolean @default(true)
-
-  categoria           Categoria          @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
-  opcoes              OpcaoAtributo[]
-  orcamentosAtributos OrcamentoAtributo[]
-
-  @@map("atributos_produto")
-}
-
-model OpcaoAtributo {
-  id         Int     @id @default(autoincrement())
-  atributoId Int     @map("atributo_id")
-  valor      String  @db.VarChar(100)
-  ordem      Int     @default(0)
-  ativo      Boolean @default(true)
-
-  atributo            AtributoProduto    @relation(fields: [atributoId], references: [id], onDelete: Cascade)
-  orcamentosAtributos OrcamentoAtributo[]
-
-  @@map("opcoes_atributo")
-}
-
 model OrcamentoAtributo {
-  id          Int     @id @default(autoincrement())
-  orcamentoId Int     @map("orcamento_id")
-  atributoId  Int     @map("atributo_id")
-  opcaoId     Int?    @map("opcao_id")
-  valorLivre  String? @map("valor_livre") @db.VarChar(255)
+  id                Int     @id @default(autoincrement())
+  orcamentoId       Int     @map("orcamento_id")
+  produtoAtributoId Int     @map("produto_atributo_id")
+  opcaoId           Int?    @map("opcao_id")
+  valorLivre        String? @map("valor_livre") @db.VarChar(255)
 
-  orcamento Orcamento       @relation(fields: [orcamentoId], references: [id], onDelete: Cascade)
-  atributo  AtributoProduto @relation(fields: [atributoId], references: [id])
-  opcao     OpcaoAtributo?  @relation(fields: [opcaoId], references: [id])
+  orcamento       Orcamento       @relation(fields: [orcamentoId], references: [id], onDelete: Cascade)
+  produtoAtributo ProdutoAtributo @relation(fields: [produtoAtributoId], references: [id])
+  opcao           OpcaoAtributo?  @relation(fields: [opcaoId], references: [id])
 
   @@map("orcamento_atributos")
 }
 
 model OrcamentoStatusHistorico {
-  id              Int      @id @default(autoincrement())
-  orcamentoId     Int      @map("orcamento_id")
-  statusAnterior  String?  @map("status_anterior") @db.VarChar(50)
-  statusNovo      String   @map("status_novo") @db.VarChar(50)
-  observacao      String?  @db.Text
-  usuarioId       Int?     @map("usuario_id")
-  createdAt       DateTime @default(now()) @map("created_at")
+  id             Int      @id @default(autoincrement())
+  orcamentoId    Int      @map("orcamento_id")
+  statusAnterior String?  @map("status_anterior") @db.VarChar(50)
+  statusNovo     String   @map("status_novo") @db.VarChar(50)
+  observacao     String?  @db.Text
+  usuarioId      Int?     @map("usuario_id")
+  createdAt      DateTime @default(now()) @map("created_at")
 
-  orcamento Orcamento    @relation(fields: [orcamentoId], references: [id], onDelete: Cascade)
+  orcamento Orcamento     @relation(fields: [orcamentoId], references: [id], onDelete: Cascade)
   usuario   UsuarioAdmin? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
 
   @@map("orcamento_status_historico")

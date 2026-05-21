@@ -69,7 +69,7 @@ router.post(
           await prisma.orcamentoAtributo.createMany({
             data: atributosData.map((a) => ({
               orcamentoId: orcamento.id,
-              atributoId: a.atributo_id,
+              produtoAtributoId: a.atributo_id,
               opcaoId: a.opcao_id ?? null,
               valorLivre: a.valor_livre ?? null,
             })),

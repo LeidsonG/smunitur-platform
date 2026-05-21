@@ -1,7 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { MessageCircle, Mail } from 'lucide-react';
+import Link from 'next/link';
+import { MessageCircle, Mail, Lock } from 'lucide-react';
 
 // ATENÇÃO: Número temporário para testes. Substituir pelo número oficial antes de ir para produção.
 const WHATSAPP_NUMBER = '5517981322215';
@@ -96,10 +97,20 @@ export default function Footer() {
           style={{ borderColor: 'rgba(255,255,255,0.08)' }}
         >
           <span>© {year} SM Unitur. Todos os direitos reservados.</span>
-          <span>
-            Desenvolvido por{' '}
-            <span style={{ color: '#FF9400' }}>Leidson F. Gonçalves</span>
-          </span>
+          <div className="flex items-center gap-4">
+            <span>
+              Desenvolvido por{' '}
+              <span style={{ color: '#FF9400' }}>Leidson F. Gonçalves</span>
+            </span>
+            <Link
+              href="/admin/login"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-100 opacity-40 hover:bg-white/10"
+              style={{ color: '#9CA3AF' }}
+            >
+              <Lock size={11} />
+              Admin
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

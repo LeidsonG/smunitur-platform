@@ -16,6 +16,7 @@ import Reveal from './Reveal';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 interface Categoria { id: number; nome: string; slug: string }
+interface Produto { id: number; nome: string; descricao?: string }
 interface Opcao { id: number; valor: string }
 interface Atributo { id: number; nome: string; obrigatorio: boolean; opcoes: Opcao[] }
 
@@ -44,7 +45,7 @@ const stepAnim = (dir: number) => ({
   initial: { opacity: 0, x: dir * 40 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: dir * -40 },
-  transition: { duration: 0.25, ease: 'easeInOut' },
+  transition: { duration: 0.25, ease: 'easeInOut' as const },
 });
 
 // ─── Componente principal ─────────────────────────────────────────────────────
@@ -54,6 +55,8 @@ export default function FormularioOrcamento() {
 
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [catSelecionada, setCatSelecionada] = useState<Categoria | null>(null);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
   const [atributos, setAtributos] = useState<Atributo[]>([]);
   const [atributoValues, setAtributoValues] = useState<Record<number, string>>({});
   const [atributoErrors, setAtributoErrors] = useState<Record<number, string>>({});
@@ -71,21 +74,42 @@ export default function FormularioOrcamento() {
     api.get('/categorias').then(r => setCategorias(r.data.categorias)).catch(() => {});
   }, []);
 
+  // Busca produtos quando uma categoria é selecionada
   useEffect(() => {
+    setProdutoSelecionado(null);
+    setAtributos([]);
     setAtributoValues({});
     setAtributoErrors({});
     if (catSelecionada) {
-      api.get(`/categorias/${catSelecionada.id}/atributos`)
+      api.get(`/produtos?categoria=${catSelecionada.id}`)
+        .then(r => setProdutos(r.data.produtos))
+        .catch(() => setProdutos([]));
+    } else {
+      setProdutos([]);
+    }
+  }, [catSelecionada]);
+
+  // Busca atributos quando um produto é selecionado
+  useEffect(() => {
+    setAtributoValues({});
+    setAtributoErrors({});
+    if (produtoSelecionado) {
+      api.get(`/produtos/${produtoSelecionado.id}/atributos`)
         .then(r => setAtributos(r.data.atributos))
         .catch(() => setAtributos([]));
     } else {
       setAtributos([]);
     }
-  }, [catSelecionada]);
+  }, [produtoSelecionado]);
 
   const selecionarCategoria = (cat: Categoria | null) => {
     setCatSelecionada(cat);
     setValue('produto_desejado', cat ? cat.nome : 'Outros (especificar nos detalhes)');
+  };
+
+  const selecionarProduto = (produto: Produto) => {
+    setProdutoSelecionado(produto);
+    setValue('produto_desejado', produto.nome);
   };
 
   const avancar = async () => {
@@ -173,7 +197,7 @@ export default function FormularioOrcamento() {
                 💬 Confirmar pelo WhatsApp
               </a>
               <button type="button"
-                onClick={() => { setEstado('idle'); setResultado(null); setStep(1); setCatSelecionada(null); }}
+                onClick={() => { setEstado('idle'); setResultado(null); setStep(1); setCatSelecionada(null); setProdutoSelecionado(null); }}
                 className="px-6 py-3 rounded-full font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50">
                 Novo Orçamento
               </button>
@@ -223,6 +247,9 @@ export default function FormularioOrcamento() {
                         categorias={categorias}
                         catSelecionada={catSelecionada}
                         onSelectCat={selecionarCategoria}
+                        produtos={produtos}
+                        produtoSelecionado={produtoSelecionado}
+                        onSelectProduto={selecionarProduto}
                         atributos={atributos}
                         atributoValues={atributoValues}
                         setAtributoValues={setAtributoValues}
@@ -246,6 +273,7 @@ export default function FormularioOrcamento() {
                         register={register}
                         errors={errors}
                         catSelecionada={catSelecionada}
+                        produtoSelecionado={produtoSelecionado}
                         atributos={atributos}
                         atributoValues={atributoValues}
                         quantidade={quantidade}
@@ -332,12 +360,15 @@ function StepIndicator({ step }: { step: number }) {
 }
 
 // ─── Etapa 1: Produto ─────────────────────────────────────────────────────────
-function Etapa1({ categorias, catSelecionada, onSelectCat, atributos, atributoValues,
-  setAtributoValues, atributoErrors, setAtributoErrors, erroProduto, register }:
+function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSelecionado, onSelectProduto,
+  atributos, atributoValues, setAtributoValues, atributoErrors, setAtributoErrors, erroProduto, register }:
 {
   categorias: Categoria[];
   catSelecionada: Categoria | null;
   onSelectCat: (c: Categoria | null) => void;
+  produtos: Produto[];
+  produtoSelecionado: Produto | null;
+  onSelectProduto: (p: Produto) => void;
   atributos: Atributo[];
   atributoValues: Record<number, string>;
   setAtributoValues: React.Dispatch<React.SetStateAction<Record<number, string>>>;
@@ -346,8 +377,6 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, atributos, atributoVa
   erroProduto?: string;
   register: ReturnType<typeof useForm<FormData>>['register'];
 }) {
-  const outros = !catSelecionada && !!register; // "Outros" selecionado quando catSelecionada é null mas algo foi escolhido
-
   return (
     <div>
       <p className="text-sm font-semibold text-gray-500 mb-1">Etapa 1 de 3</p>
@@ -379,13 +408,9 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, atributos, atributoVa
         })}
 
         {/* Card "Outros" */}
-        <button type="button"
-          onClick={() => onSelectCat(null)}
+        <button type="button" onClick={() => onSelectCat(null)}
           className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 text-center transition-all duration-200 hover:shadow-md"
-          style={{
-            borderColor: catSelecionada === null && erroProduto === undefined ? '#E5E7EB' : '#E5E7EB',
-            background: '#fff',
-          }}>
+          style={{ borderColor: '#E5E7EB', background: '#fff' }}>
           <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#F3F4F6' }}>
             <Plus size={22} style={{ color: '#6B7280' }} />
           </div>
@@ -393,9 +418,34 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, atributos, atributoVa
         </button>
       </div>
 
-      {erroProduto && (
-        <p className="text-xs text-red-500 mb-4">{erroProduto}</p>
-      )}
+      {erroProduto && <p className="text-xs text-red-500 mb-4">{erroProduto}</p>}
+
+      {/* Seleção de produto dentro da categoria */}
+      <AnimatePresence>
+        {catSelecionada && produtos.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }} transition={{ duration: 0.18 }}
+            className="border-t border-gray-100 pt-4 mb-4">
+            <p className="text-sm font-semibold text-gray-600 mb-2">Qual modelo?</p>
+            <div className="flex flex-wrap gap-2">
+              {produtos.map(produto => {
+                const sel = produtoSelecionado?.id === produto.id;
+                return (
+                  <button key={produto.id} type="button" onClick={() => onSelectProduto(produto)}
+                    className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
+                    style={{
+                      borderColor: sel ? '#005ED5' : '#E5E7EB',
+                      background: sel ? '#005ED5' : '#fff',
+                      color: sel ? '#fff' : '#374151',
+                    }}>
+                    {produto.nome}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Atributos dinâmicos */}
       <AnimatePresence>
@@ -530,11 +580,12 @@ function Etapa2({ quantidade, setQuantidade, register, imagemFile, setImagemFile
 }
 
 // ─── Etapa 3: Dados do cliente ────────────────────────────────────────────────
-function Etapa3({ register, errors, catSelecionada, atributos, atributoValues, quantidade }:
+function Etapa3({ register, errors, catSelecionada, produtoSelecionado, atributos, atributoValues, quantidade }:
 {
   register: ReturnType<typeof useForm<FormData>>['register'];
   errors: ReturnType<typeof useForm<FormData>>['formState']['errors'];
   catSelecionada: Categoria | null;
+  produtoSelecionado: Produto | null;
   atributos: Atributo[];
   atributoValues: Record<number, string>;
   quantidade: number;
@@ -544,6 +595,8 @@ function Etapa3({ register, errors, catSelecionada, atributos, atributoValues, q
     .map(a => `${a.nome}: ${a.opcoes.find(o => o.id === parseInt(atributoValues[a.id]))?.valor ?? ''}`)
     .join(' · ');
 
+  const nomeProduto = produtoSelecionado?.nome ?? catSelecionada?.nome ?? 'Outros';
+
   return (
     <div className="space-y-4">
       <div>
@@ -552,7 +605,7 @@ function Etapa3({ register, errors, catSelecionada, atributos, atributoValues, q
       </div>
 
       {/* Resumo do pedido */}
-      {(catSelecionada || atributosTexto) && (
+      {(catSelecionada || produtoSelecionado || atributosTexto) && (
         <div className="flex items-start gap-3 p-3 rounded-xl text-sm"
           style={{ background: 'rgba(0,94,213,0.05)', border: '1px solid rgba(0,94,213,0.12)' }}>
           <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
@@ -561,7 +614,7 @@ function Etapa3({ register, errors, catSelecionada, atributos, atributoValues, q
           </div>
           <div>
             <p className="font-semibold text-gray-800">
-              {catSelecionada?.nome ?? 'Outros'} — {quantidade} peças
+              {nomeProduto} — {quantidade} peças
             </p>
             {atributosTexto && <p className="text-gray-500 text-xs mt-0.5">{atributosTexto}</p>}
           </div>
