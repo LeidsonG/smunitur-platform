@@ -1,6 +1,7 @@
 'use client';
 
 import { MessageCircle, Mail, MapPin, Clock } from 'lucide-react';
+import Reveal from './Reveal';
 
 // ATENÇÃO: Número temporário para ambiente de testes.
 // Substituir pelo número oficial da SM Unitur antes de ir para produção.
@@ -39,11 +40,11 @@ const contatos = [
 
 export default function Contato() {
   return (
-    <section id="contato" className="py-12 lg:py-16 bg-white">
+    <section id="contato" className="py-10 sm:py-12 lg:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-14 items-center">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
           {/* Info */}
-          <div>
+          <Reveal>
             <span
               className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
               style={{ background: 'rgba(0,94,213,0.1)', color: '#005ED5' }}
@@ -62,9 +63,10 @@ export default function Contato() {
             </p>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              {contatos.map(({ icon: Icon, titulo, valor, href, cor }) => (
-                <div
+              {contatos.map(({ icon: Icon, titulo, valor, href, cor }, i) => (
+                <Reveal
                   key={titulo}
+                  delay={i * 0.05}
                   className="flex items-start gap-3 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-200"
                 >
                   <div
@@ -89,14 +91,15 @@ export default function Contato() {
                       <span className="text-sm font-semibold text-gray-800">{valor}</span>
                     )}
                   </div>
-                </div>
+                </Reveal>
               ))}
             </div>
-          </div>
+          </Reveal>
 
           {/* Card CTA */}
-          <div
-            className="rounded-3xl p-8 lg:p-10 text-white text-center"
+          <Reveal
+            delay={0.15}
+            className="rounded-3xl p-6 sm:p-8 lg:p-10 text-white text-center"
             style={{ background: 'linear-gradient(135deg, #003A8C, #005ED5)' }}
           >
             <div className="text-5xl mb-4">💬</div>
@@ -114,7 +117,7 @@ export default function Contato() {
               <MessageCircle size={22} />
               Iniciar Conversa
             </a>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

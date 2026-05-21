@@ -105,8 +105,49 @@ CREATE TABLE IF NOT EXISTS orcamento_status_historico (
 );
 
 -- ------------------------------------------------------------
--- Usuário admin padrão (senha: admin123 — TROCAR em produção!)
--- Hash bcrypt gerado para 'admin123'
+-- Tabela: atributos_produto
+-- Atributos configuráveis por categoria (ex: "Tipo de Gola")
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS atributos_produto (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  categoria_id INT     NOT NULL,
+  nome         VARCHAR(100) NOT NULL,
+  obrigatorio  BOOLEAN NOT NULL DEFAULT FALSE,
+  ordem        INT     NOT NULL DEFAULT 0,
+  ativo        BOOLEAN NOT NULL DEFAULT TRUE,
+  FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
+);
+
+-- ------------------------------------------------------------
+-- Tabela: opcoes_atributo
+-- Opções de cada atributo (ex: "V", "Redonda", "Polo")
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS opcoes_atributo (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  atributo_id INT     NOT NULL,
+  valor       VARCHAR(100) NOT NULL,
+  ordem       INT     NOT NULL DEFAULT 0,
+  ativo       BOOLEAN NOT NULL DEFAULT TRUE,
+  FOREIGN KEY (atributo_id) REFERENCES atributos_produto(id) ON DELETE CASCADE
+);
+
+-- ------------------------------------------------------------
+-- Tabela: orcamento_atributos
+-- Seleções feitas pelo cliente em cada orçamento
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS orcamento_atributos (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  orcamento_id INT NOT NULL,
+  atributo_id  INT NOT NULL,
+  opcao_id     INT,
+  valor_livre  VARCHAR(255),
+  FOREIGN KEY (orcamento_id) REFERENCES orcamentos(id) ON DELETE CASCADE,
+  FOREIGN KEY (atributo_id)  REFERENCES atributos_produto(id),
+  FOREIGN KEY (opcao_id)     REFERENCES opcoes_atributo(id)
+);
+
+-- ------------------------------------------------------------
+-- Usuário admin padrão (senha: Admin@1234 — TROCAR em produção!)
 -- ------------------------------------------------------------
 INSERT INTO usuarios_admin (nome, email, senha, nivel) VALUES (
   'Administrador',

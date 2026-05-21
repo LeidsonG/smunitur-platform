@@ -1,6 +1,8 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { CheckCircle, Shirt, Truck, HeartHandshake } from 'lucide-react';
+import Reveal from './Reveal';
 
 const diferenciais = [
   {
@@ -25,13 +27,21 @@ const diferenciais = [
   },
 ];
 
+const sectionVariants = { hidden: {}, visible: {} };
+
 export default function Sobre() {
   return (
-    <section id="sobre" className="py-12 lg:py-16 bg-white">
+    <section id="sobre" className="py-10 sm:py-12 lg:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center"
+        >
           {/* Conteúdo */}
-          <div>
+          <Reveal asChild>
             <span
               className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
               style={{ background: 'rgba(0,94,213,0.1)', color: '#005ED5' }}
@@ -65,13 +75,15 @@ export default function Sobre() {
             >
               Fale Conosco
             </a>
-          </div>
+          </Reveal>
 
           {/* Diferenciais */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {diferenciais.map(({ icon: Icon, titulo, desc }) => (
-              <div
+            {diferenciais.map(({ icon: Icon, titulo, desc }, i) => (
+              <Reveal
+                asChild
                 key={titulo}
+                delay={0.1 + i * 0.06}
                 className="p-6 rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group bg-white"
               >
                 <div
@@ -82,10 +94,10 @@ export default function Sobre() {
                 </div>
                 <h3 className="font-bold text-gray-900 mb-2">{titulo}</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">{desc}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

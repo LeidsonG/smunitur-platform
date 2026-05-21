@@ -11,8 +11,8 @@ export default function Footer() {
 
   return (
     <footer style={{ background: '#0A1628' }} className="text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8 sm:mb-10">
           {/* Logo + desc */}
           <div className="lg:col-span-2">
             <div className="mb-4">

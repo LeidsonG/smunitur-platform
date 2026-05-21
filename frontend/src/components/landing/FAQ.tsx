@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import Reveal from './Reveal';
 
 const faqs = [
   {
@@ -37,7 +38,7 @@ const faqs = [
   {
     pergunta: 'Quais formas de pagamento são aceitas?',
     resposta:
-      'Aceitamos PIX, transferência bancária e dinheiro. Para empresas com pedidos recorrentes, trabalhamos também com boleto bancário. Consulte condições especiais ao solicitar seu orçamento.',
+      'Aceitamos PIX, cartão de crédito ou débito, transferência bancária e dinheiro. Para empresas com pedidos recorrentes, trabalhamos também com boleto bancário. Consulte condições especiais ao solicitar seu orçamento.',
   },
 ];
 
@@ -45,9 +46,9 @@ export default function FAQ() {
   const [aberto, setAberto] = useState<number | null>(null);
 
   return (
-    <section id="faq" className="py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
+    <section id="faq" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <Reveal className="text-center mb-10 sm:mb-12">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
             style={{ background: 'rgba(255,148,0,0.1)', color: '#FF9400' }}
@@ -59,14 +60,15 @@ export default function FAQ() {
             <span style={{ color: '#005ED5' }}>frequentes</span>
           </h2>
           <p className="text-gray-600">Encontre respostas para as dúvidas mais comuns.</p>
-        </div>
+        </Reveal>
 
         <div className="space-y-3">
           {faqs.map((faq, i) => {
             const isOpen = aberto === i;
             return (
-              <div
+              <Reveal
                 key={i}
+                delay={i * 0.05}
                 className="bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-blue-100 transition-colors duration-200"
               >
                 <button
@@ -100,7 +102,7 @@ export default function FAQ() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             );
           })}
         </div>

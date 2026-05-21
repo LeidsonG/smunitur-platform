@@ -12,6 +12,25 @@ router.get('/', async (_req: Request, res: Response) => {
   return res.json({ categorias });
 });
 
+// GET /api/categorias/:id/atributos — público, retorna atributos + opções de uma categoria
+router.get('/:id/atributos', async (req: Request, res: Response) => {
+  const categoriaId = parseInt(req.params.id);
+  if (isNaN(categoriaId)) return res.status(400).json({ error: 'ID inválido' });
+
+  const atributos = await prisma.atributoProduto.findMany({
+    where: { categoriaId, ativo: true },
+    orderBy: { ordem: 'asc' },
+    include: {
+      opcoes: {
+        where: { ativo: true },
+        orderBy: { ordem: 'asc' },
+        select: { id: true, valor: true },
+      },
+    },
+  });
+  return res.json({ atributos });
+});
+
 router.post('/', authMiddleware, async (req: Request, res: Response) => {
   const { nome, slug } = req.body;
   if (!nome || !slug) return res.status(400).json({ error: 'Nome e slug são obrigatórios' });

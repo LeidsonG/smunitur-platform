@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search, CheckCircle, Clock, Package, Truck, XCircle, Eye, Loader2 } from 'lucide-react';
 import api from '@/lib/api';
+import Reveal from './Reveal';
 
 const STATUS_CONFIG: Record<string, { label: string; cor: string; icon: React.ElementType; desc: string }> = {
   recebido: {
@@ -97,9 +98,9 @@ export default function Acompanhamento() {
   const StatusIcon = statusInfo?.icon;
 
   return (
-    <section id="acompanhar" className="py-12 lg:py-16 bg-white">
+    <section id="acompanhar" className="py-10 sm:py-12 lg:py-16 bg-white">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <Reveal className="text-center mb-10 sm:mb-12">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
             style={{ background: 'rgba(0,94,213,0.1)', color: '#005ED5' }}
@@ -113,10 +114,10 @@ export default function Acompanhamento() {
           <p className="text-gray-600 text-lg">
             Informe o número do seu orçamento para ver o status em tempo real.
           </p>
-        </div>
+        </Reveal>
 
         {/* Busca */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-5 sm:p-6 mb-6">
+        <Reveal delay={0.1} className="bg-white rounded-2xl border border-gray-100 shadow-lg p-5 sm:p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
@@ -137,7 +138,7 @@ export default function Acompanhamento() {
               Buscar
             </button>
           </div>
-        </div>
+        </Reveal>
 
         {/* Erro */}
         {erro && (
