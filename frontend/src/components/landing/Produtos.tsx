@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { Shirt, Wind, FlaskConical, Plus } from 'lucide-react';
 import Reveal from './Reveal';
 
@@ -25,79 +26,89 @@ const produtos = [
   {
     icon: Plus,
     nome: 'E muito mais...',
-    desc: 'Calças, bonés, aventais, coletes e outros itens de confecção. Entre em contato para saber mais.',
-    tags: ['Bonés', 'Aventais', 'Coletes'],
+    desc: 'Calças, aventais, coletes e outros itens de confecção. Entre em contato para saber mais.',
+    tags: ['Aventais', 'Coletes', 'Calças'],
   },
 ];
+
+const sectionVariants = { hidden: {}, visible: {} };
 
 export default function Produtos() {
   return (
     <section id="produtos" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <Reveal className="text-center mb-10 sm:mb-12 lg:mb-14">
-          <span
-            className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
-            style={{ background: 'rgba(255,148,0,0.1)', color: '#FF9400' }}
-          >
-            Nossos Produtos
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
-            O que a{' '}
-            <span style={{ color: '#005ED5' }}>SM Unitur</span>
-            {' '}faz
-          </h2>
-          <p className="text-gray-600 text-lg max-w-xl mx-auto">
-            Confeccionamos peças de qualidade premium, adaptadas à identidade visual da sua marca.
-          </p>
-        </Reveal>
-
-        {/* Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {produtos.map(({ icon: Icon, nome, desc, tags }, i) => (
-            <Reveal
-              key={nome}
-              delay={i * 0.06}
-              className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200"
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+        >
+          {/* Header */}
+          <Reveal asChild className="text-center mb-10 sm:mb-12 lg:mb-14">
+            <span
+              className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
+              style={{ background: 'rgba(255,148,0,0.1)', color: '#FF9400' }}
             >
-              {/* Ícone */}
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-200"
-                style={{ background: 'linear-gradient(135deg, rgba(0,94,213,0.1), rgba(255,148,0,0.1))' }}
+              Nossos Produtos
+            </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
+              O que a{' '}
+              <span style={{ color: '#005ED5' }}>SM Unitur</span>
+              {' '}faz
+            </h2>
+            <p className="text-gray-600 text-lg max-w-xl mx-auto">
+              Confeccionamos peças de qualidade premium, adaptadas à identidade visual da sua marca.
+            </p>
+          </Reveal>
+
+          {/* Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {produtos.map(({ icon: Icon, nome, desc, tags }, i) => (
+              <Reveal
+                asChild
+                key={nome}
+                delay={0.1 + i * 0.06}
+                className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200"
               >
-                <Icon size={26} style={{ color: '#005ED5' }} />
-              </div>
+                {/* Ícone */}
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-200"
+                  style={{ background: 'linear-gradient(135deg, rgba(0,94,213,0.1), rgba(255,148,0,0.1))' }}
+                >
+                  <Icon size={26} style={{ color: '#005ED5' }} />
+                </div>
 
-              <h3 className="text-lg font-bold text-gray-900 mb-3">{nome}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed mb-4">{desc}</p>
+                <h3 className="text-lg font-bold text-gray-900 mb-3">{nome}</h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-4">{desc}</p>
 
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1.5">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2.5 py-1 rounded-full text-xs font-medium"
-                    style={{ background: 'rgba(0,94,213,0.08)', color: '#005ED5' }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </Reveal>
-          ))}
-        </div>
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1.5">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2.5 py-1 rounded-full text-xs font-medium"
+                      style={{ background: 'rgba(0,94,213,0.08)', color: '#005ED5' }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </Reveal>
+            ))}
+          </div>
 
-        {/* CTA */}
-        <Reveal className="text-center mt-10 sm:mt-12">
-          <button
-            type="button"
-            onClick={() => document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' })}
-            className="px-8 py-4 rounded-full text-white font-bold text-lg transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
-            style={{ background: 'linear-gradient(135deg, #005ED5, #FF9400)' }}
-          >
-            Solicitar Orçamento Agora
-          </button>
-        </Reveal>
+          {/* CTA */}
+          <Reveal asChild delay={0.1 + produtos.length * 0.06} className="text-center mt-10 sm:mt-12">
+            <button
+              type="button"
+              onClick={() => document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-8 py-4 rounded-full text-white font-bold text-lg transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
+              style={{ background: 'linear-gradient(135deg, #005ED5, #FF9400)' }}
+            >
+              Solicitar Orçamento Agora
+            </button>
+          </Reveal>
+        </motion.div>
       </div>
     </section>
   );

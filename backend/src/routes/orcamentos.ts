@@ -60,6 +60,24 @@ router.post(
       },
     });
 
+    // Salva atributos selecionados (opcional)
+    const atributosRaw = req.body.atributos;
+    if (atributosRaw) {
+      try {
+        const atributosData = JSON.parse(atributosRaw) as { atributo_id: number; opcao_id?: number; valor_livre?: string }[];
+        if (Array.isArray(atributosData) && atributosData.length > 0) {
+          await prisma.orcamentoAtributo.createMany({
+            data: atributosData.map((a) => ({
+              orcamentoId: orcamento.id,
+              atributoId: a.atributo_id,
+              opcaoId: a.opcao_id ?? null,
+              valorLivre: a.valor_livre ?? null,
+            })),
+          });
+        }
+      } catch { /* atributos malformados — ignora */ }
+    }
+
     // Registra histórico inicial
     await prisma.orcamentoStatusHistorico.create({
       data: {
@@ -142,6 +160,12 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
       historicos: {
         orderBy: { createdAt: 'asc' },
         include: { usuario: { select: { nome: true } } },
+      },
+      atributosOrcamento: {
+        include: {
+          atributo: { select: { nome: true } },
+          opcao: { select: { valor: true } },
+        },
       },
     },
   });

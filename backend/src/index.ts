@@ -12,6 +12,7 @@ import authRoutes from './routes/auth';
 import orcamentosRoutes from './routes/orcamentos';
 import produtosRoutes from './routes/produtos';
 import categoriasRoutes from './routes/categorias';
+import atributosRoutes from './routes/atributos';
 import adminRoutes from './routes/admin';
 import producaoRoutes from './routes/producao';
 
@@ -79,6 +80,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/orcamentos', orcamentosRoutes);
 app.use('/api/produtos', produtosRoutes);
 app.use('/api/categorias', categoriasRoutes);
+app.use('/api/atributos', atributosRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/producao', producaoRoutes);
 

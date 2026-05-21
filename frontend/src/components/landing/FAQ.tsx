@@ -38,7 +38,7 @@ const faqs = [
   {
     pergunta: 'Quais formas de pagamento são aceitas?',
     resposta:
-      'Aceitamos PIX, transferência bancária e dinheiro. Para empresas com pedidos recorrentes, trabalhamos também com boleto bancário. Consulte condições especiais ao solicitar seu orçamento.',
+      'Aceitamos PIX, cartão de crédito ou débito, transferência bancária e dinheiro. Para empresas com pedidos recorrentes, trabalhamos também com boleto bancário. Consulte condições especiais ao solicitar seu orçamento.',
   },
 ];
 
