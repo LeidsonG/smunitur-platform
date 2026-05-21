@@ -1,6 +1,6 @@
 # Sistema Web SM Unitur
 
-Sistema web completo para a empresa **SM Unitur**, focado em confecção de roupas personalizadas, uniformes e produtos têxteis personalizados.
+Sistema web completo para a empresa **SM Unitur**, especializada em confecção de uniformes, camisetas, moletons e jalecos personalizados.
 
 ---
 
@@ -9,9 +9,9 @@ Sistema web completo para a empresa **SM Unitur**, focado em confecção de roup
 Plataforma web que permite:
 
 - Clientes conhecerem os produtos e serviços da SM Unitur
-- Solicitação de orçamentos personalizados via formulário
-- Acompanhamento do status de produção pelo número do orçamento
-- Gerenciamento completo via painel administrativo (produtos, orçamentos, produção, usuários)
+- Solicitar orçamentos personalizados em 3 etapas (produto → detalhes → dados)
+- Acompanhar o status de produção pelo número do orçamento
+- Gerenciamento completo via painel administrativo (categorias, atributos, produtos, orçamentos, produção, usuários)
 
 ---
 
@@ -23,7 +23,7 @@ Plataforma web que permite:
 - **React 19**
 - **TypeScript**
 - **Tailwind CSS v4**
-- **Framer Motion** (animações)
+- **Framer Motion** (animações on-scroll via componente `Reveal`)
 - **React Hook Form + Zod** (formulários e validação)
 - **Axios** (HTTP client)
 - **Lucide React** (ícones)
@@ -32,98 +32,130 @@ Plataforma web que permite:
 
 - **Node.js + Express**
 - **TypeScript**
-- **Prisma ORM** (migrations versionadas)
+- **Prisma ORM** (schema gerenciado via `prisma db push` em dev / `prisma migrate deploy` em produção)
 - **MySQL** (via XAMPP local)
 - **Multer** (upload de arquivos com validação por magic bytes)
-- **JWT** (autenticação)
+- **JWT** (autenticação stateless)
 - **Bcryptjs** (hash de senhas)
 - **Helmet + express-rate-limit** (hardening de segurança)
 - **Pino** (logs estruturados)
-
-### Banco de Dados
-
-- **MySQL** via XAMPP (ambiente local)
-- Schema gerenciado por **Prisma Migrate** (`backend/prisma/migrations/`)
 
 ---
 
 ## Estrutura do Projeto
 
 ```
-systemweb-unitur/
-├── frontend/          # Next.js App
+web-system-unitur/
+├── frontend/               # Next.js App
 │   └── src/
-│       ├── app/       # Rotas (App Router)
+│       ├── app/
+│       │   ├── admin/      # Painel administrativo (protegido por JWT)
+│       │   └── page.tsx    # Landing page pública
 │       ├── components/
-│       └── lib/
-├── backend/           # Express API
+│       │   ├── admin/      # Sidebar, layout do painel
+│       │   └── landing/    # Seções da landing (Hero, Produtos, Serviços, etc.)
+│       └── lib/            # api.ts, whatsapp.ts
+├── backend/
+│   ├── prisma/
+│   │   ├── schema.prisma   # Fonte da verdade do banco
+│   │   └── seed.ts         # Dados iniciais
 │   └── src/
-│       ├── routes/
-│       ├── controllers/
-│       ├── middleware/
-│       └── utils/
-├── database/          # Scripts SQL
+│       ├── routes/         # atributos, auth, categorias, orcamentos, produtos, ...
+│       ├── middleware/      # auth (JWT), logger
+│       └── utils/          # prisma client, upload (multer)
+├── database/
+│   └── schema.sql          # Referência SQL gerada (não usar em produção)
 └── README.md
 ```
 
 ---
 
-## Funcionamento do Formulário de Orçamento
+## Painel Administrativo
 
-- Cliente preenche nome, telefone, e-mail, CPF/CNPJ (opcional)
-- Seleciona produto desejado (Camisetas, Moletons, Jalecos, etc.)
-- Informa quantidade (apenas inteiros), tamanhos e cores (campo textual livre)
-- Adiciona detalhes personalizados e observações
-- Pode fazer upload de imagem de referência
-- Ao enviar: dados salvos no banco + link WhatsApp gerado com resumo do orçamento
-- Número do orçamento começa em 100
+Login com JWT (níveis: `super_admin`, `admin`, `operador`).
+
+| Página | Acesso | Descrição |
+|---|---|---|
+| `/admin/dashboard` | Todos | Estatísticas gerais |
+| `/admin/orcamentos` | Todos | Listagem, busca, filtros, detalhes |
+| `/admin/producao` | Todos | Atualização de status com histórico |
+| `/admin/categorias` | admin+ | CRUD de categorias de produtos |
+| `/admin/atributos` | admin+ | Biblioteca global de atributos e opções |
+| `/admin/produtos` | Todos | CRUD de produtos + associação de atributos |
+| `/admin/usuarios` | admin+ | Cadastro e gestão de administradores |
+| `/admin/perfil` | Todos | Trocar senha, foto de perfil |
+
+---
+
+## Fluxo de Atributos
+
+Os atributos seguem uma hierarquia de 3 níveis:
+
+1. **Atributo global** (ex: "Tipo de Gola") — criado em `/admin/atributos`
+2. **Opções globais** (ex: "Careca", "V", "Polo") — cadastradas no mesmo atributo
+3. **Associação ao produto** — em `/admin/produtos`, cada produto seleciona quais atributos usa e quais opções ficam disponíveis para o cliente escolher
+
+Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básica, Jaleco etc., com opções diferentes em cada um.
+
+---
+
+## Formulário de Orçamento (3 etapas)
+
+**Etapa 1 — Produto:**
+- Seleciona a categoria (Camisetas, Moletons, Jalecos...)
+- Seleciona o modelo específico dentro da categoria
+- Escolhe as opções dos atributos do produto (ex: Gola Careca, Tamanho M)
+
+**Etapa 2 — Detalhes:**
+- Quantidade de peças (contador)
+- Tamanhos, cores, detalhes de personalização
+- Upload de imagem de referência (opcional)
+
+**Etapa 3 — Dados:**
+- Nome, telefone, e-mail, CPF/CNPJ (opcional)
+- Resumo visual do pedido
+- Ao enviar: salvo no banco + link WhatsApp gerado automaticamente
 
 ---
 
 ## Integração WhatsApp
 
-- Número temporário para testes.
-- Mensagem formatada com todos os dados do orçamento
+- Número configurado em `frontend/src/components/landing/Footer.tsx` (constante `WHATSAPP_NUMBER`)
+- Mensagem formatada com todos os dados do orçamento, incluindo atributos selecionados
 - Link gerado via `https://wa.me/{numero}?text={mensagem_codificada}`
-- Mensagem inclui número do orçamento, dados do cliente e detalhes do pedido
+
+> **Atenção:** o número atual é temporário para testes. Substituir antes de ir para produção.
 
 ---
 
-## Painel Administrativo
-
-- Login com JWT (múltiplos usuários, níveis: super_admin, admin, operador)
-- **Dashboard**: estatísticas gerais (orçamentos, status, produtos)
-- **Produtos**: CRUD completo com upload de imagem e categorias
-- **Orçamentos**: listagem, busca, filtros por status, visualização detalhada, alteração de status
-- **Produção**: atualização de status com histórico de alterações
-- **Usuários**: cadastro e gerenciamento de administradores
-
----
-
-## Decisões Importantes
+## Decisões de Arquitetura
 
 - **Next.js App Router** para SSR/SSG e melhor SEO
-- **Prisma ORM** para type-safety e migrations controladas
-- **JWT** armazenado em httpOnly cookie para segurança
-- **Multer** para upload de imagens (armazenamento local, preparado para S3 futuramente)
+- **Prisma `db push`** em desenvolvimento local (sem histórico de migrations); `migrate deploy` em produção
+- **Atributos globais** reutilizáveis por produto para evitar duplicação de dados
+- **JWT em localStorage** (painel admin interno — sem dados sensíveis expostos publicamente)
+- **Multer + magic bytes** para validar uploads de imagem no servidor
 - Sem preço fixo nos produtos — sistema baseado em orçamento personalizado
-- Código preparado para futuros upgrades (pagamentos, email marketing, automações)
 
 ---
 
-## Possíveis Upgrades Futuros (não implementados)
+## Possíveis Upgrades Futuros
 
 - Integração com gateway de pagamentos
-- Automação de e-mails (confirmação de orçamento, status)
-- Email marketing
-- Sistema avançado de produção (linha de montagem, etapas)
+- Envio automático de e-mail na criação/atualização do orçamento
+- Notificações push para o admin
+- Sistema avançado de produção (etapas, responsáveis, prazos)
+- Upload de imagens em CDN/S3 em vez de armazenamento local
 - Integrações externas (ERP, estoque)
 
 ---
 
 ## Pendências
 
-- [ ] Substituir número WhatsApp de teste pelo oficial
-- [ ] Deploy em hospedagem online
-- [ ] Configurar domínio e SSL
-- [ ] Verificar o envio pelo whatsapp e e-mail
+- [ ] Substituir número WhatsApp temporário (`5517981322215`) pelo número oficial
+- [ ] Testar envio completo pelo WhatsApp em ambiente real
+- [ ] Deploy em hospedagem (VPS ou plataforma PaaS)
+- [ ] Configurar domínio e certificado SSL
+- [ ] Rodar `prisma migrate dev` para gerar histórico de migrations antes do deploy
+- [ ] Configurar CDN ou S3 para uploads de imagem em produção
+- [ ] Revisar seed com categorias e atributos padrão da empresa
