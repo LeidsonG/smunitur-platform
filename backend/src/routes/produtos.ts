@@ -1,12 +1,21 @@
 import { Router, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
+import { Prisma } from '@prisma/client';
+
 import prisma from '../utils/prisma';
 import { upload, validarMagicBytes } from '../utils/upload';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
-// GET /api/produtos — lista produtos ativos (público)
+const erroUnico = (e: unknown, res: Response) => {
+  if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+    return res.status(409).json({ error: 'Já existe um produto com este nome nesta categoria.' });
+  }
+  throw e;
+};
+
+// GET /api/produtos — lista produtos (público)
 router.get('/', async (req: Request, res: Response) => {
   const { categoria, apenasAtivos = 'true' } = req.query;
   const where: Record<string, unknown> = {};
@@ -49,16 +58,12 @@ router.post(
     const { nome, descricao, categoria_id } = req.body;
     const imagem = req.file ? `/uploads/${req.file.filename}` : null;
 
-    const produto = await prisma.produto.create({
-      data: {
-        nome,
-        descricao: descricao || null,
-        categoriaId: parseInt(categoria_id),
-        imagem,
-      },
-    });
-
-    return res.status(201).json({ produto });
+    try {
+      const produto = await prisma.produto.create({
+        data: { nome, descricao: descricao || null, categoriaId: parseInt(categoria_id), imagem },
+      });
+      return res.status(201).json({ produto });
+    } catch (e) { return erroUnico(e, res); }
   }
 );
 
@@ -77,12 +82,10 @@ router.put(
     if (ativo !== undefined) data.ativo = ativo === 'true' || ativo === true;
     if (req.file) data.imagem = `/uploads/${req.file.filename}`;
 
-    const produto = await prisma.produto.update({
-      where: { id: parseInt(req.params.id) },
-      data,
-    });
-
-    return res.json({ produto });
+    try {
+      const produto = await prisma.produto.update({ where: { id: parseInt(req.params.id) }, data });
+      return res.json({ produto });
+    } catch (e) { return erroUnico(e, res); }
   }
 );
 
@@ -95,8 +98,125 @@ router.patch('/:id/toggle', authMiddleware, async (req: Request, res: Response) 
     where: { id: produto.id },
     data: { ativo: !produto.ativo },
   });
-
   return res.json({ produto: atualizado });
+});
+
+// DELETE /api/produtos/:id (protegido)
+router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id);
+  await prisma.produto.delete({ where: { id } });
+  return res.json({ ok: true });
+});
+
+// GET /api/produtos/:id/atributos — retorna atributos do produto com opcoes habilitadas (público)
+router.get('/:id/atributos', async (req: Request, res: Response) => {
+  const produtoId = parseInt(req.params.id);
+  if (isNaN(produtoId)) return res.status(400).json({ error: 'ID inválido' });
+
+  const produtoAtributos = await prisma.produtoAtributo.findMany({
+    where: { produtoId },
+    orderBy: { ordem: 'asc' },
+    include: {
+      atributo: { select: { nome: true } },
+      opcoes: {
+        include: { opcao: { select: { id: true, valor: true, ordem: true } } },
+        orderBy: { opcao: { ordem: 'asc' } },
+      },
+    },
+  });
+
+  const atributos = produtoAtributos.map(pa => ({
+    id: pa.id,
+    atributoId: pa.atributoId,
+    nome: pa.atributo.nome,
+    obrigatorio: pa.obrigatorio,
+    opcoes: pa.opcoes.map(pao => ({ id: pao.opcao.id, valor: pao.opcao.valor })),
+  }));
+
+  return res.json({ atributos });
+});
+
+// POST /api/produtos/:id/atributos — associa atributo global ao produto (admin)
+router.post('/:id/atributos', authMiddleware, async (req: Request, res: Response) => {
+  const produtoId = parseInt(req.params.id);
+  const { atributo_id, obrigatorio = false, opcao_ids = [] } = req.body;
+  if (!atributo_id) return res.status(400).json({ error: 'atributo_id é obrigatório' });
+
+  const total = await prisma.produtoAtributo.count({ where: { produtoId } });
+
+  try {
+    const pa = await prisma.produtoAtributo.create({
+      data: {
+        produtoId,
+        atributoId: parseInt(atributo_id),
+        obrigatorio,
+        ordem: total,
+        opcoes: { create: (opcao_ids as number[]).map(opcaoId => ({ opcaoId })) },
+      },
+      include: {
+        atributo: { select: { nome: true } },
+        opcoes: { include: { opcao: { select: { id: true, valor: true } } } },
+      },
+    });
+
+    return res.status(201).json({
+      atributo: {
+        id: pa.id,
+        atributoId: pa.atributoId,
+        nome: pa.atributo.nome,
+        obrigatorio: pa.obrigatorio,
+        opcoes: pa.opcoes.map(pao => ({ id: pao.opcao.id, valor: pao.opcao.valor })),
+      },
+    });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      return res.status(409).json({ error: 'Este atributo já está associado a este produto.' });
+    }
+    throw e;
+  }
+});
+
+// PUT /api/produtos/:id/atributos/:paId — atualiza opcoes habilitadas / obrigatorio (admin)
+router.put('/:id/atributos/:paId', authMiddleware, async (req: Request, res: Response) => {
+  const paId = parseInt(req.params.paId);
+  const { obrigatorio, opcao_ids } = req.body;
+
+  if (opcao_ids !== undefined) {
+    await prisma.produtoAtributoOpcao.deleteMany({ where: { produtoAtributoId: paId } });
+    if ((opcao_ids as number[]).length > 0) {
+      await prisma.produtoAtributoOpcao.createMany({
+        data: (opcao_ids as number[]).map(opcaoId => ({ produtoAtributoId: paId, opcaoId })),
+      });
+    }
+  }
+
+  if (obrigatorio !== undefined) {
+    await prisma.produtoAtributo.update({ where: { id: paId }, data: { obrigatorio } });
+  }
+
+  const pa = await prisma.produtoAtributo.findUnique({
+    where: { id: paId },
+    include: {
+      atributo: { select: { nome: true } },
+      opcoes: { include: { opcao: { select: { id: true, valor: true } } } },
+    },
+  });
+
+  return res.json({
+    atributo: {
+      id: pa!.id,
+      atributoId: pa!.atributoId,
+      nome: pa!.atributo.nome,
+      obrigatorio: pa!.obrigatorio,
+      opcoes: pa!.opcoes.map(pao => ({ id: pao.opcao.id, valor: pao.opcao.valor })),
+    },
+  });
+});
+
+// DELETE /api/produtos/:id/atributos/:paId — remove associação (admin)
+router.delete('/:id/atributos/:paId', authMiddleware, async (req: Request, res: Response) => {
+  await prisma.produtoAtributo.delete({ where: { id: parseInt(req.params.paId) } });
+  return res.json({ ok: true });
 });
 
 export default router;

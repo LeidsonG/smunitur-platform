@@ -1,39 +1,41 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shirt, Wind, FlaskConical, Plus } from 'lucide-react';
+import { Shirt, Wind, FlaskConical, Package } from 'lucide-react';
 import Reveal from './Reveal';
+import api from '@/lib/api';
 
-const produtos = [
-  {
-    icon: Shirt,
-    nome: 'Camisetas',
-    desc: 'Camisetas personalizadas com bordado ou estampa. Gola redonda, polo, manga longa — o modelo que você precisar.',
-    tags: ['Bordado', 'Silk Screen', 'Sublimação'],
-  },
-  {
-    icon: Wind,
-    nome: 'Moletons',
-    desc: 'Moletons de alta qualidade com fechamento, capuz ou canguru. Personalizados para times, empresas e eventos.',
-    tags: ['Capuz', 'Fechamento', 'Canguru'],
-  },
-  {
-    icon: FlaskConical,
-    nome: 'Jalecos',
-    desc: 'Jalecos profissionais para saúde, indústria e serviços. Personalização com logo e nome bordados.',
-    tags: ['Clínicas', 'Laboratórios', 'Indústria'],
-  },
-  {
-    icon: Plus,
-    nome: 'E muito mais...',
-    desc: 'Calças, aventais, coletes e outros itens de confecção. Entre em contato para saber mais.',
-    tags: ['Aventais', 'Coletes', 'Calças'],
-  },
-];
+interface Categoria { id: number; nome: string; slug: string }
+interface Produto {
+  id: number;
+  nome: string;
+  descricao?: string;
+  imagem?: string;
+  categoria: Categoria;
+}
+
+const ICONE_CATEGORIA: Record<string, React.ElementType> = {
+  camisetas: Shirt,
+  moletons: Wind,
+  jalecos: FlaskConical,
+};
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:3001';
 
 const sectionVariants = { hidden: {}, visible: {} };
 
 export default function Produtos() {
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/produtos')
+      .then(r => setProdutos(r.data.produtos))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <section id="produtos" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,52 +64,72 @@ export default function Produtos() {
           </Reveal>
 
           {/* Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {produtos.map(({ icon: Icon, nome, desc, tags }, i) => (
-              <Reveal
-                asChild
-                key={nome}
-                delay={0.1 + i * 0.06}
-                className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200"
-              >
-                {/* Ícone */}
-                <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-200"
-                  style={{ background: 'linear-gradient(135deg, rgba(0,94,213,0.1), rgba(255,148,0,0.1))' }}
-                >
-                  <Icon size={26} style={{ color: '#005ED5' }} />
+          {loading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 animate-pulse">
+                  <div className="w-14 h-14 rounded-2xl bg-gray-100 mb-5" />
+                  <div className="h-5 bg-gray-100 rounded-lg mb-3 w-2/3" />
+                  <div className="h-3 bg-gray-100 rounded-lg mb-2" />
+                  <div className="h-3 bg-gray-100 rounded-lg w-4/5" />
                 </div>
-
-                <h3 className="text-lg font-bold text-gray-900 mb-3">{nome}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed mb-4">{desc}</p>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1.5">
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2.5 py-1 rounded-full text-xs font-medium"
-                      style={{ background: 'rgba(0,94,213,0.08)', color: '#005ED5' }}
+              ))}
+            </div>
+          ) : produtos.length === 0 ? null : (
+            <div className={`grid sm:grid-cols-2 ${produtos.length <= 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6`}>
+              {produtos.map((produto, i) => {
+                const Icon = ICONE_CATEGORIA[produto.categoria.slug] ?? Package;
+                return (
+                  <Reveal
+                    asChild
+                    key={produto.id}
+                    delay={0.1 + i * 0.06}
+                    className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200"
+                  >
+                    {/* Ícone ou imagem */}
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 overflow-hidden group-hover:scale-110 transition-transform duration-200"
+                      style={{ background: 'linear-gradient(135deg, rgba(0,94,213,0.1), rgba(255,148,0,0.1))' }}
                     >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </Reveal>
-            ))}
-          </div>
+                      {produto.imagem
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={`${API_BASE}${produto.imagem}`} alt={produto.nome} className="w-full h-full object-cover" />
+                        : <Icon size={26} style={{ color: '#005ED5' }} />}
+                    </div>
+
+                    <h3 className="text-lg font-bold text-gray-900 mb-3">{produto.nome}</h3>
+                    {produto.descricao && (
+                      <p className="text-sm text-gray-600 leading-relaxed mb-4">{produto.descricao}</p>
+                    )}
+
+                    {/* Categoria como tag */}
+                    <div className="flex flex-wrap gap-1.5">
+                      <span
+                        className="px-2.5 py-1 rounded-full text-xs font-medium"
+                        style={{ background: 'rgba(0,94,213,0.08)', color: '#005ED5' }}
+                      >
+                        {produto.categoria.nome}
+                      </span>
+                    </div>
+                  </Reveal>
+                );
+              })}
+            </div>
+          )}
 
           {/* CTA */}
-          <Reveal asChild delay={0.1 + produtos.length * 0.06} className="text-center mt-10 sm:mt-12">
-            <button
-              type="button"
-              onClick={() => document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 rounded-full text-white font-bold text-lg transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #005ED5, #FF9400)' }}
-            >
-              Solicitar Orçamento Agora
-            </button>
-          </Reveal>
+          {!loading && (
+            <Reveal asChild delay={0.1 + produtos.length * 0.06} className="text-center mt-10 sm:mt-12">
+              <button
+                type="button"
+                onClick={() => document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-8 py-4 rounded-full text-white font-bold text-lg transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
+                style={{ background: 'linear-gradient(135deg, #005ED5, #FF9400)' }}
+              >
+                Solicitar Orçamento Agora
+              </button>
+            </Reveal>
+          )}
         </motion.div>
       </div>
     </section>

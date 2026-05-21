@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { body, validationResult } from 'express-validator';
 import prisma from '../utils/prisma';
 import { authMiddleware, AuthRequest, getJwtSecret } from '../middleware/auth';
+import { upload, validarMagicBytes } from '../utils/upload';
 
 const router = Router();
 
@@ -35,7 +36,7 @@ router.post(
 
     const { email, senha } = req.body;
 
-    const admin = await prisma.usuarioAdmin.findUnique({ where: { email } });
+    const admin = await prisma.usuarioAdmin.findUnique({ where: { email }, select: { id: true, nome: true, email: true, senha: true, nivel: true, foto: true, ativo: true } });
 
     // Sempre roda bcrypt.compare (mesmo com usuário inexistente) para não vazar timing.
     const hashAlvo = admin?.senha ?? DUMMY_HASH;
@@ -53,7 +54,7 @@ router.post(
 
     return res.json({
       token,
-      admin: { id: admin.id, nome: admin.nome, email: admin.email, nivel: admin.nivel },
+      admin: { id: admin.id, nome: admin.nome, email: admin.email, nivel: admin.nivel, foto: admin.foto ?? null },
     });
   }
 );
@@ -62,13 +63,27 @@ router.post(
 router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   const admin = await prisma.usuarioAdmin.findUnique({
     where: { id: req.admin!.id },
-    select: { id: true, nome: true, email: true, nivel: true, ativo: true, createdAt: true },
+    select: { id: true, nome: true, email: true, nivel: true, foto: true, ativo: true, createdAt: true },
   });
   if (!admin || !admin.ativo) {
     return res.status(401).json({ error: 'Usuário inativo ou inexistente' });
   }
   return res.json({ admin });
 });
+
+// PUT /api/auth/me/foto — atualiza foto de perfil
+router.put(
+  '/me/foto',
+  authMiddleware,
+  upload.single('foto'),
+  validarMagicBytes,
+  async (req: AuthRequest, res: Response) => {
+    if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
+    const foto = `/uploads/${req.file.filename}`;
+    await prisma.usuarioAdmin.update({ where: { id: req.admin!.id }, data: { foto } });
+    return res.json({ foto });
+  }
+);
 
 // PATCH /api/auth/change-password — usuário troca a própria senha
 router.patch(

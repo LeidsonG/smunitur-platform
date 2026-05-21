@@ -1,42 +1,37 @@
 import { Router, Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/', async (_req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
+  const todos = req.query.todos === 'true';
+  const where = todos
+    ? { ativo: true }
+    : { ativo: true, produtos: { some: { ativo: true } } };
+
   const categorias = await prisma.categoria.findMany({
-    where: { ativo: true },
+    where,
     orderBy: { nome: 'asc' },
   });
   return res.json({ categorias });
-});
-
-// GET /api/categorias/:id/atributos — público, retorna atributos + opções de uma categoria
-router.get('/:id/atributos', async (req: Request, res: Response) => {
-  const categoriaId = parseInt(req.params.id);
-  if (isNaN(categoriaId)) return res.status(400).json({ error: 'ID inválido' });
-
-  const atributos = await prisma.atributoProduto.findMany({
-    where: { categoriaId, ativo: true },
-    orderBy: { ordem: 'asc' },
-    include: {
-      opcoes: {
-        where: { ativo: true },
-        orderBy: { ordem: 'asc' },
-        select: { id: true, valor: true },
-      },
-    },
-  });
-  return res.json({ atributos });
 });
 
 router.post('/', authMiddleware, async (req: Request, res: Response) => {
   const { nome, slug } = req.body;
   if (!nome || !slug) return res.status(400).json({ error: 'Nome e slug são obrigatórios' });
 
-  const categoria = await prisma.categoria.create({ data: { nome, slug } });
-  return res.status(201).json({ categoria });
+  try {
+    const categoria = await prisma.categoria.create({ data: { nome, slug } });
+    return res.status(201).json({ categoria });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      const campo = (e.meta?.target as string[])?.includes('slug') ? 'slug' : 'nome';
+      return res.status(409).json({ error: `Já existe uma categoria com este ${campo}.` });
+    }
+    throw e;
+  }
 });
 
 router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
@@ -46,11 +41,19 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
   if (slug) data.slug = slug;
   if (ativo !== undefined) data.ativo = ativo;
 
-  const categoria = await prisma.categoria.update({
-    where: { id: parseInt(req.params.id) },
-    data,
-  });
-  return res.json({ categoria });
+  try {
+    const categoria = await prisma.categoria.update({
+      where: { id: parseInt(req.params.id) },
+      data,
+    });
+    return res.json({ categoria });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      const campo = (e.meta?.target as string[])?.includes('slug') ? 'slug' : 'nome';
+      return res.status(409).json({ error: `Já existe uma categoria com este ${campo}.` });
+    }
+    throw e;
+  }
 });
 
 export default router;

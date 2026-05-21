@@ -13,6 +13,7 @@ import {
   UserCircle,
   Menu,
   X,
+  Tag,
   SlidersHorizontal,
 } from 'lucide-react';
 
@@ -20,12 +21,15 @@ const navItems = [
   { href: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/admin/orcamentos', icon: FileText, label: 'Orçamentos' },
   { href: '/admin/producao', icon: Factory, label: 'Produção' },
+  { href: '/admin/categorias', icon: Tag, label: 'Categorias', nivel: ['super_admin', 'admin'] as string[] },
   { href: '/admin/produtos', icon: Package, label: 'Produtos' },
   { href: '/admin/atributos', icon: SlidersHorizontal, label: 'Atributos', nivel: ['super_admin', 'admin'] as string[] },
   { href: '/admin/usuarios', icon: Users, label: 'Usuários', nivel: ['super_admin', 'admin'] as string[] },
 ];
 
-interface AdminInfo { id: number; nome: string; email: string; nivel: 'super_admin' | 'admin' | 'operador' }
+interface AdminInfo { id: number; nome: string; email: string; nivel: 'super_admin' | 'admin' | 'operador'; foto?: string | null }
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:3001';
 
 const NIVEL_LABEL: Record<AdminInfo['nivel'], string> = {
   super_admin: 'Super Admin', admin: 'Admin', operador: 'Operador',
@@ -93,10 +97,13 @@ export default function Sidebar() {
           }}
         >
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+            className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
             style={{ background: 'rgba(0,94,213,0.25)' }}
           >
-            <UserCircle size={22} style={{ color: '#005ED5' }} />
+            {admin.foto
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={`${API_BASE}${admin.foto}`} alt={admin.nome} className="w-full h-full object-cover" />
+              : <UserCircle size={22} style={{ color: '#005ED5' }} />}
           </div>
           <div className="flex-1 min-w-0 text-left">
             <p className="text-sm font-semibold text-white truncate">{admin.nome}</p>

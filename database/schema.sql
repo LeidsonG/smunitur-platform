@@ -109,13 +109,13 @@ CREATE TABLE IF NOT EXISTS orcamento_status_historico (
 -- Atributos configuráveis por categoria (ex: "Tipo de Gola")
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS atributos_produto (
-  id           INT AUTO_INCREMENT PRIMARY KEY,
-  categoria_id INT     NOT NULL,
-  nome         VARCHAR(100) NOT NULL,
-  obrigatorio  BOOLEAN NOT NULL DEFAULT FALSE,
-  ordem        INT     NOT NULL DEFAULT 0,
-  ativo        BOOLEAN NOT NULL DEFAULT TRUE,
-  FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  produto_id  INT     NOT NULL,
+  nome        VARCHAR(100) NOT NULL,
+  obrigatorio BOOLEAN NOT NULL DEFAULT FALSE,
+  ordem       INT     NOT NULL DEFAULT 0,
+  ativo       BOOLEAN NOT NULL DEFAULT TRUE,
+  FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
 );
 
 -- ------------------------------------------------------------
