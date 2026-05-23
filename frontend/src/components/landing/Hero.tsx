@@ -109,7 +109,7 @@ export default function Hero() {
               style={{
                 width: 'auto',
                 maxHeight: '320px',
-                filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.35)) drop-shadow(0 2px 8px rgba(0,0,0,0.2))',
+                filter: 'drop-shadow(0 20px 48px rgba(0,0,0,0.7)) drop-shadow(0 8px 16px rgba(0,0,0,0.5)) drop-shadow(0 2px 4px rgba(0,0,0,0.4))',
               }}
               priority
             />
