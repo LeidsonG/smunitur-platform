@@ -98,26 +98,23 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Coluna direita — logo com pulso animado */}
+          {/* Coluna direita — logo com halo desfocado */}
           <div className="hidden lg:flex flex-shrink-0 items-center justify-center relative">
-            <style>{`
-              @keyframes pulse-ring {
-                0%   { transform: scale(1);    opacity: 0.55; }
-                100% { transform: scale(1.4);  opacity: 0;    }
-              }
-            `}</style>
+            {/* Halo laranja */}
             <div className="absolute rounded-full" style={{
-              width: '340px', height: '340px',
-              border: '2px solid #FF9400',
-              animation: 'pulse-ring 2.2s ease-out infinite',
+              width: '320px', height: '320px',
+              background: 'radial-gradient(circle, rgba(255,148,0,0.45) 0%, rgba(255,148,0,0.15) 50%, transparent 75%)',
+              filter: 'blur(32px)',
             }} />
+            {/* Halo azul deslocado */}
             <div className="absolute rounded-full" style={{
-              width: '340px', height: '340px',
-              border: '2px solid #FF9400',
-              animation: 'pulse-ring 2.2s ease-out infinite 1.1s',
+              width: '260px', height: '260px',
+              background: 'radial-gradient(circle, rgba(0,94,213,0.35) 0%, transparent 70%)',
+              filter: 'blur(40px)',
+              transform: 'translate(30px, -20px)',
             }} />
             <Image
-              src="/logo2.png"
+              src="/logo4.png"
               alt="SM Unitur"
               width={440}
               height={440}
