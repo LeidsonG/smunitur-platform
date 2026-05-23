@@ -117,7 +117,7 @@ export default function Hero() {
               animation: 'pulse-ring 2.2s ease-out infinite 1.1s',
             }} />
             <Image
-              src="/logo.png"
+              src="/logo2.png"
               alt="SM Unitur"
               width={440}
               height={440}
