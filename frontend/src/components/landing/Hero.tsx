@@ -37,7 +37,7 @@ export default function Hero() {
       {/* Escurecimento lateral direito para dar ênfase à logo */}
       <div
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 40%, transparent 65%)' }}
+        style={{ background: 'linear-gradient(to left, rgba(10,22,40,1) 0%, rgba(0,58,140,0.5) 40%, transparent 65%)' }}
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-40 w-full">
