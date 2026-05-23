@@ -101,7 +101,7 @@ export default function Produtos() {
                         ? <img
                             src={`${API_BASE}${produto.imagem}`}
                             alt={produto.nome}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                           />
                         : <div className="w-full h-full flex items-center justify-center">
                             <Icon size={48} style={{ color: '#005ED5', opacity: 0.25 }} />
