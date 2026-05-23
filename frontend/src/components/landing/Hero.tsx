@@ -98,38 +98,33 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Coluna direita — logo com reflexo no chão */}
-          <div className="hidden lg:flex flex-shrink-0 flex-col items-center justify-center">
+          {/* Coluna direita — logo com pulso animado */}
+          <div className="hidden lg:flex flex-shrink-0 items-center justify-center relative">
+            <style>{`
+              @keyframes pulse-ring {
+                0%   { transform: scale(1);    opacity: 0.55; }
+                100% { transform: scale(1.4);  opacity: 0;    }
+              }
+            `}</style>
+            <div className="absolute rounded-full" style={{
+              width: '340px', height: '340px',
+              border: '2px solid #FF9400',
+              animation: 'pulse-ring 2.2s ease-out infinite',
+            }} />
+            <div className="absolute rounded-full" style={{
+              width: '340px', height: '340px',
+              border: '2px solid #FF9400',
+              animation: 'pulse-ring 2.2s ease-out infinite 1.1s',
+            }} />
             <Image
               src="/logo.png"
               alt="SM Unitur"
               width={440}
               height={440}
-              className="object-contain"
+              className="object-contain relative z-10"
               style={{ width: 'auto', maxHeight: '400px' }}
               priority
             />
-            {/* Linha de "chão" */}
-            <div style={{ width: '80%', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
-            {/* Reflexo espelhado com fade */}
-            <div
-              style={{
-                height: '110px',
-                overflow: 'hidden',
-                WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 100%)',
-                maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 100%)',
-              }}
-            >
-              <Image
-                src="/logo.png"
-                alt=""
-                aria-hidden
-                width={440}
-                height={440}
-                className="object-contain"
-                style={{ width: 'auto', maxHeight: '400px', transform: 'scaleY(-1)' }}
-              />
-            </div>
           </div>
 
         </div>
