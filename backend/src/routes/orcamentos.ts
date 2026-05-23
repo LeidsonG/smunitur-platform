@@ -174,6 +174,29 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   return res.json({ orcamento });
 });
 
+// PATCH /api/orcamentos/:id/valor — define/atualiza valor do orçamento (protegido)
+router.patch('/:id/valor', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id);
+  const { valor } = req.body;
+
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+
+  const valorNum = valor === null || valor === '' ? null : parseFloat(valor);
+  if (valor !== null && valor !== '' && isNaN(valorNum as number)) {
+    return res.status(400).json({ error: 'Valor inválido' });
+  }
+
+  const orcamento = await prisma.orcamento.findUnique({ where: { id } });
+  if (!orcamento) return res.status(404).json({ error: 'Orçamento não encontrado' });
+
+  const atualizado = await prisma.orcamento.update({
+    where: { id },
+    data: { valor: valorNum },
+  });
+
+  return res.json({ orcamento: atualizado });
+});
+
 // PATCH /api/orcamentos/:id/status — atualiza status (protegido)
 router.patch('/:id/status', authMiddleware, async (req: AuthRequest, res: Response) => {
   const { status, observacao } = req.body;

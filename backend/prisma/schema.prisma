@@ -127,6 +127,7 @@ model Orcamento {
   detalhes         String?         @db.Text
   observacoes      String?         @db.Text
   imagemReferencia String?         @map("imagem_referencia") @db.VarChar(255)
+  valor            Decimal?        @db.Decimal(10, 2)
   status           StatusOrcamento @default(recebido)
   createdAt        DateTime        @default(now()) @map("created_at")
   updatedAt        DateTime        @updatedAt @map("updated_at")

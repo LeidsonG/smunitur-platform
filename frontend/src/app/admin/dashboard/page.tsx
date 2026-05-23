@@ -8,6 +8,7 @@ import api from '@/lib/api';
 interface Stats {
   totalOrcamentos: number;
   orcamentosRecebidos: number;
+  orcamentosEmAnalise: number;
   orcamentosEmProducao: number;
   orcamentosFinalizados: number;
   totalProdutos: number;
@@ -71,7 +72,7 @@ export default function DashboardPage() {
     { label: 'Em Produção', value: stats?.orcamentosEmProducao ?? 0, icon: Factory, cor: '#8B5CF6' },
     { label: 'Finalizados', value: stats?.orcamentosFinalizados ?? 0, icon: CheckCircle, cor: '#10B981' },
     { label: 'Produtos Ativos', value: stats?.totalProdutos ?? 0, icon: Package, cor: '#FF9400' },
-    { label: 'Conversão', value: `${stats?.totalOrcamentos ? Math.round((stats.orcamentosFinalizados / stats.totalOrcamentos) * 100) : 0}%`, icon: TrendingUp, cor: '#005ED5' },
+    { label: 'Em Análise', value: stats?.orcamentosEmAnalise ?? 0, icon: TrendingUp, cor: '#005ED5' },
   ];
 
   return (

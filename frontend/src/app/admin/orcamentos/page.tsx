@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Search, Eye, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Search, Eye, ChevronLeft, ChevronRight, X, DollarSign } from 'lucide-react';
 import api from '@/lib/api';
 
 const STATUS_OPTIONS = [
@@ -25,7 +25,7 @@ interface Orcamento {
   telefoneCliente: string; produtoDesejado: string; quantidade: number;
   status: string; createdAt: string; tamanhos?: string; cores?: string;
   detalhes?: string; observacoes?: string; cpfCnpj?: string;
-  imagemReferencia?: string;
+  imagemReferencia?: string; valor?: number | null;
 }
 
 export default function OrcamentosPage() {
@@ -39,6 +39,8 @@ export default function OrcamentosPage() {
   const [novoStatus, setNovoStatus] = useState('');
   const [obs, setObs] = useState('');
   const [atualizando, setAtualizando] = useState(false);
+  const [novoValor, setNovoValor] = useState('');
+  const [salvandoValor, setSalvandoValor] = useState(false);
 
   const limite = 15;
 
@@ -57,6 +59,23 @@ export default function OrcamentosPage() {
   }, [pagina, busca, status]);
 
   useEffect(() => { carregar(); }, [carregar]);
+
+  const abrirModal = (o: Orcamento) => {
+    setSelecionado(o);
+    setNovoStatus(o.status);
+    setNovoValor(o.valor != null ? String(o.valor) : '');
+  };
+
+  const salvarValor = async () => {
+    if (!selecionado) return;
+    setSalvandoValor(true);
+    try {
+      const res = await api.patch(`/orcamentos/${selecionado.id}/valor`, { valor: novoValor === '' ? null : novoValor });
+      const valorAtualizado = res.data.orcamento.valor;
+      setOrcamentos(prev => prev.map(o => o.id === selecionado.id ? { ...o, valor: valorAtualizado } : o));
+      setSelecionado({ ...selecionado, valor: valorAtualizado });
+    } finally { setSalvandoValor(false); }
+  };
 
   const atualizarStatus = async () => {
     if (!selecionado || !novoStatus) return;
@@ -145,7 +164,7 @@ export default function OrcamentosPage() {
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => { setSelecionado(o); setNovoStatus(o.status); }}
+                        onClick={() => abrirModal(o)}
                         className="p-1.5 rounded-lg hover:bg-blue-50 transition-colors"
                         style={{ color: '#005ED5' }}
                       >
@@ -207,6 +226,43 @@ export default function OrcamentosPage() {
               {selecionado.cores && <InfoRow label="Cores" value={selecionado.cores} />}
               {selecionado.detalhes && <InfoRow label="Detalhes" value={selecionado.detalhes} />}
               {selecionado.observacoes && <InfoRow label="Observações" value={selecionado.observacoes} />}
+
+              {/* Valor do orçamento */}
+              <div className="border-t border-gray-100 pt-4 mt-4">
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  Valor do Orçamento
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">R$</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={novoValor}
+                      onChange={e => setNovoValor(e.target.value)}
+                      placeholder="0,00"
+                      className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400"
+                    />
+                  </div>
+                  <button
+                    onClick={salvarValor}
+                    disabled={salvandoValor}
+                    className="px-4 py-2 rounded-xl font-semibold text-white text-sm flex items-center gap-1.5 disabled:opacity-50 transition-all hover:scale-[1.02]"
+                    style={{ background: '#10B981' }}
+                  >
+                    <DollarSign size={14} />
+                    {salvandoValor ? 'Salvando...' : 'Salvar'}
+                  </button>
+                </div>
+                {selecionado.valor != null && (
+                  <p className="text-xs text-gray-400 mt-1.5">
+                    Valor atual: <span className="font-semibold text-gray-600">
+                      {Number(selecionado.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
+                  </p>
+                )}
+              </div>
 
               <div className="border-t border-gray-100 pt-4 mt-4">
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">

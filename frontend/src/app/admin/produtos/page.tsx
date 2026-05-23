@@ -3,12 +3,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   Plus, Edit2, Trash2, ToggleLeft, ToggleRight, X,
-  Upload, Loader2, ChevronDown, Check, Link2, Link2Off,
+  Upload, Loader2, ChevronDown, Check, Link2, Link2Off, Tag,
 } from 'lucide-react';
 import api from '@/lib/api';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
-interface Categoria { id: number; nome: string; slug: string }
+interface Categoria { id: number; nome: string; slug: string; ativo: boolean }
 interface OpcaoGlobal { id: number; valor: string }
 interface AtributoGlobal { id: number; nome: string; opcoes: OpcaoGlobal[] }
 
@@ -37,6 +37,54 @@ export default function ProdutosPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [atributosGlobais, setAtributosGlobais] = useState<AtributoGlobal[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // ── Categorias ───────────────────────────────────────────────────────────────
+  const [catModal, setCatModal] = useState<'criar' | 'editar' | null>(null);
+  const [catEditando, setCatEditando] = useState<Categoria | null>(null);
+  const [catForm, setCatForm] = useState({ nome: '', slug: '' });
+  const [catSlugManual, setCatSlugManual] = useState(false);
+  const [catSalvando, setCatSalvando] = useState(false);
+  const [catErro, setCatErro] = useState<string | null>(null);
+
+  const gerarSlug = (nome: string) =>
+    nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  const abrirCriarCat = () => {
+    setCatEditando(null);
+    setCatForm({ nome: '', slug: '' });
+    setCatSlugManual(false);
+    setCatErro(null);
+    setCatModal('criar');
+  };
+
+  const abrirEditarCat = (c: Categoria) => {
+    setCatEditando(c);
+    setCatForm({ nome: c.nome, slug: c.slug });
+    setCatSlugManual(true);
+    setCatErro(null);
+    setCatModal('editar');
+  };
+
+  const salvarCat = async () => {
+    if (!catForm.nome.trim() || !catForm.slug.trim()) return;
+    setCatSalvando(true); setCatErro(null);
+    try {
+      if (catModal === 'criar') {
+        await api.post('/categorias', { nome: catForm.nome.trim(), slug: catForm.slug.trim() });
+      } else if (catEditando) {
+        await api.put(`/categorias/${catEditando.id}`, { nome: catForm.nome.trim(), slug: catForm.slug.trim() });
+      }
+      setCatModal(null);
+      await carregar();
+    } catch (e) {
+      setCatErro((e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Erro ao salvar.');
+    } finally { setCatSalvando(false); }
+  };
+
+  const toggleCatAtivo = async (c: Categoria) => {
+    await api.put(`/categorias/${c.id}`, { ativo: !c.ativo });
+    setCategorias(prev => prev.map(x => x.id === c.id ? { ...x, ativo: !x.ativo } : x));
+  };
 
   // Modal produto
   const [modal, setModal] = useState<'criar' | 'editar' | null>(null);
@@ -210,6 +258,43 @@ export default function ProdutosPage() {
           style={{ background: '#005ED5' }}>
           <Plus size={18} /> Novo Produto
         </button>
+      </div>
+
+      {/* ── Categorias ─────────────────────────────────────────────────────────── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Tag size={16} style={{ color: '#005ED5' }} />
+            <h2 className="font-semibold text-gray-900 text-sm">Categorias</h2>
+            <span className="text-xs text-gray-400">{categorias.length} cadastrada{categorias.length !== 1 ? 's' : ''}</span>
+          </div>
+          <button onClick={abrirCriarCat}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-white text-xs transition-all hover:scale-105"
+            style={{ background: '#005ED5' }}>
+            <Plus size={13} /> Nova Categoria
+          </button>
+        </div>
+        {categorias.length === 0 ? (
+          <p className="text-sm text-gray-400">Nenhuma categoria. Crie uma para começar.</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {categorias.map(c => (
+              <div key={c.id}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm transition-all ${c.ativo ? 'border-gray-200 bg-gray-50' : 'border-gray-100 bg-gray-50 opacity-50'}`}>
+                <span className="font-medium text-gray-800">{c.nome}</span>
+                <button onClick={() => toggleCatAtivo(c)}
+                  title={c.ativo ? 'Desativar' : 'Ativar'}
+                  className="text-gray-400 hover:text-green-500 transition-colors">
+                  {c.ativo ? <ToggleRight size={14} className="text-green-500" /> : <ToggleLeft size={14} />}
+                </button>
+                <button onClick={() => abrirEditarCat(c)}
+                  className="text-gray-400 hover:text-blue-500 transition-colors">
+                  <Edit2 size={12} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {loading ? (
@@ -426,6 +511,42 @@ export default function ProdutosPage() {
                 </div>
               </div>
             ))}
+        </div>
+      )}
+
+      {/* Modal criar/editar categoria */}
+      {catModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900">{catModal === 'criar' ? 'Nova Categoria' : 'Editar Categoria'}</h2>
+              <button onClick={() => setCatModal(null)} className="p-1.5 rounded-lg hover:bg-gray-100"><X size={18} /></button>
+            </div>
+            <div className="p-5 space-y-4">
+              {catErro && <div className="px-3 py-2.5 rounded-xl text-sm font-medium text-red-700 bg-red-50 border border-red-100">{catErro}</div>}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome *</label>
+                <input value={catForm.nome}
+                  onChange={e => { const v = e.target.value; setCatForm(f => ({ nome: v, slug: catSlugManual ? f.slug : gerarSlug(v) })); }}
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400"
+                  placeholder="Ex: Camisetas" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Slug</label>
+                <input value={catForm.slug}
+                  onChange={e => { setCatSlugManual(true); setCatForm(f => ({ ...f, slug: e.target.value })); }}
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 font-mono"
+                  placeholder="Ex: camisetas" />
+                <p className="text-xs text-gray-400 mt-1">Gerado automaticamente. Só letras, números e hífens.</p>
+              </div>
+              <button onClick={salvarCat} disabled={catSalvando || !catForm.nome.trim() || !catForm.slug.trim()}
+                className="w-full py-2.5 rounded-xl font-semibold text-white text-sm flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02]"
+                style={{ background: '#005ED5' }}>
+                {catSalvando ? <Loader2 size={16} className="animate-spin" /> : null}
+                {catSalvando ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

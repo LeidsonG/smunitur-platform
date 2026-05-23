@@ -22,12 +22,14 @@ router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response
   const [
     totalOrcamentos,
     orcamentosRecebidos,
+    orcamentosEmAnalise,
     orcamentosEmProducao,
     orcamentosFinalizados,
     totalProdutos,
   ] = await Promise.all([
     prisma.orcamento.count(),
     prisma.orcamento.count({ where: { status: 'recebido' } }),
+    prisma.orcamento.count({ where: { status: 'em_analise' } }),
     prisma.orcamento.count({ where: { status: 'em_producao' } }),
     prisma.orcamento.count({ where: { status: 'finalizado' } }),
     prisma.produto.count({ where: { ativo: true } }),
@@ -45,6 +47,7 @@ router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response
     stats: {
       totalOrcamentos,
       orcamentosRecebidos,
+      orcamentosEmAnalise,
       orcamentosEmProducao,
       orcamentosFinalizados,
       totalProdutos,
