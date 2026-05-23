@@ -107,20 +107,12 @@ export default function Hero() {
           {/* Coluna direita — logo */}
           <div className="hidden lg:flex flex-shrink-0 items-center justify-center">
             <Image
-              src="/logo4.png"
+              src="/logo5.png"
               alt="SM Unitur"
               width={440}
               height={440}
               className="object-contain"
-              style={{
-                width: 'auto',
-                maxHeight: '400px',
-                filter:
-                  'drop-shadow(3px 0 0 white) drop-shadow(-3px 0 0 white) ' +
-                  'drop-shadow(0 3px 0 white) drop-shadow(0 -3px 0 white) ' +
-                  'drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) ' +
-                  'drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white)',
-              }}
+              style={{ width: 'auto', maxHeight: '400px' }}
               priority
             />
           </div>
