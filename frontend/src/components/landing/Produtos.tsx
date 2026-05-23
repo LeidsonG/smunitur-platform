@@ -88,22 +88,25 @@ export default function Produtos() {
                     className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200 overflow-hidden"
                   >
                     {/* Foto do produto */}
-                    <div className="relative h-56"
-                      style={{ background: 'linear-gradient(135deg, rgba(0,94,213,0.08), rgba(255,148,0,0.08))' }}
+                    <div
+                      className="h-56"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(0,94,213,0.08), rgba(255,148,0,0.08))',
+                        overflow: 'hidden',
+                        transform: 'translateZ(0)',
+                      }}
                     >
-                      <div className="absolute inset-0 overflow-hidden">
-                        {produto.imagem
-                          // eslint-disable-next-line @next/next/no-img-element
-                          ? <img
-                              src={`${API_BASE}${produto.imagem}`}
-                              alt={produto.nome}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                          : <div className="w-full h-full flex items-center justify-center">
-                              <Icon size={48} style={{ color: '#005ED5', opacity: 0.25 }} />
-                            </div>
-                        }
-                      </div>
+                      {produto.imagem
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img
+                            src={`${API_BASE}${produto.imagem}`}
+                            alt={produto.nome}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        : <div className="w-full h-full flex items-center justify-center">
+                            <Icon size={48} style={{ color: '#005ED5', opacity: 0.25 }} />
+                          </div>
+                      }
                     </div>
 
                     {/* Conteúdo */}
