@@ -34,6 +34,12 @@ export default function Hero() {
         style={{ background: 'linear-gradient(135deg, rgba(0,58,140,0.55) 0%, rgba(0,94,213,0.35) 50%, rgba(10,22,40,0.55) 100%)' }}
       />
 
+      {/* Escurecimento lateral direito para dar ênfase à logo */}
+      <div
+        className="absolute inset-0"
+        style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 40%, transparent 65%)' }}
+      />
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-40 w-full">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
