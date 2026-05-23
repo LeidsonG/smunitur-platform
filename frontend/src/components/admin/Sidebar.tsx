@@ -13,7 +13,6 @@ import {
   UserCircle,
   Menu,
   X,
-  Tag,
   SlidersHorizontal,
 } from 'lucide-react';
 
@@ -21,7 +20,6 @@ const navItems = [
   { href: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/admin/orcamentos', icon: FileText, label: 'Orçamentos' },
   { href: '/admin/producao', icon: Factory, label: 'Produção' },
-  { href: '/admin/categorias', icon: Tag, label: 'Categorias', nivel: ['super_admin', 'admin'] as string[] },
   { href: '/admin/produtos', icon: Package, label: 'Produtos' },
   { href: '/admin/atributos', icon: SlidersHorizontal, label: 'Atributos', nivel: ['super_admin', 'admin'] as string[] },
   { href: '/admin/usuarios', icon: Users, label: 'Usuários', nivel: ['super_admin', 'admin'] as string[] },

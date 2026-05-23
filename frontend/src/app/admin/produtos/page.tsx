@@ -6,6 +6,7 @@ import {
   Upload, Loader2, ChevronDown, Check, Link2, Link2Off, Tag,
 } from 'lucide-react';
 import api from '@/lib/api';
+import ConfirmModal from '@/components/admin/ConfirmModal';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 interface Categoria { id: number; nome: string; slug: string; ativo: boolean }
@@ -46,6 +47,22 @@ export default function ProdutosPage() {
   const [catSalvando, setCatSalvando] = useState(false);
   const [catErro, setCatErro] = useState<string | null>(null);
 
+  // Modal de confirmação genérico
+  const [confirmar, setConfirmar] = useState<null | { titulo: string; mensagem: string; acao: () => Promise<void> }>(null);
+  const [confirmCarregando, setConfirmCarregando] = useState(false);
+
+  const pedirConfirmacao = (titulo: string, mensagem: string, acao: () => Promise<void>) =>
+    setConfirmar({ titulo, mensagem, acao });
+
+  const executarConfirmacao = async () => {
+    if (!confirmar) return;
+    setConfirmCarregando(true);
+    try { await confirmar.acao(); } finally {
+      setConfirmCarregando(false);
+      setConfirmar(null);
+    }
+  };
+
   const gerarSlug = (nome: string) =>
     nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -81,9 +98,16 @@ export default function ProdutosPage() {
     } finally { setCatSalvando(false); }
   };
 
-  const toggleCatAtivo = async (c: Categoria) => {
-    await api.put(`/categorias/${c.id}`, { ativo: !c.ativo });
-    setCategorias(prev => prev.map(x => x.id === c.id ? { ...x, ativo: !x.ativo } : x));
+  const excluirCategoria = async (c: Categoria) => {
+    setCatErro(null);
+    try {
+      await api.delete(`/categorias/${c.id}`);
+      setCatModal(null);
+      await carregar();
+    } catch (e) {
+      setCatErro((e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Erro ao excluir.');
+      throw e;
+    }
   };
 
   // Modal produto
@@ -174,10 +198,15 @@ export default function ProdutosPage() {
   };
 
   const excluirProduto = async (p: Produto) => {
-    if (!confirm(`Excluir "${p.nome}"? Esta ação não pode ser desfeita.`)) return;
-    await api.delete(`/produtos/${p.id}`);
-    setProdutos(prev => prev.filter(x => x.id !== p.id));
-    if (expandido === p.id) setExpandido(null);
+    pedirConfirmacao(
+      'Excluir Produto',
+      `Tem certeza que quer excluir "${p.nome}"? Esta ação não pode ser desfeita.`,
+      async () => {
+        await api.delete(`/produtos/${p.id}`);
+        setProdutos(prev => prev.filter(x => x.id !== p.id));
+        if (expandido === p.id) setExpandido(null);
+      }
+    );
   };
 
   // ── Gerenciar associações de atributos ────────────────────────────────────────
@@ -218,10 +247,15 @@ export default function ProdutosPage() {
     } finally { setCriandoAssoc(false); }
   };
 
-  const removerAssociacao = async (paId: number, produtoId: number) => {
-    if (!confirm('Remover este atributo do produto?')) return;
-    await api.delete(`/produtos/${produtoId}/atributos/${paId}`);
-    setAtributos(produtoId, a => a.filter(x => x.id !== paId));
+  const removerAssociacao = (paId: number, produtoId: number) => {
+    pedirConfirmacao(
+      'Remover Atributo',
+      'Tem certeza que quer remover este atributo do produto?',
+      async () => {
+        await api.delete(`/produtos/${produtoId}/atributos/${paId}`);
+        setAtributos(produtoId, a => a.filter(x => x.id !== paId));
+      }
+    );
   };
 
   const toggleOpcaoProduto = async (pa: AtributoProduto, opcaoId: number, produtoId: number) => {
@@ -262,12 +296,10 @@ export default function ProdutosPage() {
 
       {/* ── Categorias ─────────────────────────────────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Tag size={16} style={{ color: '#005ED5' }} />
-            <h2 className="font-semibold text-gray-900 text-sm">Categorias</h2>
-            <span className="text-xs text-gray-400">{categorias.length} cadastrada{categorias.length !== 1 ? 's' : ''}</span>
-          </div>
+        <div className="flex items-center gap-3 flex-wrap mb-4">
+          <Tag size={16} style={{ color: '#005ED5' }} />
+          <h2 className="font-semibold text-gray-900 text-sm">Categorias</h2>
+          <span className="text-xs text-gray-400">{categorias.length} cadastrada{categorias.length !== 1 ? 's' : ''}</span>
           <button onClick={abrirCriarCat}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-white text-xs transition-all hover:scale-105"
             style={{ background: '#005ED5' }}>
@@ -280,13 +312,8 @@ export default function ProdutosPage() {
           <div className="flex flex-wrap gap-2">
             {categorias.map(c => (
               <div key={c.id}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm transition-all ${c.ativo ? 'border-gray-200 bg-gray-50' : 'border-gray-100 bg-gray-50 opacity-50'}`}>
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-200 bg-gray-50 text-sm">
                 <span className="font-medium text-gray-800">{c.nome}</span>
-                <button onClick={() => toggleCatAtivo(c)}
-                  title={c.ativo ? 'Desativar' : 'Ativar'}
-                  className="text-gray-400 hover:text-green-500 transition-colors">
-                  {c.ativo ? <ToggleRight size={14} className="text-green-500" /> : <ToggleLeft size={14} />}
-                </button>
                 <button onClick={() => abrirEditarCat(c)}
                   className="text-gray-400 hover:text-blue-500 transition-colors">
                   <Edit2 size={12} />
@@ -326,7 +353,7 @@ export default function ProdutosPage() {
                       className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${p.ativo ? 'border-gray-100' : 'border-gray-200 opacity-60'}`}>
 
                       {/* Header do card */}
-                      <div className="flex items-center gap-3 p-4">
+                      <div className="flex items-start gap-3 p-4 pb-3">
                         <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100">
                           {p.imagem
                             // eslint-disable-next-line @next/next/no-img-element
@@ -337,6 +364,11 @@ export default function ProdutosPage() {
                           <p className="font-semibold text-gray-900 text-sm truncate">{p.nome}</p>
                           {p.descricao && <p className="text-xs text-gray-500 truncate mt-0.5">{p.descricao}</p>}
                         </div>
+                        <button onClick={() => excluirProduto(p)}
+                          className="flex-shrink-0 p-1.5 rounded-lg text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors"
+                          title="Excluir produto">
+                          <Trash2 size={15} />
+                        </button>
                       </div>
 
                       {/* Ações */}
@@ -352,16 +384,18 @@ export default function ProdutosPage() {
                         </button>
                         <div className="flex-1" />
                         <button onClick={() => abrirEditar(p)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-blue-600 transition-colors">
+                          className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-blue-600 transition-colors"
+                          title="Editar produto">
                           <Edit2 size={14} />
                         </button>
-                        <button onClick={() => excluirProduto(p)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors">
-                          <Trash2 size={14} />
-                        </button>
                         <button onClick={() => expandirProduto(p.id)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors">
-                          <ChevronDown size={14} className={`transition-transform duration-200 ${expandido === p.id ? 'rotate-180' : ''}`} />
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+                          style={{
+                            background: expandido === p.id ? 'rgba(0,94,213,0.08)' : '#F3F4F6',
+                            color: expandido === p.id ? '#005ED5' : '#6B7280',
+                          }}>
+                          <ChevronDown size={15} className={`transition-transform duration-200 ${expandido === p.id ? 'rotate-180' : ''}`} />
+                          Atributos
                         </button>
                       </div>
 
@@ -545,9 +579,33 @@ export default function ProdutosPage() {
                 {catSalvando ? <Loader2 size={16} className="animate-spin" /> : null}
                 {catSalvando ? 'Salvando...' : 'Salvar'}
               </button>
+              {catModal === 'editar' && catEditando && (
+                <button
+                  onClick={() => pedirConfirmacao(
+                    'Excluir Categoria',
+                    `Tem certeza que quer excluir "${catEditando.nome}"? Esta ação não pode ser desfeita.`,
+                    () => excluirCategoria(catEditando)
+                  )}
+                  disabled={catSalvando}
+                  className="w-full py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02] border border-red-200 text-red-500 hover:bg-red-50">
+                  <Trash2 size={15} />
+                  Excluir Categoria
+                </button>
+              )}
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de confirmação */}
+      {confirmar && (
+        <ConfirmModal
+          titulo={confirmar.titulo}
+          mensagem={confirmar.mensagem}
+          onConfirm={executarConfirmacao}
+          onCancel={() => setConfirmar(null)}
+          carregando={confirmCarregando}
+        />
       )}
 
       {/* Modal criar/editar produto */}

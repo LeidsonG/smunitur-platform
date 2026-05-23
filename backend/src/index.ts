@@ -100,9 +100,15 @@ app.use((err: Error & { status?: number; code?: string }, req: Request, res: Res
   const log = (req as Request & { log?: typeof logger }).log ?? logger;
   log.error({ err, code: err.code }, 'erro tratado');
 
-  // Multer e outras libs costumam usar err.code
+  // Erros do multer
   if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(413).json({ error: 'Arquivo excede o tamanho permitido' });
+    return res.status(413).json({ error: 'Arquivo excede o tamanho permitido (máx. 10 MB).' });
+  }
+  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+    return res.status(400).json({ error: 'Campo de arquivo inesperado.' });
+  }
+  if (err.code === 'LIMIT_FILE_COUNT') {
+    return res.status(400).json({ error: 'Número máximo de arquivos excedido.' });
   }
 
   const status = err.status ?? 500;

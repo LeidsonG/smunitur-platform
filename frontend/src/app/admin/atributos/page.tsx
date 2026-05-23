@@ -1,10 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, X, Check, Loader2, Tag } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Plus, Pencil, Trash2, X, Check, Loader2, Tag, Camera } from 'lucide-react';
 import api from '@/lib/api';
+import ConfirmModal from '@/components/admin/ConfirmModal';
 
-interface Opcao { id: number; valor: string; ordem: number }
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:3001';
+
+interface Opcao { id: number; valor: string; ordem: number; imagem?: string | null }
 interface Atributo { id: number; nome: string; ordem: number; opcoes: Opcao[] }
 
 const errMsg = (e: unknown) =>
@@ -27,6 +30,26 @@ export default function AtributosPage() {
   const [criandoOpcao, setCriandoOpcao] = useState<number | null>(null);
   const [editandoOpcao, setEditandoOpcao] = useState<{ id: number; atributoId: number } | null>(null);
   const [editOpcaoValor, setEditOpcaoValor] = useState('');
+
+  const [enviandoImagem, setEnviandoImagem] = useState<number | null>(null);
+  const imgInputRef = useRef<HTMLInputElement>(null);
+  const [imgTargetId, setImgTargetId] = useState<number | null>(null);
+
+  // Modal de confirmação
+  const [confirmar, setConfirmar] = useState<null | { titulo: string; mensagem: string; acao: () => Promise<void> }>(null);
+  const [confirmCarregando, setConfirmCarregando] = useState(false);
+
+  const pedirConfirmacao = (titulo: string, mensagem: string, acao: () => Promise<void>) =>
+    setConfirmar({ titulo, mensagem, acao });
+
+  const executarConfirmacao = async () => {
+    if (!confirmar) return;
+    setConfirmCarregando(true);
+    try { await confirmar.acao(); } finally {
+      setConfirmCarregando(false);
+      setConfirmar(null);
+    }
+  };
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -66,10 +89,15 @@ export default function AtributosPage() {
     } finally { setSalvando(false); }
   };
 
-  const excluir = async (id: number) => {
-    if (!confirm('Excluir este atributo e todas as suas opções? Ele será removido de todos os produtos associados.')) return;
-    await api.delete(`/atributos/${id}`);
-    setAtributos(prev => prev.filter(a => a.id !== id));
+  const excluir = (id: number) => {
+    pedirConfirmacao(
+      'Excluir Atributo',
+      'Isso vai excluir o atributo e todas as suas opções, removendo-o de todos os produtos associados.',
+      async () => {
+        await api.delete(`/atributos/${id}`);
+        setAtributos(prev => prev.filter(a => a.id !== id));
+      }
+    );
   };
 
   // ── CRUD opcoes ───────────────────────────────────────────────────────────────
@@ -100,12 +128,43 @@ export default function AtributosPage() {
     setEditandoOpcao(null);
   };
 
-  const excluirOpcao = async (opcaoId: number, atributoId: number) => {
-    if (!confirm('Excluir esta opção? Ela será removida de todos os produtos que a utilizam.')) return;
-    await api.delete(`/atributos/opcoes/${opcaoId}`);
-    setAtributos(prev => prev.map(a =>
-      a.id === atributoId ? { ...a, opcoes: a.opcoes.filter(o => o.id !== opcaoId) } : a
-    ));
+  const excluirOpcao = (opcaoId: number, atributoId: number) => {
+    pedirConfirmacao(
+      'Excluir Opção',
+      'Esta opção será removida de todos os produtos que a utilizam.',
+      async () => {
+        await api.delete(`/atributos/opcoes/${opcaoId}`);
+        setAtributos(prev => prev.map(a =>
+          a.id === atributoId ? { ...a, opcoes: a.opcoes.filter(o => o.id !== opcaoId) } : a
+        ));
+      }
+    );
+  };
+
+  const abrirUploadImagem = (opcaoId: number) => {
+    setImgTargetId(opcaoId);
+    imgInputRef.current?.click();
+  };
+
+  const uploadImagem = async (file: File) => {
+    if (!imgTargetId) return;
+    setEnviandoImagem(imgTargetId);
+    try {
+      const fd = new FormData();
+      fd.append('imagem', file);
+      const res = await api.patch(`/atributos/opcoes/${imgTargetId}/imagem`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const imgAtualizada = res.data.opcao.imagem;
+      setAtributos(prev => prev.map(a => ({
+        ...a,
+        opcoes: a.opcoes.map(o => o.id === imgTargetId ? { ...o, imagem: imgAtualizada } : o),
+      })));
+    } finally {
+      setEnviandoImagem(null);
+      setImgTargetId(null);
+      if (imgInputRef.current) imgInputRef.current.value = '';
+    }
   };
 
   // ── Render ────────────────────────────────────────────────────────────────────
@@ -160,46 +219,78 @@ export default function AtributosPage() {
                 </button>
               </div>
 
-              {/* Opções existentes */}
+              {/* Opções existentes — cards com imagem */}
               {atributo.opcoes.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {atributo.opcoes.map(opcao => (
-                    <span key={opcao.id}
-                      className="group flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium"
-                      style={{ background: 'rgba(0,94,213,0.08)', color: '#005ED5' }}>
-                      {editandoOpcao?.id === opcao.id && editandoOpcao.atributoId === atributo.id ? (
-                        <div className="flex items-center gap-1">
-                          <input
-                            value={editOpcaoValor}
-                            onChange={e => setEditOpcaoValor(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && salvarOpcao(opcao.id, atributo.id)}
-                            className="w-24 text-sm border-b border-blue-400 outline-none bg-transparent"
-                            autoFocus
-                          />
-                          <button onClick={() => salvarOpcao(opcao.id, atributo.id)} className="text-green-500">
-                            <Check size={12} />
-                          </button>
-                          <button onClick={() => setEditandoOpcao(null)} className="text-gray-400">
-                            <X size={12} />
+                <div className="flex flex-wrap gap-3 mb-3">
+                  {atributo.opcoes.map(opcao => {
+                    const editando = editandoOpcao?.id === opcao.id && editandoOpcao.atributoId === atributo.id;
+                    const carregando = enviandoImagem === opcao.id;
+                    return (
+                      <div key={opcao.id}
+                        className="group relative flex flex-col rounded-xl border border-gray-200 overflow-hidden bg-white"
+                        style={{ width: 80 }}>
+
+                        {/* Área da imagem */}
+                        <div className="relative h-16 bg-white flex items-center justify-center">
+                          {opcao.imagem
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={`${API_BASE}${opcao.imagem}`} alt={opcao.valor}
+                                className="w-full h-full object-contain p-1" />
+                            : <div className="text-gray-200 text-xs text-center leading-tight px-1">sem<br/>imagem</div>
+                          }
+                          {/* Botão câmera sobre a imagem */}
+                          <button
+                            onClick={() => abrirUploadImagem(opcao.id)}
+                            disabled={carregando}
+                            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-100"
+                            style={{ background: 'rgba(0,0,0,0.35)' }}
+                            title="Adicionar/trocar imagem"
+                          >
+                            {carregando
+                              ? <Loader2 size={16} className="text-white animate-spin" />
+                              : <Camera size={16} className="text-white" />}
                           </button>
                         </div>
-                      ) : (
-                        <>
-                          {opcao.valor}
-                          <button
-                            onClick={() => { setEditandoOpcao({ id: opcao.id, atributoId: atributo.id }); setEditOpcaoValor(opcao.valor); }}
-                            className="opacity-0 group-hover:opacity-100 ml-0.5 hover:text-blue-700">
-                            <Pencil size={10} />
-                          </button>
-                          <button
-                            onClick={() => excluirOpcao(opcao.id, atributo.id)}
-                            className="opacity-0 group-hover:opacity-100 hover:text-red-500">
-                            <X size={10} />
-                          </button>
-                        </>
-                      )}
-                    </span>
-                  ))}
+
+                        {/* Label / edição */}
+                        <div className="px-1 py-1.5 border-t border-gray-100 bg-gray-50 min-h-[32px] flex items-center justify-center">
+                          {editando ? (
+                            <div className="flex items-center gap-0.5 w-full">
+                              <input
+                                value={editOpcaoValor}
+                                onChange={e => setEditOpcaoValor(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && salvarOpcao(opcao.id, atributo.id)}
+                                className="w-full text-xs border-b border-blue-400 outline-none bg-transparent text-center"
+                                autoFocus
+                              />
+                              <button onClick={() => salvarOpcao(opcao.id, atributo.id)} className="text-green-500 flex-shrink-0">
+                                <Check size={11} />
+                              </button>
+                              <button onClick={() => setEditandoOpcao(null)} className="text-gray-400 flex-shrink-0">
+                                <X size={11} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between w-full px-0.5 gap-0.5">
+                              <span className="text-xs font-semibold text-gray-700 truncate flex-1 text-center">{opcao.valor}</span>
+                              <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                                <button
+                                  onClick={() => { setEditandoOpcao({ id: opcao.id, atributoId: atributo.id }); setEditOpcaoValor(opcao.valor); }}
+                                  className="p-0.5 rounded hover:text-blue-500 text-gray-400">
+                                  <Pencil size={10} />
+                                </button>
+                                <button
+                                  onClick={() => excluirOpcao(opcao.id, atributo.id)}
+                                  className="p-0.5 rounded hover:text-red-500 text-gray-400">
+                                  <X size={10} />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
@@ -231,6 +322,29 @@ export default function AtributosPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Input oculto para upload de imagem de opção */}
+      <input
+        ref={imgInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={e => {
+          const f = e.target.files?.[0];
+          if (f) uploadImagem(f);
+        }}
+      />
+
+      {/* Modal de confirmação */}
+      {confirmar && (
+        <ConfirmModal
+          titulo={confirmar.titulo}
+          mensagem={confirmar.mensagem}
+          onConfirm={executarConfirmacao}
+          onCancel={() => setConfirmar(null)}
+          carregando={confirmCarregando}
+        />
       )}
 
       {/* Modal criar/editar */}

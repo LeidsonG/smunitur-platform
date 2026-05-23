@@ -1,23 +1,26 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shirt, Wind, FlaskConical, Package,
-  Plus, Minus, Upload, Send, Loader2,
-  CheckCircle, AlertCircle, ChevronRight, ChevronLeft,
+  Plus, Upload, Send, Loader2, X,
+  CheckCircle, Check, AlertCircle, ChevronRight, ChevronLeft,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { gerarLinkWhatsApp } from '@/lib/whatsapp';
 import Reveal from './Reveal';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:3001';
+const TAMANHOS_PADRAO = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
+
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 interface Categoria { id: number; nome: string; slug: string }
 interface Produto { id: number; nome: string; descricao?: string }
-interface Opcao { id: number; valor: string }
+interface Opcao { id: number; valor: string; imagem?: string | null }
 interface Atributo { id: number; nome: string; obrigatorio: boolean; opcoes: Opcao[] }
 
 const ICONE_CATEGORIA: Record<string, React.ElementType> = {
@@ -60,14 +63,25 @@ export default function FormularioOrcamento() {
   const [atributos, setAtributos] = useState<Atributo[]>([]);
   const [atributoValues, setAtributoValues] = useState<Record<number, string>>({});
   const [atributoErrors, setAtributoErrors] = useState<Record<number, string>>({});
-  const [quantidade, setQuantidade] = useState(10);
-  const [imagemFile, setImagemFile] = useState<File | null>(null);
+  const [quantidade, setQuantidade] = useState(0);
+  const [imagemFiles, setImagemFiles] = useState<File[]>([]);
   const [estado, setEstado] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [resultado, setResultado] = useState<{ numero: number; linkWhatsApp: string } | null>(null);
 
   const { register, handleSubmit, setValue, trigger, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { quantidade: '10' },
+    defaultValues: {
+      nome_cliente: '',
+      telefone_cliente: '',
+      email_cliente: '',
+      cpf_cnpj: '',
+      produto_desejado: '',
+      quantidade: '0',
+      tamanhos: '',
+      cores: '',
+      detalhes: '',
+      observacoes: '',
+    },
   });
 
   useEffect(() => {
@@ -134,7 +148,7 @@ export default function FormularioOrcamento() {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([k, v]) => { if (v) formData.append(k, v as string); });
-      if (imagemFile) formData.append('imagem_referencia', imagemFile);
+      imagemFiles.forEach(f => formData.append('imagem_referencia', f));
 
       const atributosData = atributos
         .filter(a => atributoValues[a.id])
@@ -156,13 +170,15 @@ export default function FormularioOrcamento() {
         nomeCliente: data.nome_cliente,
         telefoneCliente: data.telefone_cliente,
         emailCliente: data.email_cliente,
-        cpfCnpj: data.cpf_cnpj,
-        produtoDesejado: data.produto_desejado,
+        cpfCnpj: data.cpf_cnpj || undefined,
+        categoria: catSelecionada?.nome,
+        produtoDesejado: produtoSelecionado?.nome ?? data.produto_desejado,
         quantidade: parseInt(data.quantidade),
-        tamanhos: data.tamanhos,
-        cores: data.cores,
-        detalhes: [atributosTexto, data.detalhes].filter(Boolean).join('\n\n') || undefined,
-        observacoes: data.observacoes,
+        tamanhos: data.tamanhos || undefined,
+        cores: data.cores || undefined,
+        especificacoes: atributosTexto || undefined,
+        detalhes: data.detalhes || undefined,
+        observacoes: data.observacoes || undefined,
       });
 
       setResultado({ numero: orc.numero, linkWhatsApp: link });
@@ -174,7 +190,7 @@ export default function FormularioOrcamento() {
   // ── Tela de sucesso ──────────────────────────────────────────────────────────
   if (estado === 'success' && resultado) {
     return (
-      <section id="orcamento" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
+      <section id="orcamento" className="py-16 sm:py-20 lg:py-28" style={{ background: '#F8F9FA' }}>
         <div className="max-w-xl mx-auto px-4 text-center">
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.4 }}>
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
@@ -197,7 +213,7 @@ export default function FormularioOrcamento() {
                 💬 Confirmar pelo WhatsApp
               </a>
               <button type="button"
-                onClick={() => { setEstado('idle'); setResultado(null); setStep(1); setCatSelecionada(null); setProdutoSelecionado(null); }}
+                onClick={() => { setEstado('idle'); setResultado(null); setStep(1); setCatSelecionada(null); setProdutoSelecionado(null); setImagemFiles([]); }}
                 className="px-6 py-3 rounded-full font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50">
                 Novo Orçamento
               </button>
@@ -210,7 +226,7 @@ export default function FormularioOrcamento() {
 
   // ── Formulário ───────────────────────────────────────────────────────────────
   return (
-    <section id="orcamento" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
+    <section id="orcamento" className="py-16 sm:py-20 lg:py-28" style={{ background: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal className="text-center mb-10 sm:mb-12">
           <span className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
@@ -261,11 +277,11 @@ export default function FormularioOrcamento() {
                     )}
                     {step === 2 && (
                       <Etapa2
-                        quantidade={quantidade}
                         setQuantidade={setQuantidade}
                         register={register}
-                        imagemFile={imagemFile}
-                        setImagemFile={setImagemFile}
+                        setValue={setValue}
+                        imagemFiles={imagemFiles}
+                        setImagemFiles={setImagemFiles}
                       />
                     )}
                     {step === 3 && (
@@ -459,26 +475,66 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSele
                   {atributo.nome}
                   {atributo.obrigatorio && <span className="text-red-500 ml-1">*</span>}
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {atributo.opcoes.map(opcao => {
-                    const sel = atributoValues[atributo.id] === String(opcao.id);
-                    return (
-                      <button key={opcao.id} type="button"
-                        onClick={() => {
-                          setAtributoValues(p => ({ ...p, [atributo.id]: String(opcao.id) }));
-                          setAtributoErrors(p => { const n = { ...p }; delete n[atributo.id]; return n; });
-                        }}
-                        className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
-                        style={{
-                          borderColor: sel ? '#005ED5' : '#E5E7EB',
-                          background: sel ? '#005ED5' : '#fff',
-                          color: sel ? '#fff' : '#374151',
-                        }}>
-                        {opcao.valor}
-                      </button>
-                    );
-                  })}
-                </div>
+                {atributo.opcoes.some(o => o.imagem) ? (
+                  <div className="flex flex-wrap gap-2">
+                    {atributo.opcoes.map(opcao => {
+                      const sel = atributoValues[atributo.id] === String(opcao.id);
+                      return (
+                        <button key={opcao.id} type="button"
+                          onClick={() => {
+                            setAtributoValues(p => ({ ...p, [atributo.id]: String(opcao.id) }));
+                            setAtributoErrors(p => { const n = { ...p }; delete n[atributo.id]; return n; });
+                          }}
+                          className="relative flex flex-col rounded-xl border-2 overflow-hidden transition-all duration-150 hover:shadow-md"
+                          style={{
+                            width: 80,
+                            borderColor: sel ? '#005ED5' : '#E5E7EB',
+                          }}>
+                          <div className="w-full h-16 bg-white flex items-center justify-center">
+                            {opcao.imagem
+                              // eslint-disable-next-line @next/next/no-img-element
+                              ? <img src={`${API_BASE}${opcao.imagem}`} alt={opcao.valor} className="w-full h-full object-contain p-1" />
+                              : <span className="text-gray-300 text-xs">—</span>}
+                          </div>
+                          {sel && (
+                            <div className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center"
+                              style={{ background: '#005ED5' }}>
+                              <Check size={10} className="text-white" />
+                            </div>
+                          )}
+                          <div className="w-full px-1 py-1.5 border-t border-gray-100 text-center"
+                            style={{ background: sel ? 'rgba(0,94,213,0.07)' : '#F9FAFB' }}>
+                            <span className="text-xs font-semibold truncate block"
+                              style={{ color: sel ? '#005ED5' : '#374151' }}>
+                              {opcao.valor}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {atributo.opcoes.map(opcao => {
+                      const sel = atributoValues[atributo.id] === String(opcao.id);
+                      return (
+                        <button key={opcao.id} type="button"
+                          onClick={() => {
+                            setAtributoValues(p => ({ ...p, [atributo.id]: String(opcao.id) }));
+                            setAtributoErrors(p => { const n = { ...p }; delete n[atributo.id]; return n; });
+                          }}
+                          className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
+                          style={{
+                            borderColor: sel ? '#005ED5' : '#E5E7EB',
+                            background: sel ? '#005ED5' : '#fff',
+                            color: sel ? '#fff' : '#374151',
+                          }}>
+                          {opcao.valor}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 {atributoErrors[atributo.id] && (
                   <p className="mt-1 text-xs text-red-500">{atributoErrors[atributo.id]}</p>
                 )}
@@ -492,14 +548,59 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSele
 }
 
 // ─── Etapa 2: Detalhes ────────────────────────────────────────────────────────
-function Etapa2({ quantidade, setQuantidade, register, imagemFile, setImagemFile }:
+const MAX_IMG = 10 * 1024 * 1024; // 10 MB
+
+function Etapa2({ setQuantidade, register, setValue, imagemFiles, setImagemFiles }:
 {
-  quantidade: number;
   setQuantidade: React.Dispatch<React.SetStateAction<number>>;
   register: ReturnType<typeof useForm<FormData>>['register'];
-  imagemFile: File | null;
-  setImagemFile: React.Dispatch<React.SetStateAction<File | null>>;
+  setValue: ReturnType<typeof useForm<FormData>>['setValue'];
+  imagemFiles: File[];
+  setImagemFiles: React.Dispatch<React.SetStateAction<File[]>>;
 }) {
+  const [tamQtd, setTamQtd] = useState<Record<string, number>>({});
+  const [tamEspecialAberto, setTamEspecialAberto] = useState(false);
+  const [tamEspecialNome, setTamEspecialNome] = useState('');
+  const [tamEspecialQtd, setTamEspecialQtd] = useState<number>(0);
+  const [tamLivre, setTamLivre] = useState('');
+  const [imgErro, setImgErro] = useState('');
+
+  const totalTam = TAMANHOS_PADRAO.reduce((s, t) => s + (tamQtd[t] ?? 0), 0) + (tamEspecialQtd || 0);
+
+  // Sincroniza tamanhos e quantidade com o form
+  useEffect(() => {
+    const partes: string[] = [];
+    TAMANHOS_PADRAO.forEach(t => {
+      const q = tamQtd[t] ?? 0;
+      if (q > 0) partes.push(`${t}: ${q}`);
+    });
+    if (tamEspecialNome.trim()) {
+      partes.push(tamEspecialQtd > 0
+        ? `${tamEspecialNome.trim()}: ${tamEspecialQtd}`
+        : tamEspecialNome.trim());
+    }
+    if (tamLivre.trim()) partes.push(tamLivre.trim());
+    setValue('tamanhos', partes.join(', ') || '');
+
+    const total = TAMANHOS_PADRAO.reduce((s, t) => s + (tamQtd[t] ?? 0), 0) + (tamEspecialQtd || 0);
+    if (total > 0) {
+      setQuantidade(total);
+      setValue('quantidade', String(total));
+    }
+  }, [tamQtd, tamEspecialNome, tamEspecialQtd, tamLivre, setValue, setQuantidade]);
+
+  const adicionarImagens = (files: FileList | null) => {
+    if (!files) return;
+    const validas: File[] = [];
+    let erro = '';
+    Array.from(files).forEach(f => {
+      if (f.size > MAX_IMG) { erro = `"${f.name}" excede 10 MB e foi ignorado.`; }
+      else validas.push(f);
+    });
+    setImgErro(erro);
+    setImagemFiles(prev => [...prev, ...validas]);
+  };
+
   return (
     <div className="space-y-5">
       <div>
@@ -507,45 +608,102 @@ function Etapa2({ quantidade, setQuantidade, register, imagemFile, setImagemFile
         <h3 className="text-xl font-black text-gray-900 mb-5">Quantidade e personalização</h3>
       </div>
 
-      {/* Contador de quantidade */}
+      {/* Total calculado */}
+      {totalTam > 0 && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
+          style={{ background: 'rgba(0,94,213,0.06)', border: '1px solid rgba(0,94,213,0.12)' }}>
+          <span className="text-2xl font-black" style={{ color: '#005ED5' }}>{totalTam}</span>
+          <span className="text-sm text-gray-500">peças no total</span>
+        </div>
+      )}
+
+      {/* Tamanhos */}
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-3">Quantidade de peças</p>
-        <div className="flex items-center gap-4">
+        <p className="text-sm font-semibold text-gray-700 mb-2">
+          Tamanhos <span className="font-normal text-gray-400 text-xs">— clique para selecionar</span>
+        </p>
+        <div className="flex flex-wrap gap-2 mb-3">
+          {TAMANHOS_PADRAO.map(tam => {
+            const qtd = tamQtd[tam] ?? 0;
+            const ativo = qtd > 0;
+            return ativo ? (
+              <div key={tam}
+                className="flex items-center rounded-xl border-2 overflow-hidden transition-all duration-150"
+                style={{ borderColor: '#005ED5' }}>
+                <button type="button"
+                  onClick={() => setTamQtd(p => ({ ...p, [tam]: 0 }))}
+                  className="px-3 py-2 text-sm font-bold text-white"
+                  style={{ background: '#005ED5' }}
+                  title="Clique para remover">
+                  {tam}
+                </button>
+                <input
+                  type="number" min={1} value={qtd}
+                  onChange={e => setTamQtd(p => ({ ...p, [tam]: Math.max(1, parseInt(e.target.value) || 1) }))}
+                  className="w-12 text-center text-sm font-bold outline-none py-2 border-l-2"
+                  style={{ background: 'rgba(0,94,213,0.07)', color: '#005ED5', borderColor: 'rgba(0,94,213,0.25)' }}
+                />
+              </div>
+            ) : (
+              <button key={tam} type="button"
+                onClick={() => setTamQtd(p => ({ ...p, [tam]: 1 }))}
+                className="px-4 py-2 rounded-xl border-2 border-gray-200 text-sm font-bold text-gray-400 bg-gray-50 hover:border-blue-300 hover:text-blue-500 transition-all duration-150">
+                {tam}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tamanho especial — colapsável */}
+        <div className="mt-3">
           <button type="button"
-            onClick={() => setQuantidade(q => Math.max(1, q - 1))}
-            className="w-11 h-11 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-50 transition-all">
-            <Minus size={18} className="text-gray-600" />
+            onClick={() => {
+              setTamEspecialAberto(v => !v);
+              if (tamEspecialAberto) { setTamEspecialNome(''); setTamEspecialQtd(0); setTamLivre(''); }
+            }}
+            className="flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-blue-500 transition-colors">
+            <Plus size={13} className={`transition-transform duration-200 ${tamEspecialAberto ? 'rotate-45' : ''}`} />
+            {tamEspecialAberto ? 'Fechar tamanho especial' : 'Adicionar tamanho especial'}
           </button>
-          <input
-            type="number"
-            value={quantidade}
-            min={1}
-            onChange={e => setQuantidade(Math.max(1, parseInt(e.target.value) || 1))}
-            className="w-20 text-center text-2xl font-black text-gray-900 border-b-2 border-blue-400 outline-none bg-transparent"
-          />
-          <button type="button"
-            onClick={() => setQuantidade(q => q + 1)}
-            className="w-11 h-11 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-50 transition-all">
-            <Plus size={18} className="text-gray-600" />
-          </button>
-          <span className="text-sm text-gray-500">peças</span>
+
+          {tamEspecialAberto && (
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 transition-colors"
+                style={{ borderColor: tamEspecialNome.trim() ? '#005ED5' : '#E5E7EB', background: tamEspecialNome.trim() ? 'rgba(0,94,213,0.04)' : '#fff' }}>
+                <input type="text" placeholder="Ex: 42, 44, Único, Infantil..."
+                  value={tamEspecialNome}
+                  onChange={e => setTamEspecialNome(e.target.value)}
+                  className="flex-1 text-sm outline-none bg-transparent font-medium placeholder-gray-400"
+                  style={{ color: tamEspecialNome.trim() ? '#005ED5' : undefined }}
+                  autoFocus />
+                {tamEspecialNome.trim() && (
+                  <>
+                    <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
+                    <input type="number" min={1} placeholder="Qtd"
+                      value={tamEspecialQtd || ''}
+                      onChange={e => setTamEspecialQtd(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-14 text-center text-sm font-bold outline-none bg-transparent flex-shrink-0"
+                      style={{ color: '#005ED5' }} />
+                  </>
+                )}
+              </div>
+              <textarea
+                placeholder="Outras especificações de tamanho..."
+                value={tamLivre}
+                onChange={e => setTamLivre(e.target.value)}
+                rows={2}
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 resize-none transition-colors"
+              />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Tamanhos + Cores */}
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tamanhos</label>
-          <input {...register('tamanhos')}
-            placeholder="Ex: 10 P, 20 M, 20 G"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-colors" />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Cores desejadas</label>
-          <input {...register('cores')}
-            placeholder="Ex: Azul marinho, branco"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-colors" />
-        </div>
+      {/* Cores */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Cores desejadas</label>
+        <input {...register('cores')} placeholder="Ex: Azul marinho, branco"
+          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-colors" />
       </div>
 
       {/* Detalhes */}
@@ -558,22 +716,40 @@ function Etapa2({ quantidade, setQuantidade, register, imagemFile, setImagemFile
           className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-colors resize-none" />
       </div>
 
-      {/* Upload */}
+      {/* Upload múltiplo */}
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-          Imagem de referência <span className="font-normal text-gray-400">(opcional)</span>
+          Imagens de referência <span className="font-normal text-gray-400">(opcional)</span>
         </label>
         <button type="button"
           onClick={() => document.getElementById('img-upload')?.click()}
-          className="w-full border-2 border-dashed rounded-xl p-4 flex items-center gap-3 hover:border-blue-400 transition-colors"
-          style={{ borderColor: imagemFile ? '#005ED5' : '#D1D5DB' }}>
-          <Upload size={20} style={{ color: imagemFile ? '#005ED5' : '#9CA3AF' }} />
-          {imagemFile
-            ? <span className="text-sm font-medium" style={{ color: '#005ED5' }}>{imagemFile.name}</span>
-            : <span className="text-sm text-gray-500">Toque para enviar — PNG, JPG, WebP (máx. 5MB)</span>}
+          className="w-full border-2 border-dashed rounded-xl p-4 flex items-center gap-3 hover:border-blue-400 transition-colors mb-2"
+          style={{ borderColor: imagemFiles.length > 0 ? '#005ED5' : '#D1D5DB' }}>
+          <Upload size={20} style={{ color: imagemFiles.length > 0 ? '#005ED5' : '#9CA3AF' }} />
+          <span className="text-sm" style={{ color: imagemFiles.length > 0 ? '#005ED5' : '#6B7280' }}>
+            {imagemFiles.length > 0
+              ? `${imagemFiles.length} imagem${imagemFiles.length > 1 ? 'ns' : ''} selecionada${imagemFiles.length > 1 ? 's' : ''} — toque para adicionar mais`
+              : 'Toque para enviar — PNG, JPG, WebP (máx. 10 MB por imagem)'}
+          </span>
         </button>
-        <input id="img-upload" type="file" accept="image/*" className="hidden"
-          onChange={e => setImagemFile(e.target.files?.[0] ?? null)} />
+        <input id="img-upload" type="file" accept="image/*" multiple className="hidden"
+          onChange={e => { adicionarImagens(e.target.files); e.target.value = ''; }} />
+        {imgErro && <p className="text-xs text-red-500 mb-1">{imgErro}</p>}
+        {imagemFiles.length > 0 && (
+          <ul className="space-y-1">
+            {imagemFiles.map((f, i) => (
+              <li key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-100 text-xs text-gray-600">
+                <span className="flex-1 truncate">{f.name}</span>
+                <span className="text-gray-400 flex-shrink-0">{(f.size / 1024 / 1024).toFixed(1)} MB</span>
+                <button type="button"
+                  onClick={() => setImagemFiles(prev => prev.filter((_, j) => j !== i))}
+                  className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0">
+                  <X size={13} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -119,7 +119,7 @@ router.get('/:id/atributos', async (req: Request, res: Response) => {
     include: {
       atributo: { select: { nome: true } },
       opcoes: {
-        include: { opcao: { select: { id: true, valor: true, ordem: true } } },
+        include: { opcao: { select: { id: true, valor: true, imagem: true, ordem: true } } },
         orderBy: { opcao: { ordem: 'asc' } },
       },
     },
@@ -130,7 +130,7 @@ router.get('/:id/atributos', async (req: Request, res: Response) => {
     atributoId: pa.atributoId,
     nome: pa.atributo.nome,
     obrigatorio: pa.obrigatorio,
-    opcoes: pa.opcoes.map(pao => ({ id: pao.opcao.id, valor: pao.opcao.valor })),
+    opcoes: pa.opcoes.map(pao => ({ id: pao.opcao.id, valor: pao.opcao.valor, imagem: pao.opcao.imagem ?? null })),
   }));
 
   return res.json({ atributos });

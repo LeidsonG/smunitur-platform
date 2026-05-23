@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 import prisma from '../utils/prisma';
 import { upload, validarMagicBytes } from '../utils/upload';
@@ -18,7 +18,7 @@ async function gerarNumeroOrcamento(): Promise<number> {
 // POST /api/orcamentos — cria novo orçamento (público)
 router.post(
   '/',
-  upload.single('imagem_referencia'),
+  upload.array('imagem_referencia', 5),
   validarMagicBytes,
   [
     body('nome_cliente').trim().notEmpty().withMessage('Nome obrigatório'),
@@ -27,67 +27,74 @@ router.post(
     body('produto_desejado').trim().notEmpty().withMessage('Produto obrigatório'),
     body('quantidade').isInt({ min: 1 }).withMessage('Quantidade deve ser número inteiro maior que 0'),
   ],
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const {
-      nome_cliente, email_cliente, telefone_cliente,
-      cpf_cnpj, produto_desejado, quantidade,
-      tamanhos, cores, detalhes, observacoes,
-    } = req.body;
+    try {
+      const {
+        nome_cliente, email_cliente, telefone_cliente,
+        cpf_cnpj, produto_desejado, quantidade,
+        tamanhos, cores, detalhes, observacoes,
+      } = req.body;
 
-    const imagemReferencia = req.file ? `/uploads/${req.file.filename}` : null;
-    const numero = await gerarNumeroOrcamento();
+      const arquivos = Array.isArray(req.files) ? req.files as Express.Multer.File[] : [];
+      const imagemReferencia = arquivos.length > 0
+        ? arquivos.map(f => `/uploads/${f.filename}`).join(',')
+        : null;
+      const numero = await gerarNumeroOrcamento();
 
-    const orcamento = await prisma.orcamento.create({
-      data: {
-        numero,
-        nomeCliente: nome_cliente,
-        emailCliente: email_cliente,
-        telefoneCliente: telefone_cliente,
-        cpfCnpj: cpf_cnpj || null,
-        produtoDesejado: produto_desejado,
-        quantidade: parseInt(quantidade),
-        tamanhos: tamanhos || null,
-        cores: cores || null,
-        detalhes: detalhes || null,
-        observacoes: observacoes || null,
-        imagemReferencia,
-        status: 'recebido',
-      },
-    });
+      const orcamento = await prisma.orcamento.create({
+        data: {
+          numero,
+          nomeCliente: nome_cliente,
+          emailCliente: email_cliente,
+          telefoneCliente: telefone_cliente,
+          cpfCnpj: cpf_cnpj || null,
+          produtoDesejado: produto_desejado,
+          quantidade: parseInt(quantidade),
+          tamanhos: tamanhos || null,
+          cores: cores || null,
+          detalhes: detalhes || null,
+          observacoes: observacoes || null,
+          imagemReferencia,
+          status: 'recebido',
+        },
+      });
 
-    // Salva atributos selecionados (opcional)
-    const atributosRaw = req.body.atributos;
-    if (atributosRaw) {
-      try {
-        const atributosData = JSON.parse(atributosRaw) as { atributo_id: number; opcao_id?: number; valor_livre?: string }[];
-        if (Array.isArray(atributosData) && atributosData.length > 0) {
-          await prisma.orcamentoAtributo.createMany({
-            data: atributosData.map((a) => ({
-              orcamentoId: orcamento.id,
-              produtoAtributoId: a.atributo_id,
-              opcaoId: a.opcao_id ?? null,
-              valorLivre: a.valor_livre ?? null,
-            })),
-          });
-        }
-      } catch { /* atributos malformados — ignora */ }
+      // Salva atributos selecionados (opcional)
+      const atributosRaw = req.body.atributos;
+      if (atributosRaw) {
+        try {
+          const atributosData = JSON.parse(atributosRaw) as { atributo_id: number; opcao_id?: number; valor_livre?: string }[];
+          if (Array.isArray(atributosData) && atributosData.length > 0) {
+            await prisma.orcamentoAtributo.createMany({
+              data: atributosData.map((a) => ({
+                orcamentoId: orcamento.id,
+                produtoAtributoId: a.atributo_id,
+                opcaoId: a.opcao_id ?? null,
+                valorLivre: a.valor_livre ?? null,
+              })),
+            });
+          }
+        } catch { /* atributos malformados — ignora */ }
+      }
+
+      // Registra histórico inicial
+      await prisma.orcamentoStatusHistorico.create({
+        data: {
+          orcamentoId: orcamento.id,
+          statusNovo: 'recebido',
+          observacao: 'Orçamento recebido pelo sistema',
+        },
+      });
+
+      return res.status(201).json({ orcamento });
+    } catch (e) {
+      return next(e);
     }
-
-    // Registra histórico inicial
-    await prisma.orcamentoStatusHistorico.create({
-      data: {
-        orcamentoId: orcamento.id,
-        statusNovo: 'recebido',
-        observacao: 'Orçamento recebido pelo sistema',
-      },
-    });
-
-    return res.status(201).json({ orcamento });
   }
 );
 

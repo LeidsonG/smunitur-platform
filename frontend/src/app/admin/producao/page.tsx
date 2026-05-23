@@ -165,7 +165,7 @@ export default function ProducaoPage() {
                   onChange={(e) => setNovoStatus(e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl mb-3 focus:outline-none focus:border-blue-400 bg-white"
                 >
-                  {STATUS_OPTIONS.map((o) => (
+                  {STATUS_OPTIONS.filter((o) => o.value !== 'recebido').map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>
