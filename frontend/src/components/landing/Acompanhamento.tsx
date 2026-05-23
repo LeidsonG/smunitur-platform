@@ -98,20 +98,20 @@ export default function Acompanhamento() {
   const StatusIcon = statusInfo?.icon;
 
   return (
-    <section id="acompanhar" className="py-10 sm:py-12 lg:py-16 bg-white">
+    <section id="acompanhar" className="py-16 sm:py-20 lg:py-28" style={{ background: '#0A1628' }}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal className="text-center mb-10 sm:mb-12">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
-            style={{ background: 'rgba(0,94,213,0.1)', color: '#005ED5' }}
+            style={{ background: 'rgba(255,148,0,0.15)', color: '#FF9400' }}
           >
             Acompanhar Pedido
           </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
             Acompanhe sua{' '}
-            <span style={{ color: '#005ED5' }}>produção</span>
+            <span style={{ color: '#FF9400' }}>produção</span>
           </h2>
-          <p className="text-gray-600 text-lg">
+          <p className="text-lg" style={{ color: 'rgba(255,255,255,0.65)' }}>
             Informe o número do seu orçamento para ver o status em tempo real.
           </p>
         </Reveal>
@@ -119,14 +119,18 @@ export default function Acompanhamento() {
         {/* Busca */}
         <Reveal delay={0.1} className="bg-white rounded-2xl border border-gray-100 shadow-lg p-5 sm:p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              value={numero}
-              onChange={(e) => setNumero(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && buscar()}
-              placeholder="Digite o número do orçamento (ex: 100)"
-              className="flex-1 px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-colors"
-            />
+            <div className="flex-1 flex items-center rounded-xl border border-gray-200 bg-white transition-colors focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-50">
+              <span className="pl-4 pr-1 font-bold select-none" style={{ color: '#005ED5' }}>#</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={numero}
+                onChange={(e) => setNumero(e.target.value.replace(/\D/g, ''))}
+                onKeyDown={(e) => e.key === 'Enter' && buscar()}
+                placeholder="100"
+                className="flex-1 py-3 pr-4 outline-none bg-transparent"
+              />
+            </div>
             <button
               type="button"
               onClick={buscar}
