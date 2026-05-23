@@ -68,7 +68,7 @@ export default function Produtos() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="bg-white rounded-2xl shadow-md border border-gray-100 animate-pulse overflow-hidden">
-                  <div className="h-56 bg-gray-100" />
+                  <div className="h-72 bg-gray-100" />
                   <div className="p-6">
                     <div className="h-5 bg-gray-100 rounded-lg mb-3 w-2/3" />
                     <div className="h-3 bg-gray-100 rounded-lg mb-2" />
@@ -89,7 +89,7 @@ export default function Produtos() {
                   >
                     {/* Foto do produto */}
                     <div
-                      className="h-56"
+                      className="h-72"
                       style={{
                         background: 'linear-gradient(135deg, rgba(0,94,213,0.08), rgba(255,148,0,0.08))',
                         overflow: 'hidden',
