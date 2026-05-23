@@ -98,21 +98,38 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Coluna direita — logo flutuando livre */}
-          <div className="hidden lg:flex flex-shrink-0 items-center justify-center">
+          {/* Coluna direita — logo com reflexo no chão */}
+          <div className="hidden lg:flex flex-shrink-0 flex-col items-center justify-center">
             <Image
               src="/logo.png"
               alt="SM Unitur"
-              width={360}
-              height={360}
+              width={440}
+              height={440}
               className="object-contain"
-              style={{
-                width: 'auto',
-                maxHeight: '320px',
-                filter: 'drop-shadow(0 20px 48px rgba(0,0,0,0.7)) drop-shadow(0 8px 16px rgba(0,0,0,0.5)) drop-shadow(0 2px 4px rgba(0,0,0,0.4))',
-              }}
+              style={{ width: 'auto', maxHeight: '400px' }}
               priority
             />
+            {/* Linha de "chão" */}
+            <div style={{ width: '80%', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
+            {/* Reflexo espelhado com fade */}
+            <div
+              style={{
+                height: '110px',
+                overflow: 'hidden',
+                WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 100%)',
+                maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 100%)',
+              }}
+            >
+              <Image
+                src="/logo.png"
+                alt=""
+                aria-hidden
+                width={440}
+                height={440}
+                className="object-contain"
+                style={{ width: 'auto', maxHeight: '400px', transform: 'scaleY(-1)' }}
+              />
+            </div>
           </div>
 
         </div>
