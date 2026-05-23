@@ -58,7 +58,6 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-gray-400">
               {[
                 { label: 'Início', href: '#inicio' },
-                { label: 'Sobre', href: '#sobre' },
                 { label: 'Produtos', href: '#produtos' },
                 { label: 'Serviços', href: '#servicos' },
                 { label: 'FAQ', href: '#faq' },
