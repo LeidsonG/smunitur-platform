@@ -65,10 +65,10 @@ export default function Produtos() {
 
           {/* Grid */}
           {loading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(3)].map((_, i) => (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[...Array(4)].map((_, i) => (
                 <div key={i} className="bg-white rounded-2xl shadow-md border border-gray-100 animate-pulse overflow-hidden">
-                  <div className="h-64 bg-gray-100" />
+                  <div className="h-80 bg-gray-100" />
                   <div className="p-6">
                     <div className="h-5 bg-gray-100 rounded-lg mb-3 w-2/3" />
                     <div className="h-3 bg-gray-100 rounded-lg mb-2" />
@@ -78,7 +78,7 @@ export default function Produtos() {
               ))}
             </div>
           ) : produtos.length === 0 ? null : (
-            <div className={`grid sm:grid-cols-2 ${produtos.length <= 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-6`}>
+            <div className={`grid sm:grid-cols-2 ${produtos.length <= 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-4'} gap-5`}>
               {produtos.map((produto, i) => {
                 const Icon = ICONE_CATEGORIA[produto.categoria.slug] ?? Package;
                 return (
@@ -89,7 +89,7 @@ export default function Produtos() {
                     className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200 overflow-hidden"
                   >
                     {/* Foto do produto */}
-                    <div className="relative h-64 overflow-hidden"
+                    <div className="relative h-80 overflow-hidden"
                       style={{ background: 'linear-gradient(135deg, rgba(0,94,213,0.08), rgba(255,148,0,0.08))' }}
                     >
                       {produto.imagem
