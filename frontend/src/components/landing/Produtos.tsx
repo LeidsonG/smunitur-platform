@@ -65,18 +65,20 @@ export default function Produtos() {
 
           {/* Grid */}
           {loading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 animate-pulse">
-                  <div className="w-14 h-14 rounded-2xl bg-gray-100 mb-5" />
-                  <div className="h-5 bg-gray-100 rounded-lg mb-3 w-2/3" />
-                  <div className="h-3 bg-gray-100 rounded-lg mb-2" />
-                  <div className="h-3 bg-gray-100 rounded-lg w-4/5" />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl shadow-md border border-gray-100 animate-pulse overflow-hidden">
+                  <div className="h-64 bg-gray-100" />
+                  <div className="p-6">
+                    <div className="h-5 bg-gray-100 rounded-lg mb-3 w-2/3" />
+                    <div className="h-3 bg-gray-100 rounded-lg mb-2" />
+                    <div className="h-3 bg-gray-100 rounded-lg w-4/5" />
+                  </div>
                 </div>
               ))}
             </div>
           ) : produtos.length === 0 ? null : (
-            <div className={`grid sm:grid-cols-2 ${produtos.length <= 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6`}>
+            <div className={`grid sm:grid-cols-2 ${produtos.length <= 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-6`}>
               {produtos.map((produto, i) => {
                 const Icon = ICONE_CATEGORIA[produto.categoria.slug] ?? Package;
                 return (
@@ -84,32 +86,37 @@ export default function Produtos() {
                     asChild
                     key={produto.id}
                     delay={0.1 + i * 0.06}
-                    className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200"
+                    className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200 overflow-hidden"
                   >
-                    {/* Ícone ou imagem */}
-                    <div
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 overflow-hidden group-hover:scale-110 transition-transform duration-200"
-                      style={{ background: 'linear-gradient(135deg, rgba(0,94,213,0.1), rgba(255,148,0,0.1))' }}
+                    {/* Foto do produto */}
+                    <div className="relative h-64 overflow-hidden"
+                      style={{ background: 'linear-gradient(135deg, rgba(0,94,213,0.08), rgba(255,148,0,0.08))' }}
                     >
                       {produto.imagem
                         // eslint-disable-next-line @next/next/no-img-element
-                        ? <img src={`${API_BASE}${produto.imagem}`} alt={produto.nome} className="w-full h-full object-cover" />
-                        : <Icon size={26} style={{ color: '#005ED5' }} />}
+                        ? <img
+                            src={`${API_BASE}${produto.imagem}`}
+                            alt={produto.nome}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        : <div className="w-full h-full flex items-center justify-center">
+                            <Icon size={56} style={{ color: '#005ED5', opacity: 0.3 }} />
+                          </div>
+                      }
                     </div>
 
-                    <h3 className="text-lg font-bold text-gray-900 mb-3">{produto.nome}</h3>
-                    {produto.descricao && (
-                      <p className="text-sm text-gray-600 leading-relaxed mb-4">{produto.descricao}</p>
-                    )}
-
-                    {/* Categoria como tag */}
-                    <div className="flex flex-wrap gap-1.5">
+                    {/* Conteúdo */}
+                    <div className="p-6">
                       <span
-                        className="px-2.5 py-1 rounded-full text-xs font-medium"
+                        className="px-2.5 py-1 rounded-full text-xs font-medium mb-3 inline-block"
                         style={{ background: 'rgba(0,94,213,0.08)', color: '#005ED5' }}
                       >
                         {produto.categoria.nome}
                       </span>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{produto.nome}</h3>
+                      {produto.descricao && (
+                        <p className="text-sm text-gray-600 leading-relaxed">{produto.descricao}</p>
+                      )}
                     </div>
                   </Reveal>
                 );
