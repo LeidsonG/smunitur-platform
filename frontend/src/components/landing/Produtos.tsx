@@ -78,7 +78,7 @@ export default function Produtos() {
               ))}
             </div>
           ) : produtos.length === 0 ? null : (
-            <div className={`grid sm:grid-cols-2 ${produtos.length <= 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-4'} gap-5`}>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {produtos.map((produto, i) => {
                 const Icon = ICONE_CATEGORIA[produto.categoria.slug] ?? Package;
                 return (
