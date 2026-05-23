@@ -3,15 +3,14 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
-  Menu, X, Home, Info, Shirt, Sparkles,
+  Menu, X, Home, Shirt, Sparkles,
   ClipboardList, Package, HelpCircle, Phone,
 } from 'lucide-react';
 
 const navLinks = [
   { label: 'Início',     href: '#inicio',     icon: Home },
-  { label: 'Sobre',      href: '#sobre',      icon: Info },
-  { label: 'Produtos',   href: '#produtos',   icon: Shirt },
   { label: 'Serviços',   href: '#servicos',   icon: Sparkles },
+  { label: 'Produtos',   href: '#produtos',   icon: Shirt },
   { label: 'Orçamento',  href: '#orcamento',  icon: ClipboardList },
   { label: 'Acompanhar', href: '#acompanhar', icon: Package },
   { label: 'FAQ',        href: '#faq',        icon: HelpCircle },
@@ -29,17 +28,32 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Scroll-spy: marca a seção atualmente visível no viewport
+  // Scroll-spy: marca a seção mais próxima do topo do viewport
   useEffect(() => {
     const ids = navLinks.map((l) => l.href.slice(1));
+    const visible = new Set<string>();
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) setActiveSection(entry.target.id);
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
         });
+
+        let best = '';
+        let bestTop = Infinity;
+        visible.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            const top = Math.abs(el.getBoundingClientRect().top);
+            if (top < bestTop) { bestTop = top; best = id; }
+          }
+        });
+        if (best) setActiveSection(best);
       },
-      { rootMargin: '-30% 0px -50% 0px' },
+      { rootMargin: '-20% 0px -60% 0px' },
     );
+
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -86,6 +100,11 @@ export default function Header() {
                 style={{ width: 'auto' }}
                 priority
               />
+              <span className="text-xl lg:text-2xl font-black tracking-wide pointer-events-none">
+                <span style={{ color: '#FF9400' }}>UNI</span>
+                <span style={{ color: '#005ED5' }}>T</span>
+                <span style={{ color: '#FF9400' }}>UR</span>
+              </span>
             </button>
 
             {/* Nav Desktop */}
