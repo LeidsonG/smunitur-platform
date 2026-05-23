@@ -98,22 +98,21 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Coluna direita — logo */}
+          {/* Coluna direita — logo flutuando livre */}
           <div className="hidden lg:flex flex-shrink-0 items-center justify-center">
-            <div
-              className="rounded-3xl p-8 xl:p-12"
-              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}
-            >
-              <Image
-                src="/logo.png"
-                alt="SM Unitur"
-                width={320}
-                height={320}
-                className="object-contain"
-                style={{ width: 'auto', maxHeight: '280px' }}
-                priority
-              />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="SM Unitur"
+              width={360}
+              height={360}
+              className="object-contain"
+              style={{
+                width: 'auto',
+                maxHeight: '320px',
+                filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.35)) drop-shadow(0 2px 8px rgba(0,0,0,0.2))',
+              }}
+              priority
+            />
           </div>
 
         </div>
