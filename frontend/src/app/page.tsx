@@ -1,6 +1,5 @@
 import Header from '@/components/landing/Header';
 import Hero from '@/components/landing/Hero';
-import Sobre from '@/components/landing/Sobre';
 import Produtos from '@/components/landing/Produtos';
 import Servicos from '@/components/landing/Servicos';
 import FormularioOrcamento from '@/components/landing/FormularioOrcamento';
@@ -15,7 +14,6 @@ export default function Home() {
       <Header />
       <main>
         <Hero />
-        <Sobre />
         <Produtos />
         <Servicos />
         <FormularioOrcamento />

@@ -112,7 +112,15 @@ export default function Hero() {
               width={440}
               height={440}
               className="object-contain"
-              style={{ width: 'auto', maxHeight: '400px' }}
+              style={{
+                width: 'auto',
+                maxHeight: '400px',
+                filter:
+                  'drop-shadow(3px 0 0 white) drop-shadow(-3px 0 0 white) ' +
+                  'drop-shadow(0 3px 0 white) drop-shadow(0 -3px 0 white) ' +
+                  'drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) ' +
+                  'drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white)',
+              }}
               priority
             />
           </div>
