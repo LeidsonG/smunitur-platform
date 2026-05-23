@@ -83,7 +83,6 @@ export default function Produtos() {
                 const Icon = ICONE_CATEGORIA[produto.categoria.slug] ?? Package;
                 return (
                   <Reveal
-                    asChild
                     key={produto.id}
                     delay={0.1 + i * 0.06}
                     className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200 overflow-hidden"

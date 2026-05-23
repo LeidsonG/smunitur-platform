@@ -33,7 +33,7 @@ export default function Hero() {
         style={{ background: 'linear-gradient(to left, rgba(10,22,40,1) 0%, rgba(0,58,140,0.5) 40%, transparent 65%)' }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-40 w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28 w-full">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
           {/* Coluna esquerda — conteúdo */}
@@ -57,7 +57,7 @@ export default function Hero() {
               <a
                 href="#orcamento"
                 onClick={(e) => { e.preventDefault(); document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' }); }}
-                className="px-7 sm:px-8 py-3.5 sm:py-4 rounded-full text-base sm:text-lg font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-2xl text-center"
+                className="flex-1 py-3.5 sm:py-4 rounded-full text-base sm:text-lg font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-2xl text-center"
                 style={{ background: '#FF9400' }}
               >
                 Solicitar Orçamento Grátis
@@ -65,7 +65,7 @@ export default function Hero() {
               <a
                 href="#produtos"
                 onClick={(e) => { e.preventDefault(); document.querySelector('#produtos')?.scrollIntoView({ behavior: 'smooth' }); }}
-                className="px-7 sm:px-8 py-3.5 sm:py-4 rounded-full text-base sm:text-lg font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95 text-center"
+                className="flex-1 py-3.5 sm:py-4 rounded-full text-base sm:text-lg font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95 text-center"
                 style={{ border: '2px solid rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.08)' }}
               >
                 Ver Produtos
