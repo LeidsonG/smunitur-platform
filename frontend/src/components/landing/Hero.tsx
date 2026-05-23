@@ -104,27 +104,14 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Coluna direita — logo com halo desfocado */}
-          <div className="hidden lg:flex flex-shrink-0 items-center justify-center relative">
-            {/* Halo laranja */}
-            <div className="absolute rounded-full" style={{
-              width: '320px', height: '320px',
-              background: 'radial-gradient(circle, rgba(255,148,0,0.45) 0%, rgba(255,148,0,0.15) 50%, transparent 75%)',
-              filter: 'blur(32px)',
-            }} />
-            {/* Halo azul deslocado */}
-            <div className="absolute rounded-full" style={{
-              width: '260px', height: '260px',
-              background: 'radial-gradient(circle, rgba(0,94,213,0.35) 0%, transparent 70%)',
-              filter: 'blur(40px)',
-              transform: 'translate(30px, -20px)',
-            }} />
+          {/* Coluna direita — logo */}
+          <div className="hidden lg:flex flex-shrink-0 items-center justify-center">
             <Image
               src="/logo4.png"
               alt="SM Unitur"
               width={440}
               height={440}
-              className="object-contain relative z-10"
+              className="object-contain"
               style={{ width: 'auto', maxHeight: '400px' }}
               priority
             />
