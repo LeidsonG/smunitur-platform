@@ -56,4 +56,17 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+
+  const temProdutos = await prisma.produto.count({ where: { categoriaId: id } });
+  if (temProdutos > 0) {
+    return res.status(400).json({ error: 'Categoria possui produtos vinculados. Remova os produtos antes de excluir a categoria.' });
+  }
+
+  await prisma.categoria.delete({ where: { id } });
+  return res.json({ message: 'Categoria excluída com sucesso' });
+});
+
 export default router;

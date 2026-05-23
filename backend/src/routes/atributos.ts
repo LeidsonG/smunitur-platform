@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { upload, validarMagicBytes } from '../utils/upload';
 
 const router = Router();
 
@@ -91,6 +92,22 @@ router.patch('/opcoes/:opcaoId', authMiddleware, async (req: AuthRequest, res: R
     throw e;
   }
 });
+
+// PATCH /opcoes/:opcaoId/imagem — faz upload de imagem para a opção (admin)
+router.patch(
+  '/opcoes/:opcaoId/imagem',
+  authMiddleware,
+  upload.single('imagem'),
+  validarMagicBytes,
+  async (req: AuthRequest, res: Response) => {
+    const id = parseInt(req.params.opcaoId);
+    if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+    if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
+    const imagem = `/uploads/${req.file.filename}`;
+    const opcao = await prisma.opcaoAtributo.update({ where: { id }, data: { imagem } });
+    return res.json({ opcao });
+  }
+);
 
 // DELETE /opcoes/:opcaoId — remove opção (admin)
 router.delete('/opcoes/:opcaoId', authMiddleware, async (req: AuthRequest, res: Response) => {

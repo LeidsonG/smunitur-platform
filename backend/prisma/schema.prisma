@@ -68,10 +68,11 @@ model Atributo {
 }
 
 model OpcaoAtributo {
-  id         Int    @id @default(autoincrement())
-  atributoId Int    @map("atributo_id")
-  valor      String @db.VarChar(100)
-  ordem      Int    @default(0)
+  id         Int     @id @default(autoincrement())
+  atributoId Int     @map("atributo_id")
+  valor      String  @db.VarChar(100)
+  imagem     String? @db.VarChar(255)
+  ordem      Int     @default(0)
 
   atributo            Atributo               @relation(fields: [atributoId], references: [id], onDelete: Cascade)
   produtosOpcoes      ProdutoAtributoOpcao[]

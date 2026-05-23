@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { UserCircle, Lock, Loader2, AlertCircle, CheckCircle, Mail, ShieldCheck, Camera } from 'lucide-react';
+import { UserCircle, Lock, Loader2, AlertCircle, CheckCircle, Mail, ShieldCheck, Camera, Pencil } from 'lucide-react';
 import api from '@/lib/api';
 
 interface Admin {
@@ -30,6 +30,12 @@ export default function PerfilPage() {
   const [erroSenha, setErroSenha] = useState('');
   const [sucessoSenha, setSucessoSenha] = useState(false);
 
+  const [nomeEdit, setNomeEdit] = useState('');
+  const [editandoNome, setEditandoNome] = useState(false);
+  const [salvandoNome, setSalvandoNome] = useState(false);
+  const [erroNome, setErroNome] = useState('');
+  const [sucessoNome, setSucessoNome] = useState(false);
+
   const [enviandoFoto, setEnviandoFoto] = useState(false);
   const [erroFoto, setErroFoto] = useState('');
   const fotoInputRef = useRef<HTMLInputElement>(null);
@@ -39,6 +45,34 @@ export default function PerfilPage() {
       .then((res) => setAdmin(res.data.admin))
       .finally(() => setLoading(false));
   }, []);
+
+  const abrirEdicaoNome = () => {
+    setNomeEdit(admin?.nome ?? '');
+    setErroNome('');
+    setSucessoNome(false);
+    setEditandoNome(true);
+  };
+
+  const salvarNome = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nomeEdit.trim()) return;
+    setSalvandoNome(true); setErroNome(''); setSucessoNome(false);
+    try {
+      const res = await api.patch('/auth/me/nome', { nome: nomeEdit.trim() });
+      const novoNome = res.data.admin.nome;
+      setAdmin(prev => prev ? { ...prev, nome: novoNome } : prev);
+      // Atualiza sidebar
+      try {
+        const raw = localStorage.getItem('smunitur_admin');
+        if (raw) localStorage.setItem('smunitur_admin', JSON.stringify({ ...JSON.parse(raw), nome: novoNome }));
+      } catch { /* ignore */ }
+      setSucessoNome(true);
+      setEditandoNome(false);
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { error?: string; errors?: Array<{ msg?: string }> } } };
+      setErroNome(err.response?.data?.error || err.response?.data?.errors?.[0]?.msg || 'Erro ao salvar nome');
+    } finally { setSalvandoNome(false); }
+  };
 
   const trocarFoto = async (file: File) => {
     setEnviandoFoto(true); setErroFoto('');
@@ -130,12 +164,56 @@ export default function PerfilPage() {
                 onChange={e => { const f = e.target.files?.[0]; if (f) trocarFoto(f); }}
               />
             </div>
-            <div>
-              <p className="font-bold text-gray-900">{admin.nome}</p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="font-bold text-gray-900 truncate">{admin.nome}</p>
+                <button
+                  onClick={abrirEdicaoNome}
+                  className="p-1 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors flex-shrink-0"
+                  title="Editar nome"
+                >
+                  <Pencil size={13} />
+                </button>
+              </div>
               <p className="text-xs text-gray-500">Cadastrado em {new Date(admin.createdAt).toLocaleDateString('pt-BR')}</p>
               {erroFoto && <p className="text-xs text-red-500 mt-0.5">{erroFoto}</p>}
+              {sucessoNome && <p className="text-xs text-green-600 mt-0.5">Nome atualizado!</p>}
             </div>
           </div>
+
+          {/* Formulário inline de edição de nome */}
+          {editandoNome && (
+            <form onSubmit={salvarNome} className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Novo nome</label>
+              <div className="flex gap-2">
+                <input
+                  value={nomeEdit}
+                  onChange={e => setNomeEdit(e.target.value)}
+                  maxLength={100}
+                  autoFocus
+                  className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
+                  placeholder="Seu nome"
+                />
+                <button
+                  type="submit"
+                  disabled={salvandoNome || !nomeEdit.trim()}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-1.5 disabled:opacity-50 transition-all hover:scale-[1.02]"
+                  style={{ background: '#005ED5' }}
+                >
+                  {salvandoNome ? <Loader2 size={14} className="animate-spin" /> : null}
+                  {salvandoNome ? 'Salvando...' : 'Salvar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditandoNome(false)}
+                  className="px-3 py-2 rounded-xl text-sm border border-gray-200 text-gray-500 hover:bg-gray-50 transition-all"
+                >
+                  Cancelar
+                </button>
+              </div>
+              {erroNome && <p className="text-xs text-red-500 mt-1.5">{erroNome}</p>}
+            </form>
+          )}
 
           <div className="space-y-3 text-sm">
             <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
@@ -153,10 +231,6 @@ export default function PerfilPage() {
               </div>
             </div>
           </div>
-
-          <p className="mt-5 text-xs text-gray-400">
-            Para alterar seu nome, e-mail ou nível, entre em contato com um Super Administrador.
-          </p>
         </div>
 
         {/* Trocar senha */}

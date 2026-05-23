@@ -37,7 +37,7 @@ export default function Produtos() {
   }, []);
 
   return (
-    <section id="produtos" className="py-10 sm:py-12 lg:py-16" style={{ background: '#F8F9FA' }}>
+    <section id="produtos" className="pt-16 sm:pt-20 lg:pt-28 pb-10 sm:pb-14 lg:pb-20" style={{ background: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={sectionVariants}
@@ -65,31 +65,31 @@ export default function Produtos() {
 
           {/* Grid */}
           {loading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl shadow-md border border-gray-100 animate-pulse overflow-hidden">
-                  <div className="h-72 bg-gray-100" />
-                  <div className="p-6">
-                    <div className="h-5 bg-gray-100 rounded-lg mb-3 w-2/3" />
-                    <div className="h-3 bg-gray-100 rounded-lg mb-2" />
-                    <div className="h-3 bg-gray-100 rounded-lg w-4/5" />
+                <div key={i} className="bg-white rounded-xl sm:rounded-2xl shadow-md border border-gray-100 animate-pulse overflow-hidden">
+                  <div className="h-40 sm:h-56 lg:h-72 bg-gray-100" />
+                  <div className="p-3 sm:p-5 lg:p-6">
+                    <div className="h-4 bg-gray-100 rounded-lg mb-2 w-2/3" />
+                    <div className="h-3 bg-gray-100 rounded-lg mb-1.5 hidden sm:block" />
+                    <div className="h-3 bg-gray-100 rounded-lg w-4/5 hidden sm:block" />
                   </div>
                 </div>
               ))}
             </div>
           ) : produtos.length === 0 ? null : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
               {produtos.map((produto, i) => {
                 const Icon = ICONE_CATEGORIA[produto.categoria.slug] ?? Package;
                 return (
                   <Reveal
                     key={produto.id}
                     delay={0.1 + i * 0.06}
-                    className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200 overflow-hidden"
+                    className="bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200 overflow-hidden"
                   >
                     {/* Foto do produto */}
                     <div
-                      className="h-72"
+                      className="h-40 sm:h-56 lg:h-72"
                       style={{
                         background: 'linear-gradient(135deg, rgba(0,94,213,0.08), rgba(255,148,0,0.08))',
                         overflow: 'hidden',
@@ -104,22 +104,22 @@ export default function Produtos() {
                             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                           />
                         : <div className="w-full h-full flex items-center justify-center">
-                            <Icon size={48} style={{ color: '#005ED5', opacity: 0.25 }} />
+                            <Icon size={32} className="sm:w-12 sm:h-12" style={{ color: '#005ED5', opacity: 0.25 }} />
                           </div>
                       }
                     </div>
 
                     {/* Conteúdo */}
-                    <div className="p-6">
+                    <div className="p-3 sm:p-5 lg:p-6">
                       <span
-                        className="px-2.5 py-1 rounded-full text-xs font-medium mb-3 inline-block"
+                        className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium mb-2 sm:mb-3 inline-block"
                         style={{ background: 'rgba(0,94,213,0.08)', color: '#005ED5' }}
                       >
                         {produto.categoria.nome}
                       </span>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{produto.nome}</h3>
+                      <h3 className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 mb-1 sm:mb-2 leading-tight">{produto.nome}</h3>
                       {produto.descricao && (
-                        <p className="text-sm text-gray-600 leading-relaxed">{produto.descricao}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed hidden sm:block">{produto.descricao}</p>
                       )}
                     </div>
                   </Reveal>

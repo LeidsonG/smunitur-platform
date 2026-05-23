@@ -85,6 +85,25 @@ router.put(
   }
 );
 
+// PATCH /api/auth/me/nome — usuário atualiza o próprio nome
+router.patch(
+  '/me/nome',
+  authMiddleware,
+  [body('nome').trim().notEmpty().withMessage('Nome obrigatório').isLength({ max: 100 })],
+  async (req: AuthRequest, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const { nome } = req.body;
+    const atualizado = await prisma.usuarioAdmin.update({
+      where: { id: req.admin!.id },
+      data: { nome },
+      select: { id: true, nome: true, email: true, nivel: true, foto: true },
+    });
+    return res.json({ admin: atualizado });
+  }
+);
+
 // PATCH /api/auth/change-password — usuário troca a própria senha
 router.patch(
   '/change-password',

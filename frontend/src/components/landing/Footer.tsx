@@ -55,12 +55,15 @@ export default function Footer() {
             <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-gray-300">
               Navegação
             </h4>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <ul className="space-y-2.5 text-sm text-gray-400">
               {[
                 { label: 'Início', href: '#inicio' },
-                { label: 'Produtos', href: '#produtos' },
                 { label: 'Serviços', href: '#servicos' },
+                { label: 'Produtos', href: '#produtos' },
+                { label: 'Orçamento', href: '#orcamento' },
+                { label: 'Acompanhar Pedido', href: '#acompanhar' },
                 { label: 'FAQ', href: '#faq' },
+                { label: 'Contato', href: '#contato' },
               ].map(({ label, href }) => (
                 <li key={href}>
                   <a

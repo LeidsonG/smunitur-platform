@@ -31,7 +31,7 @@ export default function Reveal({ delay = 0, asChild = false, children, ...rest }
       variants={revealVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.20 }}
+      viewport={{ once: true, amount: 0.05 }}
       transition={{ duration: 0.5, delay, ease: 'easeOut' }}
       {...rest}
     >

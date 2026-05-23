@@ -19,39 +19,60 @@ async function countSuperAdminsAtivos(excetoId?: number): Promise<number> {
 
 // GET /api/admin/dashboard — estatísticas gerais
 router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response) => {
+  // Início do período: 1º dia do mês, 11 meses atrás (= 12 meses no total)
+  const inicioJanela = new Date();
+  inicioJanela.setDate(1);
+  inicioJanela.setHours(0, 0, 0, 0);
+  inicioJanela.setMonth(inicioJanela.getMonth() - 11);
+
   const [
     totalOrcamentos,
     orcamentosRecebidos,
-    orcamentosEmAnalise,
     orcamentosEmProducao,
     orcamentosFinalizados,
     totalProdutos,
+    porMesRaw,
+    ultimosOrcamentos,
   ] = await Promise.all([
     prisma.orcamento.count(),
     prisma.orcamento.count({ where: { status: 'recebido' } }),
-    prisma.orcamento.count({ where: { status: 'em_analise' } }),
     prisma.orcamento.count({ where: { status: 'em_producao' } }),
     prisma.orcamento.count({ where: { status: 'finalizado' } }),
     prisma.produto.count({ where: { ativo: true } }),
+    prisma.$queryRaw<{ mes: string; total: bigint }[]>`
+      SELECT DATE_FORMAT(created_at, '%Y-%m') AS mes, COUNT(*) AS total
+      FROM orcamentos
+      WHERE created_at >= ${inicioJanela}
+      GROUP BY mes
+      ORDER BY mes ASC
+    `,
+    prisma.orcamento.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: { numero: true, nomeCliente: true, produtoDesejado: true, status: true, createdAt: true },
+    }),
   ]);
 
-  const ultimosOrcamentos = await prisma.orcamento.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-    select: {
-      numero: true, nomeCliente: true, produtoDesejado: true, status: true, createdAt: true,
-    },
-  });
+  // Preenche todos os 12 meses (inclusive os que não têm orçamentos)
+  const porMesMap = new Map(porMesRaw.map(r => [r.mes, Number(r.total)]));
+  const orcamentosPorMes: { mes: string; total: number }[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth() - i);
+    const chave = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    orcamentosPorMes.push({ mes: chave, total: porMesMap.get(chave) ?? 0 });
+  }
 
   return res.json({
     stats: {
       totalOrcamentos,
       orcamentosRecebidos,
-      orcamentosEmAnalise,
       orcamentosEmProducao,
       orcamentosFinalizados,
       totalProdutos,
     },
+    orcamentosPorMes,
     ultimosOrcamentos,
   });
 });
