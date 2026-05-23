@@ -9,8 +9,8 @@ import {
 
 const navLinks = [
   { label: 'Início',     href: '#inicio',     icon: Home },
-  { label: 'Produtos',   href: '#produtos',   icon: Shirt },
   { label: 'Serviços',   href: '#servicos',   icon: Sparkles },
+  { label: 'Produtos',   href: '#produtos',   icon: Shirt },
   { label: 'Orçamento',  href: '#orcamento',  icon: ClipboardList },
   { label: 'Acompanhar', href: '#acompanhar', icon: Package },
   { label: 'FAQ',        href: '#faq',        icon: HelpCircle },
@@ -28,17 +28,32 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Scroll-spy: marca a seção atualmente visível no viewport
+  // Scroll-spy: marca a seção mais próxima do topo do viewport
   useEffect(() => {
     const ids = navLinks.map((l) => l.href.slice(1));
+    const visible = new Set<string>();
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) setActiveSection(entry.target.id);
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
         });
+
+        let best = '';
+        let bestTop = Infinity;
+        visible.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            const top = Math.abs(el.getBoundingClientRect().top);
+            if (top < bestTop) { bestTop = top; best = id; }
+          }
+        });
+        if (best) setActiveSection(best);
       },
-      { rootMargin: '-30% 0px -50% 0px' },
+      { rootMargin: '-20% 0px -60% 0px' },
     );
+
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
