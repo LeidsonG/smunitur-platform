@@ -3,13 +3,12 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
-  Menu, X, Home, Info, Shirt, Sparkles,
+  Menu, X, Home, Shirt, Sparkles,
   ClipboardList, Package, HelpCircle, Phone,
 } from 'lucide-react';
 
 const navLinks = [
   { label: 'Início',     href: '#inicio',     icon: Home },
-  { label: 'Sobre',      href: '#sobre',      icon: Info },
   { label: 'Produtos',   href: '#produtos',   icon: Shirt },
   { label: 'Serviços',   href: '#servicos',   icon: Sparkles },
   { label: 'Orçamento',  href: '#orcamento',  icon: ClipboardList },
@@ -86,6 +85,11 @@ export default function Header() {
                 style={{ width: 'auto' }}
                 priority
               />
+              <span className="text-xl lg:text-2xl font-black tracking-wide pointer-events-none">
+                <span style={{ color: '#FF9400' }}>UNI</span>
+                <span style={{ color: '#005ED5' }}>T</span>
+                <span style={{ color: '#FF9400' }}>UR</span>
+              </span>
             </button>
 
             {/* Nav Desktop */}
