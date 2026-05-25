@@ -7,6 +7,7 @@
  * - GET /:id                     → admin (detalhe completo)
  * - PATCH /:id/status            → admin (transição de status + histórico)
  * - PATCH /:id/valor             → admin (define valor do orçamento)
+ * - PUT  /:id/layout-final       → admin (upload do layout final aprovado)
  *
  * Convenção: a rota /api/orcamentos é a ÚNICA fonte de verdade para mudar
  * o status de um orçamento — o painel de Produção também consome essa rota.
@@ -15,7 +16,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 import { StatusOrcamento } from '@prisma/client';
 import prisma from '../utils/prisma';
-import { upload, validarMagicBytes, processarImagens } from '../utils/upload';
+import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../utils/upload';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
@@ -146,6 +147,7 @@ router.post(
         quantidade: true,
         status: true,
         imagemReferencia: true,
+        layoutFinal: true,
         createdAt: true,
         updatedAt: true,
         historicos: {
@@ -280,5 +282,41 @@ router.patch('/:id/status', authMiddleware, async (req: AuthRequest, res: Respon
 
   return res.json({ orcamento: atualizado });
 });
+
+// PUT /api/orcamentos/:id/layout-final — admin sobe o layout final aprovado
+// Substitui o anterior (apaga do disco) e atualiza o registro do orçamento.
+router.put(
+  '/:id/layout-final',
+  authMiddleware,
+  upload.single('layout'),
+  validarMagicBytes,
+  processarImagens,
+  async (req: AuthRequest, res: Response) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+    if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
+
+    const atual = await prisma.orcamento.findUnique({
+      where: { id },
+      select: { layoutFinal: true },
+    });
+    if (!atual) {
+      await apagarUpload(`/uploads/${req.file.filename}`);
+      return res.status(404).json({ error: 'Orçamento não encontrado' });
+    }
+
+    const layoutFinal = `/uploads/${req.file.filename}`;
+    const atualizado = await prisma.orcamento.update({
+      where: { id },
+      data: { layoutFinal },
+      select: { id: true, layoutFinal: true },
+    });
+
+    // Best-effort: limpa o arquivo anterior do disco.
+    if (atual.layoutFinal) await apagarUpload(atual.layoutFinal);
+
+    return res.json({ orcamento: atualizado });
+  }
+);
 
 export default router;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, CheckCircle, Clock, Package, Truck, XCircle, Eye, Loader2, ImageIcon, Mail } from 'lucide-react';
+import { Search, CheckCircle, Clock, Package, Truck, XCircle, Eye, Loader2, ImageIcon, Mail, Sparkles } from 'lucide-react';
 import api, { API_BASE } from '@/lib/api';
 import Reveal from './Reveal';
 
@@ -63,6 +63,7 @@ interface OrcamentoStatus {
   quantidade: number;
   status: string;
   imagemReferencia: string | null;
+  layoutFinal: string | null;
   createdAt: string;
   updatedAt: string;
   historicos: Historico[];
@@ -216,6 +217,32 @@ export default function Acompanhamento() {
                 </div>
               </div>
             </div>
+
+            {/* Layout final enviado pela equipe */}
+            {orcamento.layoutFinal && (
+              <div className="p-6 border-b border-gray-100" style={{ background: 'rgba(0,94,213,0.04)' }}>
+                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <Sparkles size={16} style={{ color: '#FF9400' }} />
+                  Layout final da nossa equipe
+                </h4>
+                <a
+                  href={`${API_BASE}${orcamento.layoutFinal}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block rounded-xl overflow-hidden border border-gray-100 bg-white hover:scale-[1.01] transition-transform"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`${API_BASE}${orcamento.layoutFinal}`}
+                    alt="Layout final aprovado pela equipe"
+                    className="w-full max-h-[480px] object-contain"
+                  />
+                </a>
+                <p className="text-xs text-gray-500 mt-2">
+                  Clique na imagem para ampliar. Em caso de ajustes, entre em contato pelo WhatsApp.
+                </p>
+              </div>
+            )}
 
             {/* Imagens de referência enviadas pelo cliente */}
             {orcamento.imagemReferencia && (
