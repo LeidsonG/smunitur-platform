@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, CheckCircle, Clock, Package, Truck, XCircle, Eye, Loader2, ImageIcon } from 'lucide-react';
+import { Search, CheckCircle, Clock, Package, Truck, XCircle, Eye, Loader2, ImageIcon, Mail } from 'lucide-react';
 import api, { API_BASE } from '@/lib/api';
 import Reveal from './Reveal';
 
@@ -70,23 +70,29 @@ interface OrcamentoStatus {
 
 export default function Acompanhamento() {
   const [numero, setNumero] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [orcamento, setOrcamento] = useState<OrcamentoStatus | null>(null);
   const [erro, setErro] = useState('');
 
   const buscar = async () => {
-    if (!numero.trim()) return;
+    if (!numero.trim() || !email.trim()) return;
     setLoading(true);
     setErro('');
     setOrcamento(null);
 
     try {
-      const res = await api.get(`/orcamentos/acompanhar/${numero.trim()}`);
+      const res = await api.post('/orcamentos/acompanhar', {
+        numero: numero.trim(),
+        email: email.trim(),
+      });
       setOrcamento(res.data.orcamento);
     } catch (err: unknown) {
       const e = err as { response?: { status?: number } };
       if (e.response?.status === 404) {
-        setErro('Orçamento não encontrado. Verifique o número e tente novamente.');
+        setErro('Orçamento não encontrado ou e-mail não confere.');
+      } else if (e.response?.status === 400) {
+        setErro('Verifique o número e o e-mail informados.');
       } else {
         setErro('Erro ao buscar orçamento. Tente novamente.');
       }
@@ -119,28 +125,46 @@ export default function Acompanhamento() {
 
         {/* Busca */}
         <Reveal delay={0.1} className="bg-white rounded-2xl border border-gray-100 shadow-lg p-5 sm:p-6 mb-6">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 flex items-center rounded-xl border border-gray-200 bg-white transition-colors focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-50">
-              <span className="pl-4 pr-1 font-bold select-none" style={{ color: '#005ED5' }}>#</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={numero}
-                onChange={(e) => setNumero(e.target.value.replace(/\D/g, ''))}
-                onKeyDown={(e) => e.key === 'Enter' && buscar()}
-                placeholder="100"
-                className="flex-1 py-3 pr-4 outline-none bg-transparent"
-              />
+          <p className="text-sm text-gray-500 mb-3">
+            Informe o número do orçamento e o e-mail usado no cadastro.
+          </p>
+          <div className="flex flex-col gap-3">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="flex items-center rounded-xl border border-gray-200 bg-white transition-colors focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-50">
+                <span className="pl-4 pr-1 font-bold select-none" style={{ color: '#005ED5' }}>#</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={numero}
+                  onChange={(e) => setNumero(e.target.value.replace(/\D/g, ''))}
+                  onKeyDown={(e) => e.key === 'Enter' && buscar()}
+                  placeholder="100"
+                  className="flex-1 py-3 pr-4 outline-none bg-transparent"
+                  aria-label="Número do orçamento"
+                />
+              </div>
+              <div className="flex items-center rounded-xl border border-gray-200 bg-white transition-colors focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-50">
+                <Mail size={16} className="ml-3 mr-2 flex-shrink-0" style={{ color: '#005ED5' }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && buscar()}
+                  placeholder="seu@email.com"
+                  className="flex-1 py-3 pr-4 outline-none bg-transparent"
+                  aria-label="E-mail usado no orçamento"
+                />
+              </div>
             </div>
             <button
               type="button"
               onClick={buscar}
-              disabled={loading || !numero.trim()}
+              disabled={loading || !numero.trim() || !email.trim()}
               className="px-6 py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: '#005ED5' }}
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
-              Buscar
+              Buscar Orçamento
             </button>
           </div>
         </Reveal>
