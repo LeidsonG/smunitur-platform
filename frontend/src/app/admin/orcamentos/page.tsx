@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Search, Eye, ChevronLeft, ChevronRight, X, DollarSign } from 'lucide-react';
-import api from '@/lib/api';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { Search, Eye, ChevronLeft, ChevronRight, X, DollarSign, Upload, MessageCircle, Loader2 } from 'lucide-react';
+import api, { API_BASE } from '@/lib/api';
 import { STATUS_LIST, STATUS_COLOR, STATUS_LABEL } from '@/lib/orcamentoStatus';
 
 // Opções do <select> do filtro: "Todos" + a lista canônica importada.
@@ -13,7 +13,7 @@ interface Orcamento {
   telefoneCliente: string; produtoDesejado: string; quantidade: number;
   status: string; createdAt: string; tamanhos?: string; cores?: string;
   detalhes?: string; observacoes?: string; cpfCnpj?: string;
-  imagemReferencia?: string; valor?: number | null;
+  imagemReferencia?: string; layoutFinal?: string | null; valor?: number | null;
 }
 
 export default function OrcamentosPage() {
@@ -29,6 +29,8 @@ export default function OrcamentosPage() {
   const [atualizando, setAtualizando] = useState(false);
   const [novoValor, setNovoValor] = useState('');
   const [salvandoValor, setSalvandoValor] = useState(false);
+  const [uploadingLayout, setUploadingLayout] = useState(false);
+  const layoutInputRef = useRef<HTMLInputElement>(null);
 
   const limite = 15;
 
@@ -63,6 +65,42 @@ export default function OrcamentosPage() {
       setOrcamentos(prev => prev.map(o => o.id === selecionado.id ? { ...o, valor: valorAtualizado } : o));
       setSelecionado({ ...selecionado, valor: valorAtualizado });
     } finally { setSalvandoValor(false); }
+  };
+
+  const enviarLayoutFinal = async (file: File) => {
+    if (!selecionado) return;
+    setUploadingLayout(true);
+    try {
+      const fd = new FormData();
+      fd.append('layout', file);
+      const res = await api.put(`/orcamentos/${selecionado.id}/layout-final`, fd);
+      const novoLayout: string = res.data.orcamento.layoutFinal;
+      setOrcamentos((prev) => prev.map((o) => o.id === selecionado.id ? { ...o, layoutFinal: novoLayout } : o));
+      setSelecionado({ ...selecionado, layoutFinal: novoLayout });
+    } finally {
+      setUploadingLayout(false);
+      if (layoutInputRef.current) layoutInputRef.current.value = '';
+    }
+  };
+
+  // Abre o WhatsApp Web/App pré-preenchido com link público do layout final.
+  // Telefones aceitos: com ou sem máscara; prepende 55 (BR) se não tiver código.
+  const enviarPorWhatsApp = () => {
+    if (!selecionado?.layoutFinal) return;
+    const digits = selecionado.telefoneCliente.replace(/\D/g, '');
+    const telefone = digits.startsWith('55') ? digits : `55${digits}`;
+    const linkImagem = `${API_BASE}${selecionado.layoutFinal}`;
+    const msg = [
+      `Olá ${selecionado.nomeCliente}! 👋`,
+      ``,
+      `Segue o layout final do seu orçamento *#${selecionado.numero}*.`,
+      ``,
+      `Visualizar: ${linkImagem}`,
+      ``,
+      `Qualquer ajuste, é só responder por aqui.`,
+      `— Equipe SM Unitur`,
+    ].join('\n');
+    window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   };
 
   const atualizarStatus = async () => {
@@ -250,6 +288,63 @@ export default function OrcamentosPage() {
                     </span>
                   </p>
                 )}
+              </div>
+
+              {/* Layout final */}
+              <div className="border-t border-gray-100 pt-4 mt-4">
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  Layout Final
+                </label>
+                {selecionado.layoutFinal ? (
+                  <div className="space-y-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`${API_BASE}${selecionado.layoutFinal}`}
+                      alt="Layout final"
+                      className="w-full max-h-64 object-contain rounded-xl border border-gray-100 bg-gray-50"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => layoutInputRef.current?.click()}
+                        disabled={uploadingLayout}
+                        className="py-2 px-3 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                      >
+                        {uploadingLayout ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                        {uploadingLayout ? 'Enviando...' : 'Trocar imagem'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={enviarPorWhatsApp}
+                        className="py-2 px-3 rounded-xl font-semibold text-white text-sm flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02]"
+                        style={{ background: '#25D366' }}
+                      >
+                        <MessageCircle size={14} />
+                        WhatsApp
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => layoutInputRef.current?.click()}
+                    disabled={uploadingLayout}
+                    className="w-full py-3 px-4 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-500 hover:border-blue-300 hover:bg-blue-50/50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {uploadingLayout ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                    {uploadingLayout ? 'Enviando...' : 'Anexar layout final'}
+                  </button>
+                )}
+                <input
+                  ref={layoutInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) enviarLayoutFinal(f);
+                  }}
+                />
               </div>
 
               <div className="border-t border-gray-100 pt-4 mt-4">
