@@ -128,9 +128,9 @@ erDiagram
 
 - **Atributos globais reutilizáveis**: "Tipo de Gola" é cadastrado uma vez e associado a Camiseta Polo, Camiseta Básica etc. Cada produto escolhe **quais opções** daquele atributo expõe ao cliente (via `ProdutoAtributoOpcao`).
 - **`OrcamentoAtributo` com FKs em `SetNull`**: se uma opção for excluída no futuro, o orçamento antigo perde a referência mas o registro permanece — auditoria preservada. Use o campo `valorLivre` como snapshot textual quando precisar dessa garantia.
-- **Sem entidade Cliente**: nome/e-mail/telefone são copiados em cada orçamento. Trade-off conhecido — virou item da v2 (ver [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md)).
+- **Sem entidade Cliente**: nome/e-mail/telefone são copiados em cada orçamento. Trade-off conhecido — virou item para uma próxima versão (ver [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md)).
 - **`Orcamento.numero`**: começa em 100, auto-incrementado pela aplicação (não pelo banco), para gerar IDs amigáveis ao cliente.
-- **`Orcamento.tamanhos`** e **`Orcamento.cores`**: strings concatenadas (`"PP: 5, P: 10"`). O frontend já estrutura no momento da entrada — virou item da v2 normalizar isso.
+- **`Orcamento.tamanhos`** e **`Orcamento.cores`**: strings concatenadas (`"PP: 5, P: 10"`). O frontend já estrutura no momento da entrada — normalizar isso virou item para uma próxima versão.
 - **`UsuarioAdmin.tokenVersion`**: incrementa em troca de senha, desativação, ou reset administrativo. O middleware compara com o `tv` do JWT — token desatualizado = 401. Substitui a necessidade de uma blacklist de tokens.
 
 ---
@@ -227,4 +227,4 @@ Decisões registradas em [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-
 - FK forte de produto/categoria no orçamento
 - Anexar "layout final" para o cliente visualizar
 
-A v1 (esta branch) foca em estabilidade, segurança e operação. Features de negócio adicionais entram em branches separadas após o go-live e validação com o cliente real.
+A versão atual foca em estabilidade, segurança e operação. Features de negócio adicionais entram em branches separadas após o lançamento e validação com o cliente real.

@@ -1,4 +1,4 @@
-# Checklist pré-Go-Live — Sistema SM Unitur
+# Checklist Pré-Produção — Sistema SM Unitur
 
 Lista de TODOS os pontos que precisam ser definidos/preenchidos com valores reais ANTES de o sistema ir para o ar para o cliente. Cada item tem um placeholder no código ou na configuração que aceita o valor temporário, mas NÃO PODE ficar em produção.
 
@@ -15,7 +15,7 @@ Use este arquivo como roteiro de aceite. Marque `[x]` quando concluído.
 | Endereço físico (se for exibir) | `frontend/src/components/landing/Footer.tsx` / `Contato.tsx` | [ ] |
 | Redes sociais (Instagram, Facebook) — links reais | `frontend/src/components/landing/Footer.tsx` | [ ] |
 | Logo da empresa (substituir asset em `/image/`) | conferir referências em components | [ ] |
-| Paleta de cores especial da fábrica (aguardando) | será nova feature na v2 — ver [`3-proximas-funcionalidades.md`](3-proximas-funcionalidades.md) | [ ] |
+| Paleta de cores especial da fábrica (aguardando) | será nova feature numa próxima versão — ver [`3-proximas-funcionalidades.md`](3-proximas-funcionalidades.md) | [ ] |
 
 ---
 
@@ -140,7 +140,7 @@ Ver [`2-deploy.md`](2-deploy.md) passo-a-passo. Itens-chave:
 
 ---
 
-## 11. Segurança (auditoria pré-go-live)
+## 11. Segurança (auditoria pré-produção)
 
 - [ ] Senha `admin123` **NUNCA** está mais ativa em nenhum usuário
 - [ ] `JWT_SECRET` não é o de exemplo
@@ -153,7 +153,7 @@ Ver [`2-deploy.md`](2-deploy.md) passo-a-passo. Itens-chave:
 
 ## Quando todos os itens estiverem `[x]`
 
-Comunique go-live para o cliente, envie:
+Comunique o lançamento ao cliente e envie:
 1. URL: `https://smunitur.com.br`
 2. URL admin: `https://smunitur.com.br/admin/login`
 3. Credenciais iniciais (e-mail + senha) por canal seguro (não e-mail simples)

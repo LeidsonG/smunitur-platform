@@ -1,8 +1,8 @@
-# Roadmap V2 — Sistema SM Unitur
+# Próximas Funcionalidades — Sistema SM Unitur
 
-Funcionalidades planejadas **após o go-live da v1** (esta branch). Cada item tem contexto, decisões já tomadas, perguntas pendentes para o cliente e estimativa relativa.
+Funcionalidades planejadas **após o lançamento da versão atual**. Cada item tem contexto, decisões já tomadas, perguntas pendentes para o cliente e estimativa relativa.
 
-A v1 foca em estabilidade, segurança e operação. A v2 traz regras de negócio mais ricas — mas só implementar depois de validar o que realmente é necessário com o pessoal da SM Unitur.
+A versão atual foca em estabilidade, segurança e operação. As próximas trazem regras de negócio mais ricas — mas só implementar depois de validar o que realmente é necessário com o pessoal da SM Unitur.
 
 ---
 
@@ -103,7 +103,7 @@ A v1 foca em estabilidade, segurança e operação. A v2 traz regras de negócio
 
 ---
 
-## Outras melhorias avaliadas e PULADAS na v2
+## Outras melhorias avaliadas e PULADAS por enquanto
 
 | ID | Item | Por que pular |
 |----|------|---------------|
@@ -129,7 +129,7 @@ A v1 foca em estabilidade, segurança e operação. A v2 traz regras de negócio
 
 ---
 
-## Ordem sugerida quando começar a v2
+## Ordem sugerida quando começar essas funcionalidades
 
 1. **R10** (FK produto/categoria) — pequeno, abre caminho para métricas reais no dashboard
 2. **R2** (prazo de entrega) — alto valor para a operação, pequeno esforço
