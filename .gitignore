@@ -31,6 +31,7 @@ Thumbs.db
 
 # Local-only configuration
 .claude/
+CLAUDE.md
 
 # Uploads (manter pasta, ignorar arquivos)
 backend/uploads/*
@@ -41,4 +42,3 @@ backend/uploads/*
 
 # TypeScript
 *.tsbuildinfo
-CLAUDE.md
