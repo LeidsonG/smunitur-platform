@@ -1,6 +1,6 @@
 /**
- * Seed do banco: garante que existe um super_admin inicial + as categorias
- * padrão usadas no formulário do cliente.
+ * Seed do banco: garante que existe um super_admin inicial.
+ * Categorias e produtos são cadastrados pelo painel admin em /admin/categorias.
  *
  * Em produção, sempre informe `SEED_ADMIN_PASSWORD` no ambiente — o fallback
  * `admin123` é apenas para desenvolvimento local.
@@ -38,22 +38,8 @@ async function main() {
     console.log('[seed] Usuário admin já existe — pulando.');
   }
 
-  // ─── Categorias iniciais ──────────────────────────────
-  const categorias = [
-    { nome: 'Camisetas', slug: 'camisetas' },
-    { nome: 'Moletons',  slug: 'moletons'  },
-    { nome: 'Jalecos',   slug: 'jalecos'   },
-  ];
-
-  for (const c of categorias) {
-    await prisma.categoria.upsert({
-      where: { slug: c.slug },
-      update: {},
-      create: c,
-    });
-  }
-  // eslint-disable-next-line no-console
-  console.log(`[seed] ${categorias.length} categorias garantidas.`);
+  // ─── Categorias ───────────────────────────────────────
+  // Nenhuma categoria pré-definida — cadastre pelo painel admin em /admin/categorias.
 }
 
 main()
