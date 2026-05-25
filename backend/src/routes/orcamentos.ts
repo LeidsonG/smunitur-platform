@@ -131,6 +131,7 @@ router.get('/acompanhar/:numero', async (req: Request, res: Response) => {
       produtoDesejado: true,
       quantidade: true,
       status: true,
+      imagemReferencia: true,
       createdAt: true,
       updatedAt: true,
       historicos: {

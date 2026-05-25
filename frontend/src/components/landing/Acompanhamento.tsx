@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, CheckCircle, Clock, Package, Truck, XCircle, Eye, Loader2 } from 'lucide-react';
-import api from '@/lib/api';
+import { Search, CheckCircle, Clock, Package, Truck, XCircle, Eye, Loader2, ImageIcon } from 'lucide-react';
+import api, { API_BASE } from '@/lib/api';
 import Reveal from './Reveal';
 
 const STATUS_CONFIG: Record<string, { label: string; cor: string; icon: React.ElementType; desc: string }> = {
@@ -62,6 +62,7 @@ interface OrcamentoStatus {
   produtoDesejado: string;
   quantidade: number;
   status: string;
+  imagemReferencia: string | null;
   createdAt: string;
   updatedAt: string;
   historicos: Historico[];
@@ -191,6 +192,34 @@ export default function Acompanhamento() {
                 </div>
               </div>
             </div>
+
+            {/* Imagens de referência enviadas pelo cliente */}
+            {orcamento.imagemReferencia && (
+              <div className="p-6 border-b border-gray-100">
+                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <ImageIcon size={16} style={{ color: '#005ED5' }} />
+                  Imagens enviadas
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {orcamento.imagemReferencia.split(',').map((src, i) => (
+                    <a
+                      key={i}
+                      href={`${API_BASE}${src}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block aspect-square rounded-xl overflow-hidden border border-gray-100 bg-gray-50 hover:scale-[1.03] transition-transform"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`${API_BASE}${src}`}
+                        alt={`Referência ${i + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Histórico */}
             {orcamento.historicos.length > 0 && (
