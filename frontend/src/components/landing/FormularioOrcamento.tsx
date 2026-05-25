@@ -10,11 +10,10 @@ import {
   Plus, Upload, Send, Loader2, X,
   CheckCircle, Check, AlertCircle, ChevronRight, ChevronLeft,
 } from 'lucide-react';
-import api from '@/lib/api';
+import api, { API_BASE } from '@/lib/api';
 import { gerarLinkWhatsApp } from '@/lib/whatsapp';
 import Reveal from './Reveal';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:3001';
 const TAMANHOS_PADRAO = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -548,6 +547,9 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSele
 }
 
 // ─── Etapa 2: Detalhes ────────────────────────────────────────────────────────
+// Limite por imagem em bytes. Deve ESTAR ALINHADO com `MAX_FILE_SIZE` do
+// backend (backend/.env) — caso contrário o servidor rejeitará uploads que
+// o frontend deixou passar.
 const MAX_IMG = 10 * 1024 * 1024; // 10 MB
 
 function Etapa2({ setQuantidade, register, setValue, imagemFiles, setImagemFiles }:

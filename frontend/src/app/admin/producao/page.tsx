@@ -3,18 +3,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Package, Clock, Eye, X } from 'lucide-react';
 import api from '@/lib/api';
+import { STATUS_LIST, statusInfo } from '@/lib/orcamentoStatus';
 
+// Status considerados "em produção" pela tela — usado para filtrar a lista
+// localmente após atualizar um pedido (mantém na visualização só os que
+// continuam na esteira de produção).
 const STATUS_EM_PRODUCAO = ['em_analise', 'aguardando_aprovacao', 'em_producao'];
-
-const STATUS_OPTIONS = [
-  { value: 'recebido', label: 'Recebido', cor: '#6B7280' },
-  { value: 'em_analise', label: 'Em Análise', cor: '#F59E0B' },
-  { value: 'aguardando_aprovacao', label: 'Ag. Aprovação', cor: '#8B5CF6' },
-  { value: 'em_producao', label: 'Em Produção', cor: '#005ED5' },
-  { value: 'finalizado', label: 'Finalizado', cor: '#10B981' },
-  { value: 'enviado', label: 'Enviado', cor: '#FF9400' },
-  { value: 'cancelado', label: 'Cancelado', cor: '#EF4444' },
-];
 
 interface OrcProd {
   id: number; numero: number; nomeCliente: string;
@@ -60,7 +54,8 @@ export default function ProducaoPage() {
     if (!selecionado) return;
     setSalvando(true);
     try {
-      await api.patch(`/producao/${selecionado.id}/status`, { status: novoStatus, observacao: obs });
+      // Fonte única para mudar status — sem rota /producao paralela.
+      await api.patch(`/orcamentos/${selecionado.id}/status`, { status: novoStatus, observacao: obs });
       setOrcamentos((prev) =>
         prev.map((o) => o.id === selecionado.id ? { ...o, status: novoStatus } : o)
           .filter((o) => STATUS_EM_PRODUCAO.includes(o.status))
@@ -74,7 +69,7 @@ export default function ProducaoPage() {
     }
   };
 
-  const getStatusInfo = (s: string) => STATUS_OPTIONS.find((o) => o.value === s) || { label: s, cor: '#9CA3AF' };
+  const getStatusInfo = (s: string) => statusInfo(s);
 
   return (
     <div className="flex-1 p-6 lg:p-8">
@@ -165,7 +160,7 @@ export default function ProducaoPage() {
                   onChange={(e) => setNovoStatus(e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl mb-3 focus:outline-none focus:border-blue-400 bg-white"
                 >
-                  {STATUS_OPTIONS.filter((o) => o.value !== 'recebido').map((o) => (
+                  {STATUS_LIST.filter((o) => o.value !== 'recebido').map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>

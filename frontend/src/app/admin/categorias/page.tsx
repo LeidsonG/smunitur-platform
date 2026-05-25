@@ -3,16 +3,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, Edit2, ToggleLeft, ToggleRight, X, Loader2, Check } from 'lucide-react';
 import api from '@/lib/api';
+import { gerarSlug } from '@/lib/slug';
 
 interface Categoria { id: number; nome: string; slug: string; ativo: boolean }
-
-function gerarSlug(nome: string) {
-  return nome
-    .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
 
 export default function CategoriasPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);

@@ -3,22 +3,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Search, Eye, ChevronLeft, ChevronRight, X, DollarSign } from 'lucide-react';
 import api from '@/lib/api';
+import { STATUS_LIST, STATUS_COLOR, STATUS_LABEL } from '@/lib/orcamentoStatus';
 
-const STATUS_OPTIONS = [
-  { value: '', label: 'Todos' },
-  { value: 'recebido', label: 'Recebido' },
-  { value: 'em_analise', label: 'Em Análise' },
-  { value: 'aguardando_aprovacao', label: 'Ag. Aprovação' },
-  { value: 'em_producao', label: 'Em Produção' },
-  { value: 'finalizado', label: 'Finalizado' },
-  { value: 'enviado', label: 'Enviado' },
-  { value: 'cancelado', label: 'Cancelado' },
-];
-
-const STATUS_COLOR: Record<string, string> = {
-  recebido: '#6B7280', em_analise: '#F59E0B', aguardando_aprovacao: '#8B5CF6',
-  em_producao: '#005ED5', finalizado: '#10B981', enviado: '#FF9400', cancelado: '#EF4444',
-};
+// Opções do <select> do filtro: "Todos" + a lista canônica importada.
+const FILTRO_STATUS = [{ value: '', label: 'Todos' }, ...STATUS_LIST];
 
 interface Orcamento {
   id: number; numero: number; nomeCliente: string; emailCliente: string;
@@ -117,7 +105,7 @@ export default function OrcamentosPage() {
           onChange={(e) => { setStatus(e.target.value); setPagina(1); }}
           className="px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 bg-white"
         >
-          {STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {FILTRO_STATUS.map((o) => <option key={o.value || 'todos'} value={o.value}>{o.label}</option>)}
         </select>
       </div>
 
@@ -156,7 +144,7 @@ export default function OrcamentosPage() {
                         className="px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap"
                         style={{ background: `${STATUS_COLOR[o.status]}18`, color: STATUS_COLOR[o.status] }}
                       >
-                        {STATUS_OPTIONS.find((s) => s.value === o.status)?.label || o.status}
+                        {STATUS_LABEL[o.status] || o.status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
@@ -273,7 +261,8 @@ export default function OrcamentosPage() {
                   onChange={(e) => setNovoStatus(e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl mb-3 focus:outline-none focus:border-blue-400 bg-white"
                 >
-                  {STATUS_OPTIONS.filter((o) => o.value && o.value !== 'recebido').map((o) => (
+                  {/* "recebido" é o estado inicial — não faz sentido voltar para ele manualmente */}
+                  {STATUS_LIST.filter((o) => o.value !== 'recebido').map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>

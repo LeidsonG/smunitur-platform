@@ -1,6 +1,19 @@
 import axios from 'axios';
 
+/**
+ * Cliente HTTP central — usado por toda a UI (landing + admin).
+ *
+ * - `API_URL`  : base da API REST, com sufixo `/api` (ex.: http://host/api).
+ * - `API_BASE` : mesma origem SEM o sufixo `/api` — usado para montar URLs
+ *                de arquivos estáticos servidos pelo backend (ex.:
+ *                `${API_BASE}/uploads/imagem.png`). Mantido aqui para
+ *                evitar a repetição do `.replace('/api', '')` em vários
+ *                componentes.
+ */
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
+export const API_BASE = API_URL.replace(/\/api\/?$/, '');
 
 export const api = axios.create({
   baseURL: API_URL,

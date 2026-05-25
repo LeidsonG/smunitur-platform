@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { UserCircle, Lock, Loader2, AlertCircle, CheckCircle, Mail, ShieldCheck, Camera, Pencil } from 'lucide-react';
-import api from '@/lib/api';
+import api, { API_BASE } from '@/lib/api';
 
 interface Admin {
   id: number; nome: string; email: string;
@@ -16,8 +16,6 @@ const NIVEL_LABEL: Record<Admin['nivel'], string> = {
   admin: 'Administrador',
   operador: 'Operador',
 };
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:3001';
 
 export default function PerfilPage() {
   const [admin, setAdmin] = useState<Admin | null>(null);

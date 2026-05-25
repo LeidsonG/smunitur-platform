@@ -1,11 +1,23 @@
 'use client';
 
+/**
+ * Página /admin/produtos
+ * --------------------------------------------------------------------------
+ * CRUD de produtos + gestão de quais atributos (e quais opções de cada
+ * atributo) cada produto expõe ao cliente no formulário de orçamento.
+ *
+ * Categorias são apenas LISTADAS aqui (necessárias para criar/editar
+ * produto). O CRUD completo de categorias vive em /admin/categorias —
+ * para evitar duas fontes de verdade na UI.
+ */
+
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import {
   Plus, Edit2, Trash2, ToggleLeft, ToggleRight, X,
-  Upload, Loader2, ChevronDown, Check, Link2, Link2Off, Tag,
+  Upload, Loader2, ChevronDown, Check, Link2, Link2Off, Tag, ExternalLink,
 } from 'lucide-react';
-import api from '@/lib/api';
+import api, { API_BASE } from '@/lib/api';
 import ConfirmModal from '@/components/admin/ConfirmModal';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -30,8 +42,6 @@ interface Produto {
 const errMsg = (e: unknown) =>
   (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Erro inesperado.';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:3001';
-
 // ─── Página ───────────────────────────────────────────────────────────────────
 export default function ProdutosPage() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -39,15 +49,8 @@ export default function ProdutosPage() {
   const [atributosGlobais, setAtributosGlobais] = useState<AtributoGlobal[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ── Categorias ───────────────────────────────────────────────────────────────
-  const [catModal, setCatModal] = useState<'criar' | 'editar' | null>(null);
-  const [catEditando, setCatEditando] = useState<Categoria | null>(null);
-  const [catForm, setCatForm] = useState({ nome: '', slug: '' });
-  const [catSlugManual, setCatSlugManual] = useState(false);
-  const [catSalvando, setCatSalvando] = useState(false);
-  const [catErro, setCatErro] = useState<string | null>(null);
-
-  // Modal de confirmação genérico
+  // Modal de confirmação genérico (compartilhado entre exclusão de produto e
+  // remoção de associação de atributo).
   const [confirmar, setConfirmar] = useState<null | { titulo: string; mensagem: string; acao: () => Promise<void> }>(null);
   const [confirmCarregando, setConfirmCarregando] = useState(false);
 
@@ -60,53 +63,6 @@ export default function ProdutosPage() {
     try { await confirmar.acao(); } finally {
       setConfirmCarregando(false);
       setConfirmar(null);
-    }
-  };
-
-  const gerarSlug = (nome: string) =>
-    nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
-  const abrirCriarCat = () => {
-    setCatEditando(null);
-    setCatForm({ nome: '', slug: '' });
-    setCatSlugManual(false);
-    setCatErro(null);
-    setCatModal('criar');
-  };
-
-  const abrirEditarCat = (c: Categoria) => {
-    setCatEditando(c);
-    setCatForm({ nome: c.nome, slug: c.slug });
-    setCatSlugManual(true);
-    setCatErro(null);
-    setCatModal('editar');
-  };
-
-  const salvarCat = async () => {
-    if (!catForm.nome.trim() || !catForm.slug.trim()) return;
-    setCatSalvando(true); setCatErro(null);
-    try {
-      if (catModal === 'criar') {
-        await api.post('/categorias', { nome: catForm.nome.trim(), slug: catForm.slug.trim() });
-      } else if (catEditando) {
-        await api.put(`/categorias/${catEditando.id}`, { nome: catForm.nome.trim(), slug: catForm.slug.trim() });
-      }
-      setCatModal(null);
-      await carregar();
-    } catch (e) {
-      setCatErro((e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Erro ao salvar.');
-    } finally { setCatSalvando(false); }
-  };
-
-  const excluirCategoria = async (c: Categoria) => {
-    setCatErro(null);
-    try {
-      await api.delete(`/categorias/${c.id}`);
-      setCatModal(null);
-      await carregar();
-    } catch (e) {
-      setCatErro((e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Erro ao excluir.');
-      throw e;
     }
   };
 
@@ -294,31 +250,36 @@ export default function ProdutosPage() {
         </button>
       </div>
 
-      {/* ── Categorias ─────────────────────────────────────────────────────────── */}
+      {/*
+        Painel resumo de categorias.
+        Apenas listagem — para criar/editar/desativar, segue link para
+        /admin/categorias (fonte da verdade única).
+      */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
-        <div className="flex items-center gap-3 flex-wrap mb-4">
+        <div className="flex items-center gap-3 flex-wrap mb-3">
           <Tag size={16} style={{ color: '#005ED5' }} />
           <h2 className="font-semibold text-gray-900 text-sm">Categorias</h2>
-          <span className="text-xs text-gray-400">{categorias.length} cadastrada{categorias.length !== 1 ? 's' : ''}</span>
-          <button onClick={abrirCriarCat}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-white text-xs transition-all hover:scale-105"
-            style={{ background: '#005ED5' }}>
-            <Plus size={13} /> Nova Categoria
-          </button>
+          <span className="text-xs text-gray-400">
+            {categorias.length} cadastrada{categorias.length !== 1 ? 's' : ''}
+          </span>
+          <Link
+            href="/admin/categorias"
+            className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:underline"
+          >
+            Gerenciar categorias <ExternalLink size={12} />
+          </Link>
         </div>
         {categorias.length === 0 ? (
-          <p className="text-sm text-gray-400">Nenhuma categoria. Crie uma para começar.</p>
+          <p className="text-sm text-gray-400">
+            Nenhuma categoria cadastrada. <Link href="/admin/categorias" className="text-blue-600 hover:underline">Cadastre a primeira</Link> para criar produtos.
+          </p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {categorias.map(c => (
-              <div key={c.id}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-200 bg-gray-50 text-sm">
-                <span className="font-medium text-gray-800">{c.nome}</span>
-                <button onClick={() => abrirEditarCat(c)}
-                  className="text-gray-400 hover:text-blue-500 transition-colors">
-                  <Edit2 size={12} />
-                </button>
-              </div>
+              <span key={c.id}
+                className="px-3 py-1.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-800">
+                {c.nome}
+              </span>
             ))}
           </div>
         )}
@@ -545,55 +506,6 @@ export default function ProdutosPage() {
                 </div>
               </div>
             ))}
-        </div>
-      )}
-
-      {/* Modal criar/editar categoria */}
-      {catModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h2 className="font-bold text-gray-900">{catModal === 'criar' ? 'Nova Categoria' : 'Editar Categoria'}</h2>
-              <button onClick={() => setCatModal(null)} className="p-1.5 rounded-lg hover:bg-gray-100"><X size={18} /></button>
-            </div>
-            <div className="p-5 space-y-4">
-              {catErro && <div className="px-3 py-2.5 rounded-xl text-sm font-medium text-red-700 bg-red-50 border border-red-100">{catErro}</div>}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome *</label>
-                <input value={catForm.nome}
-                  onChange={e => { const v = e.target.value; setCatForm(f => ({ nome: v, slug: catSlugManual ? f.slug : gerarSlug(v) })); }}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400"
-                  placeholder="Ex: Camisetas" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Slug</label>
-                <input value={catForm.slug}
-                  onChange={e => { setCatSlugManual(true); setCatForm(f => ({ ...f, slug: e.target.value })); }}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 font-mono"
-                  placeholder="Ex: camisetas" />
-                <p className="text-xs text-gray-400 mt-1">Gerado automaticamente. Só letras, números e hífens.</p>
-              </div>
-              <button onClick={salvarCat} disabled={catSalvando || !catForm.nome.trim() || !catForm.slug.trim()}
-                className="w-full py-2.5 rounded-xl font-semibold text-white text-sm flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02]"
-                style={{ background: '#005ED5' }}>
-                {catSalvando ? <Loader2 size={16} className="animate-spin" /> : null}
-                {catSalvando ? 'Salvando...' : 'Salvar'}
-              </button>
-              {catModal === 'editar' && catEditando && (
-                <button
-                  onClick={() => pedirConfirmacao(
-                    'Excluir Categoria',
-                    `Tem certeza que quer excluir "${catEditando.nome}"? Esta ação não pode ser desfeita.`,
-                    () => excluirCategoria(catEditando)
-                  )}
-                  disabled={catSalvando}
-                  className="w-full py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02] border border-red-200 text-red-500 hover:bg-red-50">
-                  <Trash2 size={15} />
-                  Excluir Categoria
-                </button>
-              )}
-            </div>
-          </div>
         </div>
       )}
 

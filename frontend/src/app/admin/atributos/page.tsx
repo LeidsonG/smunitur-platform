@@ -2,10 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Plus, Pencil, Trash2, X, Check, Loader2, Tag, Camera } from 'lucide-react';
-import api from '@/lib/api';
+import api, { API_BASE } from '@/lib/api';
 import ConfirmModal from '@/components/admin/ConfirmModal';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:3001';
 
 interface Opcao { id: number; valor: string; ordem: number; imagem?: string | null }
 interface Atributo { id: number; nome: string; ordem: number; opcoes: Opcao[] }

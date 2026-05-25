@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shirt, Wind, FlaskConical, Package } from 'lucide-react';
 import Reveal from './Reveal';
-import api from '@/lib/api';
+import api, { API_BASE } from '@/lib/api';
 
 interface Categoria { id: number; nome: string; slug: string }
 interface Produto {
@@ -20,8 +20,6 @@ const ICONE_CATEGORIA: Record<string, React.ElementType> = {
   moletons: Wind,
   jalecos: FlaskConical,
 };
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:3001';
 
 const sectionVariants = { hidden: {}, visible: {} };
 

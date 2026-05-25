@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import api from '@/lib/api';
+import { STATUS_LABEL, STATUS_COLOR } from '@/lib/orcamentoStatus';
 
 interface Stats {
   totalOrcamentos: number;
@@ -26,16 +27,6 @@ interface UltimoOrcamento {
   status: string;
   createdAt: string;
 }
-
-const STATUS_LABEL: Record<string, string> = {
-  recebido: 'Recebido', em_analise: 'Em Análise', aguardando_aprovacao: 'Ag. Aprovação',
-  em_producao: 'Em Produção', finalizado: 'Finalizado', enviado: 'Enviado', cancelado: 'Cancelado',
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  recebido: '#6B7280', em_analise: '#F59E0B', aguardando_aprovacao: '#8B5CF6',
-  em_producao: '#005ED5', finalizado: '#10B981', enviado: '#FF9400', cancelado: '#EF4444',
-};
 
 const MESES_ABREV = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 const MESES_FULL  = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];

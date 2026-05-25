@@ -15,6 +15,7 @@ import {
   X,
   SlidersHorizontal,
 } from 'lucide-react';
+import { API_BASE } from '@/lib/api';
 
 const navItems = [
   { href: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -26,8 +27,6 @@ const navItems = [
 ];
 
 interface AdminInfo { id: number; nome: string; email: string; nivel: 'super_admin' | 'admin' | 'operador'; foto?: string | null }
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:3001';
 
 const NIVEL_LABEL: Record<AdminInfo['nivel'], string> = {
   super_admin: 'Super Admin', admin: 'Admin', operador: 'Operador',
