@@ -2,6 +2,14 @@
 
 Sistema web completo para a empresa **SM Unitur**, especializada em confecção de uniformes, camisetas, moletons e jalecos personalizados.
 
+## Documentação
+
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — como rodar o projeto localmente
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — visão arquitetural, modelo de dados, fluxos
+- [`DEPLOY.md`](DEPLOY.md) — guia passo a passo de deploy na Oracle Cloud (Linux)
+- [`PRE_GO_LIVE_CHECKLIST.md`](PRE_GO_LIVE_CHECKLIST.md) — checklist obrigatório antes do go-live
+- [`ROADMAP_V2.md`](ROADMAP_V2.md) — funcionalidades planejadas para depois da v1 + perguntas para o cliente
+
 ---
 
 ## Objetivo do Projeto
@@ -152,10 +160,6 @@ Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básic
 
 ## Pendências
 
-- [ ] Substituir número WhatsApp temporário (`5517981322215`) pelo número oficial
-- [ ] Testar envio completo pelo WhatsApp em ambiente real
-- [ ] Deploy em hospedagem (VPS ou plataforma PaaS)
-- [ ] Configurar domínio e certificado SSL
-- [ ] Rodar `prisma migrate dev` para gerar histórico de migrations antes do deploy
-- [ ] Configurar CDN ou S3 para uploads de imagem em produção
-- [ ] Revisar seed com categorias e atributos padrão da empresa
+Veja [`PRE_GO_LIVE_CHECKLIST.md`](PRE_GO_LIVE_CHECKLIST.md) — checklist completo dos itens que precisam ser definidos antes do go-live (WhatsApp oficial, JWT_SECRET, senha do admin, domínio, etc).
+
+Para próximas funcionalidades (cliente como entidade, notificação por e-mail, anexo de layout final) veja [`ROADMAP_V2.md`](ROADMAP_V2.md).
