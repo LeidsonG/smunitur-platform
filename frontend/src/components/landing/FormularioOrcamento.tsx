@@ -29,9 +29,12 @@ const ICONE_CATEGORIA: Record<string, React.ElementType> = {
 };
 
 const schema = z.object({
-  nome_cliente: z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
-  telefone_cliente: z.string().min(10, 'Telefone inválido'),
-  email_cliente: z.string().email('E-mail inválido'),
+  nome_cliente: z.string().min(2, 'Informe seu nome'),
+  telefone_cliente: z.string().min(10, 'Telefone incompleto'),
+  // Empty string passes `.email()` falsely as "invalid". Splitting the rule
+  // gives a clearer message for the empty case and avoids "E-mail inválido"
+  // when the user has not typed anything yet.
+  email_cliente: z.string().min(1, 'E-mail obrigatório').email('E-mail inválido'),
   cpf_cnpj: z.string().optional(),
   produto_desejado: z.string().min(1, 'Selecione um produto'),
   quantidade: z.string(),
@@ -801,13 +804,13 @@ function Etapa3({ register, errors, catSelecionada, produtoSelecionado, atributo
 
       {/* Campos de dados */}
       <div className="grid sm:grid-cols-2 gap-4">
-        <InputField label="Nome completo *" error={errors.nome_cliente?.message}>
+        <InputField label="Nome completo" error={errors.nome_cliente?.message}>
           <input {...register('nome_cliente')} placeholder="Seu nome" />
         </InputField>
-        <InputField label="Telefone / WhatsApp *" error={errors.telefone_cliente?.message}>
+        <InputField label="Telefone / WhatsApp" error={errors.telefone_cliente?.message}>
           <input {...register('telefone_cliente')} placeholder="(17) 99999-9999" />
         </InputField>
-        <InputField label="E-mail *" error={errors.email_cliente?.message}>
+        <InputField label="E-mail" error={errors.email_cliente?.message}>
           <input {...register('email_cliente')} type="email" placeholder="seu@email.com" />
         </InputField>
         <InputField label="CPF / CNPJ">
