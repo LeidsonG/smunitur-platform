@@ -4,11 +4,13 @@ Sistema web completo para a empresa **SM Unitur**, especializada em confecção 
 
 ## Documentação
 
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — como rodar o projeto localmente
-- [`ARCHITECTURE.md`](ARCHITECTURE.md) — visão arquitetural, modelo de dados, fluxos
-- [`DEPLOY.md`](DEPLOY.md) — guia passo a passo de deploy na Oracle Cloud (Linux)
-- [`PRE_GO_LIVE_CHECKLIST.md`](PRE_GO_LIVE_CHECKLIST.md) — checklist obrigatório antes do go-live
-- [`ROADMAP_V2.md`](ROADMAP_V2.md) — funcionalidades planejadas para depois da v1 + perguntas para o cliente
+Toda a documentação técnica está em [`docs/`](docs/), numerada pela ordem de leitura sugerida:
+
+1. [`docs/1-contributing.md`](docs/1-contributing.md) — como rodar o projeto localmente
+2. [`docs/2-architecture.md`](docs/2-architecture.md) — visão arquitetural, modelo de dados, fluxos
+3. [`docs/3-checklist-pre-producao.md`](docs/3-checklist-pre-producao.md) — itens obrigatórios antes de subir o sistema para o cliente
+4. [`docs/4-deploy.md`](docs/4-deploy.md) — guia passo a passo de deploy na Oracle Cloud (Linux)
+5. [`docs/5-proximas-funcionalidades.md`](docs/5-proximas-funcionalidades.md) — funcionalidades planejadas para depois da versão atual
 
 ---
 
@@ -160,6 +162,6 @@ Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básic
 
 ## Pendências
 
-Veja [`PRE_GO_LIVE_CHECKLIST.md`](PRE_GO_LIVE_CHECKLIST.md) — checklist completo dos itens que precisam ser definidos antes do go-live (WhatsApp oficial, JWT_SECRET, senha do admin, domínio, etc).
+Veja [`docs/3-checklist-pre-producao.md`](docs/3-checklist-pre-producao.md) — checklist completo dos itens que precisam ser definidos antes de subir para o cliente (WhatsApp oficial, JWT_SECRET, senha do admin, domínio, etc).
 
-Para próximas funcionalidades (cliente como entidade, notificação por e-mail, anexo de layout final) veja [`ROADMAP_V2.md`](ROADMAP_V2.md).
+Para próximas funcionalidades (cliente como entidade, notificação por e-mail, anexo de layout final) veja [`docs/5-proximas-funcionalidades.md`](docs/5-proximas-funcionalidades.md).
