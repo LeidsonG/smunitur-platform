@@ -116,37 +116,55 @@ router.post(
   }
 );
 
-// GET /api/orcamentos/acompanhar/:numero — consulta pública por número
-router.get('/acompanhar/:numero', async (req: Request, res: Response) => {
-  const numero = parseInt(req.params.numero);
-  if (isNaN(numero)) {
-    return res.status(400).json({ error: 'Número de orçamento inválido' });
-  }
+// POST /api/orcamentos/acompanhar — consulta pública (exige número + e-mail).
+// Mudamos de GET para POST porque agora exigimos o e-mail do solicitante como
+// segundo fator: assim ninguém consegue listar orçamentos alheios apenas
+// adivinhando o número. Resposta 404 é a mesma para "número inexistente" ou
+// "e-mail não confere", evitando enumeração.
+router.post(
+  '/acompanhar',
+  [
+    body('numero').isInt({ min: 1 }).withMessage('Número de orçamento inválido'),
+    body('email').isEmail().withMessage('E-mail inválido').normalizeEmail(),
+  ],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
-  const orcamento = await prisma.orcamento.findUnique({
-    where: { numero },
-    select: {
-      numero: true,
-      nomeCliente: true,
-      produtoDesejado: true,
-      quantidade: true,
-      status: true,
-      imagemReferencia: true,
-      createdAt: true,
-      updatedAt: true,
-      historicos: {
-        orderBy: { createdAt: 'asc' },
-        select: { statusNovo: true, observacao: true, createdAt: true },
+    const numero = parseInt(req.body.numero);
+    const email = String(req.body.email).toLowerCase();
+
+    const orcamento = await prisma.orcamento.findUnique({
+      where: { numero },
+      select: {
+        numero: true,
+        nomeCliente: true,
+        emailCliente: true,
+        produtoDesejado: true,
+        quantidade: true,
+        status: true,
+        imagemReferencia: true,
+        createdAt: true,
+        updatedAt: true,
+        historicos: {
+          orderBy: { createdAt: 'asc' },
+          select: { statusNovo: true, observacao: true, createdAt: true },
+        },
       },
-    },
-  });
+    });
 
-  if (!orcamento) {
-    return res.status(404).json({ error: 'Orçamento não encontrado' });
+    // Mesmo response para "não existe" e "email errado" — evita enumeração.
+    if (!orcamento || orcamento.emailCliente.toLowerCase() !== email) {
+      return res.status(404).json({ error: 'Orçamento não encontrado ou e-mail não confere' });
+    }
+
+    // Não devolvemos o e-mail no payload final (cliente já o digitou).
+    const { emailCliente: _email, ...payload } = orcamento;
+    return res.json({ orcamento: payload });
   }
-
-  return res.json({ orcamento });
-});
+);
 
 // GET /api/orcamentos — listagem admin (protegido)
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
