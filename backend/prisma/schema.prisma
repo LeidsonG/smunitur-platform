@@ -144,6 +144,10 @@ model Orcamento {
   detalhes         String?         @db.Text
   observacoes      String?         @db.Text
   imagemReferencia String?         @map("imagem_referencia") @db.VarChar(255)
+  // Arte-final aprovada/em revisão pelo admin. Diferente da imagemReferencia
+  // (que é o que o cliente enviou): aqui é o layout final que a equipe
+  // produziu. Cliente vê no acompanhamento e admin compartilha por WhatsApp.
+  layoutFinal      String?         @map("layout_final") @db.VarChar(255)
   valor            Decimal?        @db.Decimal(10, 2)
   status           StatusOrcamento @default(recebido)
   createdAt        DateTime        @default(now()) @map("created_at")
