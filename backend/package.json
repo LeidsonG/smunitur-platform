@@ -11,7 +11,7 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",
-    "db:migrate:baseline": "prisma migrate resolve --applied 20260510000000_init",
+    "db:migrate:baseline": "prisma migrate resolve --applied 20260524000000_init",
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio"
   },

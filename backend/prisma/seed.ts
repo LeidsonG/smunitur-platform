@@ -1,16 +1,24 @@
+/**
+ * Seed do banco: garante que existe um super_admin inicial + as categorias
+ * padrão usadas no formulário do cliente.
+ *
+ * Em produção, sempre informe `SEED_ADMIN_PASSWORD` no ambiente — o fallback
+ * `admin123` é apenas para desenvolvimento local.
+ */
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
+const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS) || 12;
 
 async function main() {
   // ─── Usuário admin padrão ─────────────────────────────
-  const adminEmail = 'admin@smunitur.com.br';
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@smunitur.com.br';
   const existente = await prisma.usuarioAdmin.findUnique({ where: { email: adminEmail } });
 
   if (!existente) {
     const senha = process.env.SEED_ADMIN_PASSWORD || 'admin123';
-    const hash = await bcrypt.hash(senha, 10);
+    const hash = await bcrypt.hash(senha, BCRYPT_ROUNDS);
     await prisma.usuarioAdmin.create({
       data: {
         nome: 'Administrador',
@@ -20,9 +28,11 @@ async function main() {
       },
     });
     // eslint-disable-next-line no-console
-    console.log(`[seed] Usuário admin criado: ${adminEmail} (senha: ${senha})`);
-    // eslint-disable-next-line no-console
-    console.log('[seed] ⚠️  Troque a senha imediatamente após o primeiro login!');
+    console.log(`[seed] Usuário admin criado: ${adminEmail}`);
+    if (!process.env.SEED_ADMIN_PASSWORD) {
+      // eslint-disable-next-line no-console
+      console.log('[seed] AVISO: usando senha padrão "admin123" — TROQUE imediatamente.');
+    }
   } else {
     // eslint-disable-next-line no-console
     console.log('[seed] Usuário admin já existe — pulando.');

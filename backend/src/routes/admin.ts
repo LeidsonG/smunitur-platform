@@ -1,7 +1,21 @@
+/**
+ * Rotas de administração (/api/admin)
+ * --------------------------------------------------------------------------
+ * - GET /dashboard               → todos os admins logados
+ * - CRUD /usuarios               → super_admin (admin lê listagem)
+ *
+ * Regras de segurança importantes:
+ *   - O último super_admin ativo não pode ser despromovido, desativado ou
+ *     excluído (impede lockout do sistema).
+ *   - Nenhum usuário consegue desativar/excluir a si mesmo.
+ *   - Trocar senha ou desativar incrementa `tokenVersion`, invalidando
+ *     tokens JWT já emitidos.
+ */
 import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { body, validationResult } from 'express-validator';
 import prisma from '../utils/prisma';
+import { env } from '../utils/env';
 import { authMiddleware, requireNivel, AuthRequest } from '../middleware/auth';
 
 const router = Router();
@@ -114,7 +128,7 @@ router.post(
     const existente = await prisma.usuarioAdmin.findUnique({ where: { email } });
     if (existente) return res.status(409).json({ error: 'E-mail já cadastrado' });
 
-    const hash = await bcrypt.hash(senha, 10);
+    const hash = await bcrypt.hash(senha, env.BCRYPT_ROUNDS);
 
     const usuario = await prisma.usuarioAdmin.create({
       data: { nome, email, senha: hash, nivel },
@@ -199,8 +213,13 @@ router.patch(
     const alvo = await prisma.usuarioAdmin.findUnique({ where: { id } });
     if (!alvo) return res.status(404).json({ error: 'Usuário não encontrado' });
 
-    const hash = await bcrypt.hash(req.body.novaSenha, 10);
-    await prisma.usuarioAdmin.update({ where: { id }, data: { senha: hash } });
+    const hash = await bcrypt.hash(req.body.novaSenha, env.BCRYPT_ROUNDS);
+    // Incrementa tokenVersion para forçar logout em todas as sessões abertas
+    // do usuário-alvo (caso o admin esteja "expulsando" alguém comprometido).
+    await prisma.usuarioAdmin.update({
+      where: { id },
+      data: { senha: hash, tokenVersion: { increment: 1 } },
+    });
 
     return res.json({ message: 'Senha redefinida com sucesso' });
   }
@@ -230,9 +249,14 @@ router.patch(
       }
     }
 
+    // Ao desativar, incrementa tokenVersion para invalidar tokens vivos.
+    // Ao reativar, mantém — usuário precisará fazer login normalmente.
     const atualizado = await prisma.usuarioAdmin.update({
       where: { id },
-      data: { ativo: !usuario.ativo },
+      data: {
+        ativo: !usuario.ativo,
+        ...(usuario.ativo ? { tokenVersion: { increment: 1 } } : {}),
+      },
       select: { id: true, nome: true, email: true, nivel: true, ativo: true },
     });
 

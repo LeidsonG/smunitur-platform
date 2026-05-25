@@ -1,11 +1,21 @@
+/**
+ * Rotas de autenticação (/api/auth)
+ * --------------------------------------------------------------------------
+ * - POST /login              → emite JWT (rate limit agressivo)
+ * - GET  /me                 → perfil do usuário logado
+ * - PUT  /me/foto            → atualiza foto de perfil (upload)
+ * - PATCH /me/nome           → renomeia o próprio usuário
+ * - PATCH /change-password   → troca a própria senha (invalida sessões anteriores)
+ */
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
 import { body, validationResult } from 'express-validator';
 import prisma from '../utils/prisma';
-import { authMiddleware, AuthRequest, getJwtSecret } from '../middleware/auth';
-import { upload, validarMagicBytes } from '../utils/upload';
+import { env } from '../utils/env';
+import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../utils/upload';
 
 const router = Router();
 
@@ -36,9 +46,16 @@ router.post(
 
     const { email, senha } = req.body;
 
-    const admin = await prisma.usuarioAdmin.findUnique({ where: { email }, select: { id: true, nome: true, email: true, senha: true, nivel: true, foto: true, ativo: true } });
+    const admin = await prisma.usuarioAdmin.findUnique({
+      where: { email },
+      select: {
+        id: true, nome: true, email: true, senha: true,
+        nivel: true, foto: true, ativo: true, tokenVersion: true,
+      },
+    });
 
-    // Sempre roda bcrypt.compare (mesmo com usuário inexistente) para não vazar timing.
+    // Roda bcrypt.compare incondicionalmente (mesmo com usuário inexistente)
+    // para não vazar a existência de um e-mail pelo tempo de resposta.
     const hashAlvo = admin?.senha ?? DUMMY_HASH;
     const senhaValida = await bcrypt.compare(senha, hashAlvo);
 
@@ -47,9 +64,9 @@ router.post(
     }
 
     const token = jwt.sign(
-      { id: admin.id, email: admin.email, nivel: admin.nivel },
-      getJwtSecret(),
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
+      { id: admin.id, email: admin.email, nivel: admin.nivel, tv: admin.tokenVersion },
+      env.JWT_SECRET,
+      { expiresIn: env.JWT_EXPIRES_IN } as jwt.SignOptions
     );
 
     return res.json({
@@ -71,21 +88,24 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   return res.json({ admin });
 });
 
-// PUT /api/auth/me/foto — atualiza foto de perfil
+// PUT /api/auth/me/foto — substitui foto de perfil e apaga a anterior
 router.put(
   '/me/foto',
   authMiddleware,
   upload.single('foto'),
   validarMagicBytes,
+  processarImagens,
   async (req: AuthRequest, res: Response) => {
     if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
+    const atual = await prisma.usuarioAdmin.findUnique({ where: { id: req.admin!.id }, select: { foto: true } });
     const foto = `/uploads/${req.file.filename}`;
     await prisma.usuarioAdmin.update({ where: { id: req.admin!.id }, data: { foto } });
+    if (atual?.foto) await apagarUpload(atual.foto);
     return res.json({ foto });
   }
 );
 
-// PATCH /api/auth/me/nome — usuário atualiza o próprio nome
+// PATCH /api/auth/me/nome — usuário renomeia a si próprio
 router.patch(
   '/me/nome',
   authMiddleware,
@@ -105,6 +125,8 @@ router.patch(
 );
 
 // PATCH /api/auth/change-password — usuário troca a própria senha
+// Incrementa `tokenVersion` para invalidar sessões abertas em outros lugares
+// (o token que ele está usando agora também — front precisa relogar).
 router.patch(
   '/change-password',
   authMiddleware,
@@ -130,8 +152,11 @@ router.patch(
       return res.status(400).json({ error: 'A nova senha deve ser diferente da atual' });
     }
 
-    const hash = await bcrypt.hash(novaSenha, 10);
-    await prisma.usuarioAdmin.update({ where: { id: admin.id }, data: { senha: hash } });
+    const hash = await bcrypt.hash(novaSenha, env.BCRYPT_ROUNDS);
+    await prisma.usuarioAdmin.update({
+      where: { id: admin.id },
+      data: { senha: hash, tokenVersion: { increment: 1 } },
+    });
 
     return res.json({ message: 'Senha alterada com sucesso' });
   }

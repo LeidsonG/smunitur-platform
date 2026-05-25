@@ -15,6 +15,10 @@ model UsuarioAdmin {
   nivel     NivelAdmin @default(operador)
   foto      String?    @db.VarChar(255)
   ativo     Boolean    @default(true)
+  // Versão da sessão. Incrementada quando a senha muda ou quando o usuário
+  // é desativado — invalida tokens JWT antigos sem precisar de blacklist
+  // externa. O middleware compara `payload.tv` com este campo.
+  tokenVersion Int     @default(0) @map("token_version")
   createdAt DateTime   @default(now()) @map("created_at")
 
   historicos OrcamentoStatusHistorico[]
@@ -55,11 +59,19 @@ model Produto {
 }
 
 // ─── Biblioteca global de atributos ──────────────────────────────────────────
+//
+// Atributo  = característica reutilizável (ex.: "Tipo de Gola", "Tecido").
+// Opção     = valor possível dessa característica (ex.: "Polo", "Careca").
+// Ambas são "globais": cadastradas uma única vez em /admin/atributos e
+// associadas a múltiplos produtos (ver ProdutoAtributo).
 
 model Atributo {
-  id    Int    @id @default(autoincrement())
-  nome  String @unique @db.VarChar(100)
-  ordem Int    @default(0)
+  id    Int     @id @default(autoincrement())
+  nome  String  @unique @db.VarChar(100)
+  ordem Int     @default(0)
+  // `ativo = false` esconde o atributo do formulário do cliente sem perder
+  // o histórico de orçamentos que já o usaram.
+  ativo Boolean @default(true)
 
   opcoes   OpcaoAtributo[]
   produtos ProdutoAtributo[]
@@ -76,6 +88,10 @@ model OpcaoAtributo {
 
   atributo            Atributo               @relation(fields: [atributoId], references: [id], onDelete: Cascade)
   produtosOpcoes      ProdutoAtributoOpcao[]
+  // NOTA: SetNull em vez de Cascade. Se uma opção é excluída depois de já ter
+  // sido usada em algum orçamento, o registro histórico permanece (apenas a
+  // referência fica nula) — preserva a auditoria do que o cliente escolheu.
+  // O `valorLivre` em OrcamentoAtributo pode ser usado como cópia textual.
   orcamentosAtributos OrcamentoAtributo[]
 
   @@unique([atributoId, valor])
@@ -152,13 +168,18 @@ enum StatusOrcamento {
 model OrcamentoAtributo {
   id                Int     @id @default(autoincrement())
   orcamentoId       Int     @map("orcamento_id")
-  produtoAtributoId Int     @map("produto_atributo_id")
+  produtoAtributoId Int?    @map("produto_atributo_id")
   opcaoId           Int?    @map("opcao_id")
+  // Snapshot textual: copiado da Opção no momento da criação do orçamento.
+  // Garante que o histórico continue legível mesmo se a opção original for
+  // editada ou excluída no futuro.
   valorLivre        String? @map("valor_livre") @db.VarChar(255)
 
   orcamento       Orcamento       @relation(fields: [orcamentoId], references: [id], onDelete: Cascade)
-  produtoAtributo ProdutoAtributo @relation(fields: [produtoAtributoId], references: [id])
-  opcao           OpcaoAtributo?  @relation(fields: [opcaoId], references: [id])
+  // SetNull em produtoAtributo: mesmo motivo do `opcao` abaixo — preserva
+  // o histórico se um produto for despublicado/excluído.
+  produtoAtributo ProdutoAtributo? @relation(fields: [produtoAtributoId], references: [id], onDelete: SetNull)
+  opcao           OpcaoAtributo?  @relation(fields: [opcaoId], references: [id], onDelete: SetNull)
 
   @@map("orcamento_atributos")
 }
