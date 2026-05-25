@@ -15,7 +15,7 @@ Use este arquivo como roteiro de aceite. Marque `[x]` quando concluído.
 | Endereço físico (se for exibir) | `frontend/src/components/landing/Footer.tsx` / `Contato.tsx` | [ ] |
 | Redes sociais (Instagram, Facebook) — links reais | `frontend/src/components/landing/Footer.tsx` | [ ] |
 | Logo da empresa (substituir asset em `/image/`) | conferir referências em components | [ ] |
-| Paleta de cores especial da fábrica (aguardando) | será nova feature na v2 — ver [`5-proximas-funcionalidades.md`](5-proximas-funcionalidades.md) | [ ] |
+| Paleta de cores especial da fábrica (aguardando) | será nova feature na v2 — ver [`3-proximas-funcionalidades.md`](3-proximas-funcionalidades.md) | [ ] |
 
 ---
 
@@ -33,7 +33,7 @@ Use este arquivo como roteiro de aceite. Marque `[x]` quando concluído.
 
 ## 3. Infraestrutura Oracle Cloud
 
-Ver [`4-deploy.md`](4-deploy.md) passo-a-passo. Itens-chave:
+Ver [`2-deploy.md`](2-deploy.md) passo-a-passo. Itens-chave:
 
 | Item | Status |
 |------|--------|
@@ -136,7 +136,7 @@ Ver [`4-deploy.md`](4-deploy.md) passo-a-passo. Itens-chave:
 | Rotação de logs PM2 (`pm2 install pm2-logrotate`) | [ ] |
 | (Recomendado) Monitor externo (UptimeRobot ou OCI Monitoring) | [ ] |
 | (Recomendado) Backup off-site para Oracle Object Storage | [ ] |
-| Documentação interna entregue ao cliente (este arquivo + 4-deploy.md) | [ ] |
+| Documentação interna entregue ao cliente (este arquivo + 2-deploy.md) | [ ] |
 
 ---
 
@@ -157,5 +157,5 @@ Comunique go-live para o cliente, envie:
 1. URL: `https://smunitur.com.br`
 2. URL admin: `https://smunitur.com.br/admin/login`
 3. Credenciais iniciais (e-mail + senha) por canal seguro (não e-mail simples)
-4. Cópia do [`2-architecture.md`](2-architecture.md) para entender o sistema
-5. Cópia de [`4-deploy.md`](4-deploy.md) (para o time de TI, se houver)
+4. Cópia do [`ARCHITECTURE.md`](../ARCHITECTURE.md) para entender o sistema
+5. Cópia de [`2-deploy.md`](2-deploy.md) (para o time de TI, se houver)

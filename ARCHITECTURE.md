@@ -128,7 +128,7 @@ erDiagram
 
 - **Atributos globais reutilizáveis**: "Tipo de Gola" é cadastrado uma vez e associado a Camiseta Polo, Camiseta Básica etc. Cada produto escolhe **quais opções** daquele atributo expõe ao cliente (via `ProdutoAtributoOpcao`).
 - **`OrcamentoAtributo` com FKs em `SetNull`**: se uma opção for excluída no futuro, o orçamento antigo perde a referência mas o registro permanece — auditoria preservada. Use o campo `valorLivre` como snapshot textual quando precisar dessa garantia.
-- **Sem entidade Cliente**: nome/e-mail/telefone são copiados em cada orçamento. Trade-off conhecido — virou item da v2 (ver [`5-proximas-funcionalidades.md`](5-proximas-funcionalidades.md)).
+- **Sem entidade Cliente**: nome/e-mail/telefone são copiados em cada orçamento. Trade-off conhecido — virou item da v2 (ver [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md)).
 - **`Orcamento.numero`**: começa em 100, auto-incrementado pela aplicação (não pelo banco), para gerar IDs amigáveis ao cliente.
 - **`Orcamento.tamanhos`** e **`Orcamento.cores`**: strings concatenadas (`"PP: 5, P: 10"`). O frontend já estrutura no momento da entrada — virou item da v2 normalizar isso.
 - **`UsuarioAdmin.tokenVersion`**: incrementa em troca de senha, desativação, ou reset administrativo. O middleware compara com o `tv` do JWT — token desatualizado = 401. Substitui a necessidade de uma blacklist de tokens.
@@ -212,13 +212,13 @@ requireNivel(['super_admin'])
 | Logs Nginx | `/var/log/nginx/` | logrotate padrão |
 | SSL | `/etc/letsencrypt/` | renova via `certbot.timer` |
 
-Ver [`4-deploy.md`](4-deploy.md) para procedimento completo.
+Ver [`docs/2-deploy.md`](docs/2-deploy.md) para procedimento completo.
 
 ---
 
 ## O que NÃO está implementado (intencional)
 
-Decisões registradas em [`5-proximas-funcionalidades.md`](5-proximas-funcionalidades.md):
+Decisões registradas em [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md):
 
 - Cliente como entidade própria (sem deduplicação)
 - Prazo de entrega no orçamento

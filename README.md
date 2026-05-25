@@ -4,13 +4,14 @@ Sistema web completo para a empresa **SM Unitur**, especializada em confecção 
 
 ## Documentação
 
-Toda a documentação técnica está em [`docs/`](docs/), numerada pela ordem de leitura sugerida:
+**Na raiz** (documentos principais):
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — como rodar o projeto localmente
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — visão arquitetural, modelo de dados, fluxos
 
-1. [`docs/1-contributing.md`](docs/1-contributing.md) — como rodar o projeto localmente
-2. [`docs/2-architecture.md`](docs/2-architecture.md) — visão arquitetural, modelo de dados, fluxos
-3. [`docs/3-checklist-pre-producao.md`](docs/3-checklist-pre-producao.md) — itens obrigatórios antes de subir o sistema para o cliente
-4. [`docs/4-deploy.md`](docs/4-deploy.md) — guia passo a passo de deploy na Oracle Cloud (Linux)
-5. [`docs/5-proximas-funcionalidades.md`](docs/5-proximas-funcionalidades.md) — funcionalidades planejadas para depois da versão atual
+**Em [`docs/`](docs/)** (operacional e roadmap, na ordem de leitura sugerida):
+1. [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md) — itens obrigatórios antes de subir o sistema para o cliente
+2. [`docs/2-deploy.md`](docs/2-deploy.md) — guia passo a passo de deploy na Oracle Cloud (Linux)
+3. [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md) — funcionalidades planejadas para depois da versão atual
 
 ---
 
@@ -162,6 +163,6 @@ Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básic
 
 ## Pendências
 
-Veja [`docs/3-checklist-pre-producao.md`](docs/3-checklist-pre-producao.md) — checklist completo dos itens que precisam ser definidos antes de subir para o cliente (WhatsApp oficial, JWT_SECRET, senha do admin, domínio, etc).
+Veja [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md) — checklist completo dos itens que precisam ser definidos antes de subir para o cliente (WhatsApp oficial, JWT_SECRET, senha do admin, domínio, etc).
 
-Para próximas funcionalidades (cliente como entidade, notificação por e-mail, anexo de layout final) veja [`docs/5-proximas-funcionalidades.md`](docs/5-proximas-funcionalidades.md).
+Para próximas funcionalidades (cliente como entidade, notificação por e-mail, anexo de layout final) veja [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md).

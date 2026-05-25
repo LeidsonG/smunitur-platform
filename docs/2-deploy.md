@@ -10,7 +10,7 @@ Guia passo a passo para subir o sistema do zero na **Oracle Cloud Infrastructure
 - [ ] Telefone celular para receber SMS de verificação.
 - [ ] Domínio comprado (ex.: `smunitur.com.br`) — pode ser Registro.br, GoDaddy, Cloudflare etc.
 - [ ] Acesso SSH no seu computador (Windows 10+/macOS/Linux já têm o cliente SSH).
-- [ ] Arquivo [`3-checklist-pre-producao.md`](3-checklist-pre-producao.md) deste repo com os valores reais (senhas, e-mails, WhatsApp).
+- [ ] Arquivo [`1-checklist-pre-producao.md`](1-checklist-pre-producao.md) deste repo com os valores reais (senhas, e-mails, WhatsApp).
 
 ---
 
