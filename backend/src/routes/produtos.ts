@@ -3,7 +3,7 @@ import { body, validationResult } from 'express-validator';
 import { Prisma } from '@prisma/client';
 
 import prisma from '../utils/prisma';
-import { upload, validarMagicBytes } from '../utils/upload';
+import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../utils/upload';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
@@ -47,6 +47,7 @@ router.post(
   authMiddleware,
   upload.single('imagem'),
   validarMagicBytes,
+  processarImagens,
   [
     body('nome').trim().notEmpty().withMessage('Nome obrigatório'),
     body('categoria_id').isInt().withMessage('Categoria obrigatória'),
@@ -73,17 +74,28 @@ router.put(
   authMiddleware,
   upload.single('imagem'),
   validarMagicBytes,
+  processarImagens,
   async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
     const { nome, descricao, categoria_id, ativo } = req.body;
     const data: Record<string, unknown> = {};
     if (nome) data.nome = nome;
     if (descricao !== undefined) data.descricao = descricao;
     if (categoria_id) data.categoriaId = parseInt(categoria_id);
     if (ativo !== undefined) data.ativo = ativo === 'true' || ativo === true;
-    if (req.file) data.imagem = `/uploads/${req.file.filename}`;
+
+    // Se houver imagem nova, captura a antiga ANTES do update para apagar
+    // depois — evita acúmulo de arquivos órfãos no disco.
+    let imagemAntiga: string | null = null;
+    if (req.file) {
+      const atual = await prisma.produto.findUnique({ where: { id }, select: { imagem: true } });
+      imagemAntiga = atual?.imagem ?? null;
+      data.imagem = `/uploads/${req.file.filename}`;
+    }
 
     try {
-      const produto = await prisma.produto.update({ where: { id: parseInt(req.params.id) }, data });
+      const produto = await prisma.produto.update({ where: { id }, data });
+      if (imagemAntiga) await apagarUpload(imagemAntiga);
       return res.json({ produto });
     } catch (e) { return erroUnico(e, res); }
   }
@@ -104,7 +116,9 @@ router.patch('/:id/toggle', authMiddleware, async (req: Request, res: Response) 
 // DELETE /api/produtos/:id (protegido)
 router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
+  const produto = await prisma.produto.findUnique({ where: { id }, select: { imagem: true } });
   await prisma.produto.delete({ where: { id } });
+  if (produto?.imagem) await apagarUpload(produto.imagem);
   return res.json({ ok: true });
 });
 

@@ -1,10 +1,27 @@
+/**
+ * Rotas de Orçamento (/api/orcamentos)
+ * --------------------------------------------------------------------------
+ * - POST /                       → público (cria orçamento + upload imgs)
+ * - GET /acompanhar/:numero      → público (cliente consulta pelo número)
+ * - GET /                        → admin (listagem com filtros/paginação)
+ * - GET /:id                     → admin (detalhe completo)
+ * - PATCH /:id/status            → admin (transição de status + histórico)
+ * - PATCH /:id/valor             → admin (define valor do orçamento)
+ *
+ * Convenção: a rota /api/orcamentos é a ÚNICA fonte de verdade para mudar
+ * o status de um orçamento — o painel de Produção também consome essa rota.
+ */
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
+import { StatusOrcamento } from '@prisma/client';
 import prisma from '../utils/prisma';
-import { upload, validarMagicBytes } from '../utils/upload';
+import { upload, validarMagicBytes, processarImagens } from '../utils/upload';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
+
+// Lista derivada do enum do Prisma para validar entrada de PATCH /:id/status.
+const STATUS_VALIDOS = new Set<string>(Object.values(StatusOrcamento));
 
 // Gera próximo número de orçamento (começa em 100)
 async function gerarNumeroOrcamento(): Promise<number> {
@@ -20,6 +37,7 @@ router.post(
   '/',
   upload.array('imagem_referencia', 5),
   validarMagicBytes,
+  processarImagens,
   [
     body('nome_cliente').trim().notEmpty().withMessage('Nome obrigatório'),
     body('email_cliente').isEmail().withMessage('E-mail inválido'),
@@ -170,7 +188,10 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
       },
       atributosOrcamento: {
         include: {
-          atributo: { select: { nome: true } },
+          // OrcamentoAtributo aponta para ProdutoAtributo, que por sua vez
+          // aponta para Atributo — precisamos atravessar 2 níveis para
+          // chegar no nome do atributo escolhido pelo cliente.
+          produtoAtributo: { include: { atributo: { select: { nome: true } } } },
           opcao: { select: { valor: true } },
         },
       },
@@ -204,10 +225,21 @@ router.patch('/:id/valor', authMiddleware, async (req: AuthRequest, res: Respons
   return res.json({ orcamento: atualizado });
 });
 
-// PATCH /api/orcamentos/:id/status — atualiza status (protegido)
+// PATCH /api/orcamentos/:id/status — transição de status (protegido)
+//
+// Toda mudança fica registrada em `orcamento_status_historico` com:
+//   - status anterior + novo
+//   - observação opcional (texto livre do admin)
+//   - usuário responsável (quando autenticado)
+//
+// Não há máquina de estados formal: qualquer status pode ir para qualquer
+// outro. Validação rejeita apenas valores fora do enum.
 router.patch('/:id/status', authMiddleware, async (req: AuthRequest, res: Response) => {
   const { status, observacao } = req.body;
   const id = parseInt(req.params.id);
+
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+  if (!STATUS_VALIDOS.has(status)) return res.status(400).json({ error: 'Status inválido' });
 
   const orcamento = await prisma.orcamento.findUnique({ where: { id } });
   if (!orcamento) return res.status(404).json({ error: 'Orçamento não encontrado' });
