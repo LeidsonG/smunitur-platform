@@ -43,7 +43,7 @@ router.post(
     body('nome_cliente').trim().notEmpty().withMessage('Nome obrigatório'),
     body('email_cliente').isEmail().withMessage('E-mail inválido'),
     body('telefone_cliente').trim().notEmpty().withMessage('Telefone obrigatório'),
-    body('produto_desejado').trim().notEmpty().withMessage('Produto obrigatório'),
+    body('modelo_desejado').trim().notEmpty().withMessage('Modelo obrigatório'),
     body('quantidade').isInt({ min: 1 }).withMessage('Quantidade deve ser número inteiro maior que 0'),
   ],
   async (req: Request, res: Response, next: NextFunction) => {
@@ -55,7 +55,7 @@ router.post(
     try {
       const {
         nome_cliente, email_cliente, telefone_cliente,
-        cpf_cnpj, produto_desejado, quantidade,
+        cpf_cnpj, modelo_desejado, quantidade,
         tamanhos, cores, detalhes, observacoes,
       } = req.body;
 
@@ -72,7 +72,7 @@ router.post(
           emailCliente: email_cliente,
           telefoneCliente: telefone_cliente,
           cpfCnpj: cpf_cnpj || null,
-          produtoDesejado: produto_desejado,
+          modeloDesejado: modelo_desejado,
           quantidade: parseInt(quantidade),
           tamanhos: tamanhos || null,
           cores: cores || null,
@@ -83,22 +83,22 @@ router.post(
         },
       });
 
-      // Salva atributos selecionados (opcional)
-      const atributosRaw = req.body.atributos;
-      if (atributosRaw) {
+      // Salva especificações selecionadas (opcional)
+      const especificacoesRaw = req.body.especificacoes;
+      if (especificacoesRaw) {
         try {
-          const atributosData = JSON.parse(atributosRaw) as { atributo_id: number; opcao_id?: number; valor_livre?: string }[];
-          if (Array.isArray(atributosData) && atributosData.length > 0) {
-            await prisma.orcamentoAtributo.createMany({
-              data: atributosData.map((a) => ({
+          const especsData = JSON.parse(especificacoesRaw) as { modelo_especificacao_id: number; variacao_id?: number; valor_livre?: string }[];
+          if (Array.isArray(especsData) && especsData.length > 0) {
+            await prisma.orcamentoEspecificacao.createMany({
+              data: especsData.map((e) => ({
                 orcamentoId: orcamento.id,
-                produtoAtributoId: a.atributo_id,
-                opcaoId: a.opcao_id ?? null,
-                valorLivre: a.valor_livre ?? null,
+                modeloEspecificacaoId: e.modelo_especificacao_id,
+                variacaoId: e.variacao_id ?? null,
+                valorLivre: e.valor_livre ?? null,
               })),
             });
           }
-        } catch { /* atributos malformados — ignora */ }
+        } catch { /* especificacoes malformadas — ignora */ }
       }
 
       // Registra histórico inicial
@@ -143,7 +143,7 @@ router.post(
         numero: true,
         nomeCliente: true,
         emailCliente: true,
-        produtoDesejado: true,
+        modeloDesejado: true,
         quantidade: true,
         status: true,
         imagemReferencia: true,
@@ -207,13 +207,13 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
         orderBy: { createdAt: 'asc' },
         include: { usuario: { select: { nome: true } } },
       },
-      atributosOrcamento: {
+      especificacoesOrcament: {
         include: {
-          // OrcamentoAtributo aponta para ProdutoAtributo, que por sua vez
-          // aponta para Atributo — precisamos atravessar 2 níveis para
-          // chegar no nome do atributo escolhido pelo cliente.
-          produtoAtributo: { include: { atributo: { select: { nome: true } } } },
-          opcao: { select: { valor: true } },
+          // OrcamentoEspecificacao aponta para ModeloEspecificacao, que por
+          // sua vez aponta para Especificacao — atravessamos 2 níveis para
+          // chegar no nome da especificação escolhida pelo cliente.
+          modeloEspecificacao: { include: { especificacao: { select: { nome: true } } } },
+          variacao: { select: { valor: true } },
         },
       },
     },

@@ -1,6 +1,6 @@
 /**
  * Seed do banco: garante que existe um super_admin inicial.
- * Categorias e produtos são cadastrados pelo painel admin em /admin/categorias.
+ * Linhas e modelos são cadastrados pelo painel admin em /admin/linhas.
  *
  * Em produção, sempre informe `SEED_ADMIN_PASSWORD` no ambiente — o fallback
  * `admin123` é apenas para desenvolvimento local.
@@ -38,8 +38,8 @@ async function main() {
     console.log('[seed] Usuário admin já existe — pulando.');
   }
 
-  // ─── Categorias ───────────────────────────────────────
-  // Nenhuma categoria pré-definida — cadastre pelo painel admin em /admin/categorias.
+  // ─── Linhas ───────────────────────────────────────────
+  // Nenhuma linha pré-definida — cadastre pelo painel admin em /admin/linhas.
 }
 
 main()

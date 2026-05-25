@@ -241,7 +241,7 @@ cd /var/www/smunitur/backend
 npm ci
 npm run db:generate
 npm run db:migrate:deploy   # aplica a migration no banco vazio
-npm run db:seed             # cria admin inicial + categorias padrão
+npm run db:seed             # cria admin inicial + linhas padrão
 npm run build               # compila TypeScript → dist/
 
 # Frontend
@@ -447,7 +447,7 @@ Considere automatizar isso em `deploy.sh` ou GitHub Actions.
 - [ ] Formulário de orçamento → submete → número aparece.
 - [ ] `/admin/login` → login com `SEED_ADMIN_EMAIL` funciona → **TROCAR a senha** em `/admin/perfil`.
 - [ ] `curl https://smunitur.com.br/api/health` retorna `{"status":"ok","db":"ok"}`.
-- [ ] Upload de imagem no admin/produtos funciona.
+- [ ] Upload de imagem no admin/modelos funciona.
 - [ ] Backup rodou: `ls /var/backups/smunitur` no dia seguinte.
 - [ ] Renovação SSL automática: `sudo certbot renew --dry-run`.
 

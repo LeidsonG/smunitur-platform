@@ -6,13 +6,13 @@ import { Shirt, Wind, FlaskConical, Package } from 'lucide-react';
 import Reveal from './Reveal';
 import api, { API_BASE } from '@/lib/api';
 
-interface Categoria { id: number; nome: string; slug: string }
-interface Produto {
+interface Linha { id: number; nome: string; slug: string }
+interface Modelo {
   id: number;
   nome: string;
   descricao?: string;
   imagem?: string;
-  categoria: Categoria;
+  linha: Linha;
 }
 
 const ICONE_CATEGORIA: Record<string, React.ElementType> = {
@@ -23,19 +23,19 @@ const ICONE_CATEGORIA: Record<string, React.ElementType> = {
 
 const sectionVariants = { hidden: {}, visible: {} };
 
-export default function Produtos() {
-  const [produtos, setProdutos] = useState<Produto[]>([]);
+export default function Modelos() {
+  const [modelos, setModelos] = useState<Modelo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/produtos')
-      .then(r => setProdutos(r.data.produtos))
+    api.get('/modelos')
+      .then(r => setModelos(r.data.modelos))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <section id="produtos" className="pt-16 sm:pt-20 lg:pt-28 pb-10 sm:pb-14 lg:pb-20" style={{ background: '#F8F9FA' }}>
+    <section id="modelos" className="pt-16 sm:pt-20 lg:pt-28 pb-10 sm:pb-14 lg:pb-20" style={{ background: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={sectionVariants}
@@ -49,7 +49,7 @@ export default function Produtos() {
               className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
               style={{ background: 'rgba(255,148,0,0.1)', color: '#FF9400' }}
             >
-              Nossos Produtos
+              Nossos Modelos
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
               O que a{' '}
@@ -75,17 +75,17 @@ export default function Produtos() {
                 </div>
               ))}
             </div>
-          ) : produtos.length === 0 ? null : (
+          ) : modelos.length === 0 ? null : (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-              {produtos.map((produto, i) => {
-                const Icon = ICONE_CATEGORIA[produto.categoria.slug] ?? Package;
+              {modelos.map((modelo, i) => {
+                const Icon = ICONE_CATEGORIA[modelo.linha.slug] ?? Package;
                 return (
                   <Reveal
-                    key={produto.id}
+                    key={modelo.id}
                     delay={0.1 + i * 0.06}
                     className="bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 group cursor-default border border-gray-100 hover:border-blue-200 overflow-hidden"
                   >
-                    {/* Foto do produto */}
+                    {/* Foto do modelo */}
                     <div
                       className="h-40 sm:h-56 lg:h-72"
                       style={{
@@ -94,11 +94,11 @@ export default function Produtos() {
                         transform: 'translateZ(0)',
                       }}
                     >
-                      {produto.imagem
+                      {modelo.imagem
                         // eslint-disable-next-line @next/next/no-img-element
                         ? <img
-                            src={`${API_BASE}${produto.imagem}`}
-                            alt={produto.nome}
+                            src={`${API_BASE}${modelo.imagem}`}
+                            alt={modelo.nome}
                             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                           />
                         : <div className="w-full h-full flex items-center justify-center">
@@ -113,11 +113,11 @@ export default function Produtos() {
                         className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium mb-2 sm:mb-3 inline-block"
                         style={{ background: 'rgba(0,94,213,0.08)', color: '#005ED5' }}
                       >
-                        {produto.categoria.nome}
+                        {modelo.linha.nome}
                       </span>
-                      <h3 className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 mb-1 sm:mb-2 leading-tight">{produto.nome}</h3>
-                      {produto.descricao && (
-                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed hidden sm:block">{produto.descricao}</p>
+                      <h3 className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 mb-1 sm:mb-2 leading-tight">{modelo.nome}</h3>
+                      {modelo.descricao && (
+                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed hidden sm:block">{modelo.descricao}</p>
                       )}
                     </div>
                   </Reveal>
@@ -128,7 +128,7 @@ export default function Produtos() {
 
           {/* CTA */}
           {!loading && (
-            <Reveal asChild delay={0.1 + produtos.length * 0.06} className="text-center mt-10 sm:mt-12">
+            <Reveal asChild delay={0.1 + modelos.length * 0.06} className="text-center mt-10 sm:mt-12">
               <button
                 type="button"
                 onClick={() => document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' })}

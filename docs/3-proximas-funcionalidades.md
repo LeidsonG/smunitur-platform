@@ -65,15 +65,15 @@ A versão atual foca em estabilidade, segurança e operação. As próximas traz
 
 ---
 
-## R10 — FK forte de produto/categoria no orçamento
+## R10 — FK forte de modelo/linha no orçamento
 
-**Hoje**: `Orcamento.produtoDesejado` é VARCHAR sem FK. Cliente que escolheu "Outros" digita texto livre.
+**Hoje**: `Orcamento.modeloDesejado` é VARCHAR sem FK. Cliente que escolheu "Outros" digita texto livre.
 
 **Proposta**:
-- Adicionar `produtoId Int?` (nullable, para acomodar "Outros")
-- Adicionar `categoriaId Int?`
-- Manter `produtoDesejado` como texto descritivo (snapshot) — útil para histórico mesmo se produto for removido
-- Habilita estatísticas confiáveis no dashboard: "produto mais pedido", "categoria com mais demanda"
+- Adicionar `modeloId Int?` (nullable, para acomodar "Outros")
+- Adicionar `linhaId Int?`
+- Manter `modeloDesejado` como texto descritivo (snapshot) — útil para histórico mesmo se modelo for removido
+- Habilita estatísticas confiáveis no dashboard: "modelo mais pedido", "linha com mais demanda"
 
 **Tamanho estimado**: S (migration trivial + adaptação no form de criação + 1 gráfico extra no dashboard)
 
@@ -109,7 +109,7 @@ A versão atual foca em estabilidade, segurança e operação. As próximas traz
 |----|------|---------------|
 | R3 | Etapas granulares de produção (modelagem/corte/costura/...) | Cliente disse "preço final ou por peça quando terminar o orçamento" — etapas detalhadas não são necessárias |
 | R4 | Responsável por etapa de produção | Mesmo motivo de R3 |
-| R5 | Preço base por produto + por opção | Cliente disse "preço apenas no fim do orçamento". O campo `Orcamento.valor` (já existente) cobre. |
+| R5 | Preço base por modelo + por variação | Cliente disse "preço apenas no fim do orçamento". O campo `Orcamento.valor` (já existente) cobre. |
 | R6 | Matriz estruturada de tamanhos no banco | Cliente já alterou para caixas com quantidade no front. String concatenada no banco é suficiente para o fluxo dele. |
 | R7 | Paleta de cores padronizada | Aguardando a fábrica enviar a paleta especial. Fica como sub-tarefa quando chegar. |
 | R8 | Notas internas separadas das do cliente | Cliente confirmou que não há equipe interna usando o admin para conversar entre si. |
@@ -120,7 +120,7 @@ A versão atual foca em estabilidade, segurança e operação. As próximas traz
 
 - **Exportação Excel/PDF** dos orçamentos (pedido comum de cliente final)
 - **Soft delete** em entidades principais (auditoria)
-- **Busca** em `/admin/produtos` e `/admin/atributos`
+- **Busca** em `/admin/modelos` e `/admin/especificacoes`
 - **Testes automatizados** mínimos (rotas críticas: criar orçamento, login, status)
 - **Dashboard com mais métricas**: ticket médio (mês), taxa de conversão (orçamentos vs. fechados), tempo médio em produção
 - **Dark mode** no admin (opcional)
@@ -131,7 +131,7 @@ A versão atual foca em estabilidade, segurança e operação. As próximas traz
 
 ## Ordem sugerida quando começar essas funcionalidades
 
-1. **R10** (FK produto/categoria) — pequeno, abre caminho para métricas reais no dashboard
+1. **R10** (FK modelo/linha) — pequeno, abre caminho para métricas reais no dashboard
 2. **R2** (prazo de entrega) — alto valor para a operação, pequeno esforço
 3. **R9** (notificação por e-mail) — alto valor para a experiência do cliente, esforço médio
 4. **R11** (anexo de layout) — alto valor para fluxo de aprovação, esforço médio

@@ -19,10 +19,10 @@ Sistema web completo para a empresa **SM Unitur**, especializada em confecção 
 
 Plataforma web que permite:
 
-- Clientes conhecerem os produtos e serviços da SM Unitur
-- Solicitar orçamentos personalizados em 3 etapas (produto → detalhes → dados)
+- Clientes conhecerem os modelos e serviços da SM Unitur
+- Solicitar orçamentos personalizados em 3 etapas (modelo → detalhes → dados)
 - Acompanhar o status de produção pelo número do orçamento
-- Gerenciamento completo via painel administrativo (categorias, atributos, produtos, orçamentos, produção, usuários)
+- Gerenciamento completo via painel administrativo (linhas, especificações, modelos, orçamentos, produção, usuários)
 
 ---
 
@@ -64,18 +64,16 @@ web-system-unitur/
 │       │   └── page.tsx    # Landing page pública
 │       ├── components/
 │       │   ├── admin/      # Sidebar, layout do painel
-│       │   └── landing/    # Seções da landing (Hero, Produtos, Serviços, etc.)
+│       │   └── landing/    # Seções da landing (Hero, Modelos, Serviços, etc.)
 │       └── lib/            # api.ts, whatsapp.ts
 ├── backend/
 │   ├── prisma/
 │   │   ├── schema.prisma   # Fonte da verdade do banco
 │   │   └── seed.ts         # Dados iniciais
 │   └── src/
-│       ├── routes/         # atributos, auth, categorias, orcamentos, produtos, ...
+│       ├── routes/         # especificações, auth, linhas, orcamentos, modelos, ...
 │       ├── middleware/      # auth (JWT), logger
 │       └── utils/          # prisma client, upload (multer)
-├── database/
-│   └── schema.sql          # Referência SQL gerada (não usar em produção)
 └── README.md
 ```
 
@@ -90,32 +88,32 @@ Login com JWT (níveis: `super_admin`, `admin`, `operador`).
 | `/admin/dashboard` | Todos | Estatísticas gerais |
 | `/admin/orcamentos` | Todos | Listagem, busca, filtros, detalhes |
 | `/admin/producao` | Todos | Atualização de status com histórico |
-| `/admin/categorias` | admin+ | CRUD de categorias de produtos |
-| `/admin/atributos` | admin+ | Biblioteca global de atributos e opções |
-| `/admin/produtos` | Todos | CRUD de produtos + associação de atributos |
+| `/admin/linhas` | admin+ | CRUD de linhas de modelos |
+| `/admin/especificacoes` | admin+ | Biblioteca global de especificações e variações |
+| `/admin/modelos` | Todos | CRUD de modelos + associação de especificações |
 | `/admin/usuarios` | admin+ | Cadastro e gestão de administradores |
 | `/admin/perfil` | Todos | Trocar senha, foto de perfil |
 
 ---
 
-## Fluxo de Atributos
+## Fluxo de Especificações
 
-Os atributos seguem uma hierarquia de 3 níveis:
+As especificações seguem uma hierarquia de 3 níveis:
 
-1. **Atributo global** (ex: "Tipo de Gola") — criado em `/admin/atributos`
-2. **Opções globais** (ex: "Careca", "V", "Polo") — cadastradas no mesmo atributo
-3. **Associação ao produto** — em `/admin/produtos`, cada produto seleciona quais atributos usa e quais opções ficam disponíveis para o cliente escolher
+1. **Especificação global** (ex: "Tipo de Gola") — criado em `/admin/especificacoes`
+2. **Variações globais** (ex: "Careca", "V", "Polo") — cadastradas na mesma especificação
+3. **Associação ao modelo** — em `/admin/modelos`, cada modelo seleciona quais especificações usa e quais variações ficam disponíveis para o cliente escolher
 
-Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básica, Jaleco etc., com opções diferentes em cada um.
+Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básica, Jaleco etc., com variações diferentes em cada um.
 
 ---
 
 ## Formulário de Orçamento (3 etapas)
 
-**Etapa 1 — Produto:**
-- Seleciona a categoria (Camisetas, Moletons, Jalecos...)
-- Seleciona o modelo específico dentro da categoria
-- Escolhe as opções dos atributos do produto (ex: Gola Careca, Tamanho M)
+**Etapa 1 — Modelo:**
+- Seleciona a linha (Camisetas, Moletons, Jalecos...)
+- Seleciona o modelo específico dentro da linha
+- Escolhe as variações das especificações do modelo (ex: Gola Careca, Tamanho M)
 
 **Etapa 2 — Detalhes:**
 - Quantidade de peças (contador)
@@ -132,7 +130,7 @@ Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básic
 ## Integração WhatsApp
 
 - Número configurado em `frontend/src/components/landing/Footer.tsx` (constante `WHATSAPP_NUMBER`)
-- Mensagem formatada com todos os dados do orçamento, incluindo atributos selecionados
+- Mensagem formatada com todos os dados do orçamento, incluindo especificações selecionadas
 - Link gerado via `https://wa.me/{numero}?text={mensagem_codificada}`
 
 > **Atenção:** o número atual é temporário para testes. Substituir antes de ir para produção.
@@ -143,10 +141,10 @@ Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básic
 
 - **Next.js App Router** para SSR/SSG e melhor SEO
 - **Prisma `db push`** em desenvolvimento local (sem histórico de migrations); `migrate deploy` em produção
-- **Atributos globais** reutilizáveis por produto para evitar duplicação de dados
+- **Especificações globais** reutilizáveis por modelo para evitar duplicação de dados
 - **JWT em localStorage** (painel admin interno — sem dados sensíveis expostos publicamente)
 - **Multer + magic bytes** para validar uploads de imagem no servidor
-- Sem preço fixo nos produtos — sistema baseado em orçamento personalizado
+- Sem preço fixo nos modelos — sistema baseado em orçamento personalizado
 
 ---
 

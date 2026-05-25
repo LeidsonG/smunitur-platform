@@ -26,9 +26,9 @@ import prisma, { registrarShutdownPrisma } from './utils/prisma';
 
 import authRoutes from './routes/auth';
 import orcamentosRoutes from './routes/orcamentos';
-import produtosRoutes from './routes/produtos';
-import categoriasRoutes from './routes/categorias';
-import atributosRoutes from './routes/atributos';
+import modelosRoutes from './routes/modelos';
+import linhasRoutes from './routes/linhas';
+import especificacoesRoutes from './routes/especificacoes';
 import adminRoutes from './routes/admin';
 import producaoRoutes from './routes/producao';
 
@@ -85,9 +85,9 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/orcamentos', orcamentosRoutes);
-app.use('/api/produtos', produtosRoutes);
-app.use('/api/categorias', categoriasRoutes);
-app.use('/api/atributos', atributosRoutes);
+app.use('/api/modelos', modelosRoutes);
+app.use('/api/linhas', linhasRoutes);
+app.use('/api/especificacoes', especificacoesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/producao', producaoRoutes);
 

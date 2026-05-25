@@ -15,7 +15,7 @@
  *
  * Helper:
  *   `apagarUpload('/uploads/x.jpg')` — remove arquivo do disco. Use ao
- *   substituir uma imagem antiga (foto de perfil, imagem de produto, etc.)
+ *   substituir uma imagem antiga (foto de perfil, imagem de modelo, etc.)
  *   para evitar acúmulo no servidor.
  */
 import multer from 'multer';

@@ -8,8 +8,8 @@ interface DadosOrcamento {
   telefoneCliente: string;
   emailCliente: string;
   cpfCnpj?: string;
-  categoria?: string;
-  produtoDesejado: string;
+  linha?: string;
+  modeloDesejado: string;
   quantidade: number;
   tamanhos?: string;
   cores?: string;
@@ -26,7 +26,7 @@ export function gerarLinkWhatsApp(dados: DadosOrcamento): string {
     ? dados.tamanhos.split(',').map(s => s.trim()).filter(Boolean).map(s => `    ${s}`)
     : [];
 
-  // Atributos já vêm separados por \n
+  // Especificacoes já vêm separados por \n
   const linhasEspec = dados.especificacoes
     ? dados.especificacoes.split('\n').map(s => `  ${s.trim()}`).filter(s => s.trim())
     : [];
@@ -41,9 +41,9 @@ export function gerarLinkWhatsApp(dados: DadosOrcamento): string {
     `  E-mail: ${dados.emailCliente}`,
     dados.cpfCnpj ? `  CPF/CNPJ: ${dados.cpfCnpj}` : null,
     ``,
-    `*Produto Solicitado*`,
-    dados.categoria ? `  Tipo de peça: *${dados.categoria}*` : null,
-    `  Material / modelo: *${dados.produtoDesejado}*`,
+    `*Modelo Solicitado*`,
+    dados.linha ? `  Tipo de peça: *${dados.linha}*` : null,
+    `  Material / modelo: *${dados.modeloDesejado}*`,
     dados.quantidade > 0 ? `  Quantidade total: *${dados.quantidade} peças*` : null,
   ];
 
@@ -58,7 +58,7 @@ export function gerarLinkWhatsApp(dados: DadosOrcamento): string {
 
   if (linhasEspec.length > 0) {
     partes.push(``);
-    partes.push(`*Especificações do Produto*`);
+    partes.push(`*Especificações do Modelo*`);
     linhasEspec.forEach(l => partes.push(l));
   }
 

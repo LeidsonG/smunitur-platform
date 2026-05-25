@@ -9,13 +9,13 @@ router.get('/', async (req: Request, res: Response) => {
   const todos = req.query.todos === 'true';
   const where = todos
     ? { ativo: true }
-    : { ativo: true, produtos: { some: { ativo: true } } };
+    : { ativo: true, modelos: { some: { ativo: true } } };
 
-  const categorias = await prisma.categoria.findMany({
+  const linhas = await prisma.linha.findMany({
     where,
     orderBy: { nome: 'asc' },
   });
-  return res.json({ categorias });
+  return res.json({ linhas });
 });
 
 router.post('/', authMiddleware, async (req: Request, res: Response) => {
@@ -23,12 +23,12 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
   if (!nome || !slug) return res.status(400).json({ error: 'Nome e slug são obrigatórios' });
 
   try {
-    const categoria = await prisma.categoria.create({ data: { nome, slug } });
-    return res.status(201).json({ categoria });
+    const linha = await prisma.linha.create({ data: { nome, slug } });
+    return res.status(201).json({ linha });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
       const campo = (e.meta?.target as string[])?.includes('slug') ? 'slug' : 'nome';
-      return res.status(409).json({ error: `Já existe uma categoria com este ${campo}.` });
+      return res.status(409).json({ error: `Já existe uma linha com este ${campo}.` });
     }
     throw e;
   }
@@ -42,15 +42,15 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
   if (ativo !== undefined) data.ativo = ativo;
 
   try {
-    const categoria = await prisma.categoria.update({
+    const linha = await prisma.linha.update({
       where: { id: parseInt(req.params.id) },
       data,
     });
-    return res.json({ categoria });
+    return res.json({ linha });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
       const campo = (e.meta?.target as string[])?.includes('slug') ? 'slug' : 'nome';
-      return res.status(409).json({ error: `Já existe uma categoria com este ${campo}.` });
+      return res.status(409).json({ error: `Já existe uma linha com este ${campo}.` });
     }
     throw e;
   }
@@ -60,13 +60,13 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
-  const temProdutos = await prisma.produto.count({ where: { categoriaId: id } });
-  if (temProdutos > 0) {
-    return res.status(400).json({ error: 'Categoria possui produtos vinculados. Remova os produtos antes de excluir a categoria.' });
+  const temModelos = await prisma.modelo.count({ where: { linhaId: id } });
+  if (temModelos > 0) {
+    return res.status(400).json({ error: 'Linha possui modelos vinculados. Remova os modelos antes de excluir a linha.' });
   }
 
-  await prisma.categoria.delete({ where: { id } });
-  return res.json({ message: 'Categoria excluída com sucesso' });
+  await prisma.linha.delete({ where: { id } });
+  return res.json({ message: 'Linha excluída com sucesso' });
 });
 
 export default router;

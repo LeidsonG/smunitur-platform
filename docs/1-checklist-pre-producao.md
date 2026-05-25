@@ -103,10 +103,10 @@ Ver [`2-deploy.md`](2-deploy.md) passo-a-passo. Itens-chave:
 
 | Item | Status |
 |------|--------|
-| Categorias revisadas (vêm 3 padrão do seed: Camisetas, Moletons, Jalecos) — ajustar se SM Unitur tem outras | [ ] |
-| Atributos globais cadastrados (ex.: Tipo de Gola, Tecido, Manga) com opções | [ ] |
-| Produtos cadastrados com imagens reais | [ ] |
-| Cada produto associado aos atributos relevantes + opções habilitadas | [ ] |
+| Linhas revisadas (vêm 3 padrão do seed: Camisetas, Moletons, Jalecos) — ajustar se SM Unitur tem outras | [ ] |
+| Especificações globais cadastrados (ex.: Tipo de Gola, Tecido, Manga) com variações | [ ] |
+| Modelos cadastrados com imagens reais | [ ] |
+| Cada modelo associado aos especificações relevantes + variações habilitadas | [ ] |
 
 ---
 
@@ -118,7 +118,7 @@ Ver [`2-deploy.md`](2-deploy.md) passo-a-passo. Itens-chave:
 | Formulário de orçamento — fluxo completo até o WhatsApp | [ ] |
 | Upload de imagem de referência funciona | [ ] |
 | Acompanhamento por número exibe status correto | [ ] |
-| Admin: cria categoria, produto, atributo, associa opções | [ ] |
+| Admin: cria linha, modelo, especificação, associa variações | [ ] |
 | Admin: muda status do orçamento, observa histórico | [ ] |
 | Admin: edita valor do orçamento | [ ] |
 | Admin: cria operador novo, faz login com ele, confirma RBAC | [ ] |

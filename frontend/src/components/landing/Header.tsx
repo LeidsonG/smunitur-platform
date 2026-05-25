@@ -10,7 +10,7 @@ import {
 const navLinks = [
   { label: 'Início',     href: '#inicio',     icon: Home },
   { label: 'Serviços',   href: '#servicos',   icon: Sparkles },
-  { label: 'Produtos',   href: '#produtos',   icon: Shirt },
+  { label: 'Modelos',   href: '#modelos',   icon: Shirt },
   { label: 'Orçamento',  href: '#orcamento',  icon: ClipboardList },
   { label: 'Acompanhar', href: '#acompanhar', icon: Package },
   { label: 'FAQ',        href: '#faq',        icon: HelpCircle },

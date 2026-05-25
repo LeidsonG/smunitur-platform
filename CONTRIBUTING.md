@@ -107,16 +107,16 @@ Painel admin em `http://localhost:3000/admin`
 
 | Rota                  | Descrição                                                      |
 | --------------------- | ---------------------------------------------------------------- |
-| `/`                 | Landing page (Hero, Sobre, Produtos, Serviços, FAQ, Orçamento) |
+| `/`                 | Landing page (Hero, Sobre, Modelos, Serviços, FAQ, Orçamento) |
 | `/#orcamento`       | Formulário de orçamento (3 etapas)                             |
 | `/#acompanhar`      | Acompanhamento de produção por número                         |
 | `/admin/login`      | Login do painel                                                  |
 | `/admin/dashboard`  | Dashboard com estatísticas                                      |
 | `/admin/orcamentos` | Gestão de orçamentos                                           |
 | `/admin/producao`   | Painel de produção                                             |
-| `/admin/categorias` | CRUD de categorias                                               |
-| `/admin/atributos`  | Biblioteca global de atributos e opções                        |
-| `/admin/produtos`   | CRUD de produtos + associação de atributos                     |
+| `/admin/linhas` | CRUD de linhas                                               |
+| `/admin/especificacoes`  | Biblioteca global de especificações e variações                        |
+| `/admin/modelos`   | CRUD de modelos + associação de especificações                     |
 | `/admin/usuarios`   | Gestão de usuários admin                                       |
 | `/admin/perfil`     | Perfil, senha e foto do usuário logado                          |
 
@@ -133,40 +133,40 @@ Painel admin em `http://localhost:3000/admin`
 | PATCH   | `/api/auth/change-password` | ✓   | Trocar senha                           |
 | PUT     | `/api/auth/me/foto`         | ✓   | Upload de foto de perfil               |
 
-### Categorias
+### Linhas
 
 | Método | Rota                    | Auth | Descrição                                                          |
 | ------- | ----------------------- | ---- | -------------------------------------------------------------------- |
-| GET     | `/api/categorias`     | —   | Categorias com produtos ativos.`?todos=true` retorna todas (admin) |
-| POST    | `/api/categorias`     | ✓   | Criar categoria                                                      |
-| PUT     | `/api/categorias/:id` | ✓   | Editar nome/slug/ativo                                               |
+| GET     | `/api/linhas`     | —   | Linhas com modelos ativos.`?todos=true` retorna todas (admin) |
+| POST    | `/api/linhas`     | ✓   | Criar linha                                                      |
+| PUT     | `/api/linhas/:id` | ✓   | Editar nome/slug/ativo                                               |
 
-### Atributos (biblioteca global)
+### Especificações (biblioteca global)
 
 | Método | Rota                               | Auth | Descrição                          |
 | ------- | ---------------------------------- | ---- | ------------------------------------ |
-| GET     | `/api/atributos`                 | —   | Todos os atributos com suas opções |
-| POST    | `/api/atributos`                 | ✓   | Criar atributo global                |
-| PUT     | `/api/atributos/:id`             | ✓   | Editar nome do atributo              |
-| DELETE  | `/api/atributos/:id`             | ✓   | Excluir atributo (e suas opções)   |
-| POST    | `/api/atributos/:id/opcoes`      | ✓   | Adicionar opção ao atributo        |
-| PATCH   | `/api/atributos/opcoes/:opcaoId` | ✓   | Editar opção                       |
-| DELETE  | `/api/atributos/opcoes/:opcaoId` | ✓   | Excluir opção                      |
+| GET     | `/api/especificacoes`                 | —   | Todos as especificações com suas variações |
+| POST    | `/api/especificacoes`                 | ✓   | Criar especificação global                |
+| PUT     | `/api/especificacoes/:id`             | ✓   | Editar nome da especificação              |
+| DELETE  | `/api/especificacoes/:id`             | ✓   | Excluir especificação (e suas variações)   |
+| POST    | `/api/especificacoes/:id/variações`      | ✓   | Adicionar variação à especificação        |
+| PATCH   | `/api/especificacoes/variações/:opcaoId` | ✓   | Editar variação                       |
+| DELETE  | `/api/especificacoes/variações/:opcaoId` | ✓   | Excluir variação                      |
 
-### Produtos
+### Modelos
 
 | Método | Rota                                  | Auth | Descrição                                               |
 | ------- | ------------------------------------- | ---- | --------------------------------------------------------- |
-| GET     | `/api/produtos`                     | —   | Listar produtos ativos.`?apenasAtivos=false` para admin |
-| GET     | `/api/produtos/:id`                 | —   | Detalhes do produto                                       |
-| POST    | `/api/produtos`                     | ✓   | Criar produto (multipart/form-data)                       |
-| PUT     | `/api/produtos/:id`                 | ✓   | Editar produto                                            |
-| PATCH   | `/api/produtos/:id/toggle`          | ✓   | Ativar / desativar                                        |
-| DELETE  | `/api/produtos/:id`                 | ✓   | Excluir produto                                           |
-| GET     | `/api/produtos/:id/atributos`       | —   | Atributos do produto com opções habilitadas             |
-| POST    | `/api/produtos/:id/atributos`       | ✓   | Associar atributo global ao produto                       |
-| PUT     | `/api/produtos/:id/atributos/:paId` | ✓   | Atualizar opções habilitadas / obrigatoriedade          |
-| DELETE  | `/api/produtos/:id/atributos/:paId` | ✓   | Remover atributo do produto                               |
+| GET     | `/api/modelos`                     | —   | Listar modelos ativos.`?apenasAtivos=false` para admin |
+| GET     | `/api/modelos/:id`                 | —   | Detalhes do modelo                                       |
+| POST    | `/api/modelos`                     | ✓   | Criar modelo (multipart/form-data)                       |
+| PUT     | `/api/modelos/:id`                 | ✓   | Editar modelo                                            |
+| PATCH   | `/api/modelos/:id/toggle`          | ✓   | Ativar / desativar                                        |
+| DELETE  | `/api/modelos/:id`                 | ✓   | Excluir modelo                                           |
+| GET     | `/api/modelos/:id/especificações`       | —   | Especificações do modelo com variações habilitadas             |
+| POST    | `/api/modelos/:id/especificações`       | ✓   | Associar especificação global ao modelo                       |
+| PUT     | `/api/modelos/:id/especificações/:paId` | ✓   | Atualizar variações habilitadas / obrigatoriedade          |
+| DELETE  | `/api/modelos/:id/especificações/:paId` | ✓   | Remover especificação do modelo                               |
 
 ### Orçamentos
 

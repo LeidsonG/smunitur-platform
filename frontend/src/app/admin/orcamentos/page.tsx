@@ -10,7 +10,7 @@ const FILTRO_STATUS = [{ value: '', label: 'Todos' }, ...STATUS_LIST];
 
 interface Orcamento {
   id: number; numero: number; nomeCliente: string; emailCliente: string;
-  telefoneCliente: string; produtoDesejado: string; quantidade: number;
+  telefoneCliente: string; modeloDesejado: string; quantidade: number;
   status: string; createdAt: string; tamanhos?: string; cores?: string;
   detalhes?: string; observacoes?: string; cpfCnpj?: string;
   imagemReferencia?: string; layoutFinal?: string | null; valor?: number | null;
@@ -160,7 +160,7 @@ export default function OrcamentosPage() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  {['#', 'Cliente', 'Produto', 'Qtd', 'Status', 'Data', ''].map((h) => (
+                  {['#', 'Cliente', 'Modelo', 'Qtd', 'Status', 'Data', ''].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       {h}
                     </th>
@@ -175,7 +175,7 @@ export default function OrcamentosPage() {
                       <div className="font-medium text-gray-900 truncate max-w-32">{o.nomeCliente}</div>
                       <div className="text-xs text-gray-400 truncate max-w-32">{o.emailCliente}</div>
                     </td>
-                    <td className="px-4 py-3 text-gray-700 truncate max-w-32">{o.produtoDesejado}</td>
+                    <td className="px-4 py-3 text-gray-700 truncate max-w-32">{o.modeloDesejado}</td>
                     <td className="px-4 py-3 text-gray-700">{o.quantidade}</td>
                     <td className="px-4 py-3">
                       <span
@@ -246,7 +246,7 @@ export default function OrcamentosPage() {
               <InfoRow label="E-mail" value={selecionado.emailCliente} />
               <InfoRow label="Telefone" value={selecionado.telefoneCliente} />
               {selecionado.cpfCnpj && <InfoRow label="CPF/CNPJ" value={selecionado.cpfCnpj} />}
-              <InfoRow label="Produto" value={selecionado.produtoDesejado} />
+              <InfoRow label="Modelo" value={selecionado.modeloDesejado} />
               <InfoRow label="Quantidade" value={`${selecionado.quantidade} unidades`} />
               {selecionado.tamanhos && <InfoRow label="Tamanhos" value={selecionado.tamanhos} />}
               {selecionado.cores && <InfoRow label="Cores" value={selecionado.cores} />}
