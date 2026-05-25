@@ -2,8 +2,19 @@
 
 ## Pré-requisitos
 
-- Baixar o Node.js 18+
+- **Node.js 22 LTS** (mínimo obrigatório: Node 20 — versões anteriores quebram o `sharp` e o `thread-stream`)
 - Baixar o XAMPP
+
+> **Como verificar sua versão:** `node -v`
+>
+> **Como trocar a versão com nvm (recomendado):**
+> ```bash
+> nvm list          # ver versões instaladas
+> nvm install 22    # instalar Node 22 (se não tiver)
+> nvm use 22        # ativar Node 22
+> ```
+>
+> Baixe o nvm: Windows → [nvm-windows](https://github.com/coreybutler/nvm-windows/releases) | macOS/Linux → [nvm.sh](https://github.com/nvm-sh/nvm)
 
 ---
 

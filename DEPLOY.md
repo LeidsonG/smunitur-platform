@@ -103,12 +103,12 @@ sudo systemctl restart ssh
 ## 6. Instalar stack: Node 20, MySQL 8, Nginx, Certbot, PM2
 
 ```bash
-# Node.js 20 LTS via NodeSource (mais atualizado que o do apt)
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+# Node.js 22 LTS via NodeSource (mínimo obrigatório: Node 20 — versões anteriores quebram sharp/thread-stream)
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
 
 # Verificar
-node --version  # v20.x.x
+node --version  # v22.x.x
 npm --version
 
 # MySQL 8
