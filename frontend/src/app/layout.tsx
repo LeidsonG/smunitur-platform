@@ -29,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="h-full" data-scroll-behavior="smooth">
       <head>
+        <meta name="color-scheme" content="light" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

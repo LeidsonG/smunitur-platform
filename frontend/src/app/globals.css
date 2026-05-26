@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+:root {
+  color-scheme: light;
+}
+
 @theme {
   --color-brand-blue: #005ED5;
   --color-brand-orange: #FF9400;
