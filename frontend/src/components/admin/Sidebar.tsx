@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   SlidersHorizontal,
+  ExternalLink,
 } from 'lucide-react';
 import { API_BASE } from '@/lib/api';
 
@@ -39,10 +40,15 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('smunitur_admin');
-      if (raw) setAdmin(JSON.parse(raw));
-    } catch { /* ignore */ }
+    const carregarAdmin = () => {
+      try {
+        const raw = localStorage.getItem('smunitur_admin');
+        if (raw) setAdmin(JSON.parse(raw));
+      } catch { /* ignore */ }
+    };
+    carregarAdmin();
+    window.addEventListener('admin-atualizado', carregarAdmin);
+    return () => window.removeEventListener('admin-atualizado', carregarAdmin);
   }, []);
 
   // Fecha o menu ao trocar de rota
@@ -131,8 +137,17 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="px-3 pb-6">
+      {/* Ver site + Logout */}
+      <div className="px-3 pb-6 space-y-1">
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-blue-300 hover:bg-blue-400/10 transition-all duration-200"
+        >
+          <ExternalLink size={18} />
+          <span className="flex-1 text-left">Ver site</span>
+        </a>
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200"

@@ -64,6 +64,7 @@ export default function PerfilPage() {
         const raw = localStorage.getItem('smunitur_admin');
         if (raw) localStorage.setItem('smunitur_admin', JSON.stringify({ ...JSON.parse(raw), nome: novoNome }));
       } catch { /* ignore */ }
+      window.dispatchEvent(new Event('admin-atualizado'));
       setSucessoNome(true);
       setEditandoNome(false);
     } catch (e: unknown) {
@@ -87,6 +88,7 @@ export default function PerfilPage() {
           localStorage.setItem('smunitur_admin', JSON.stringify({ ...parsed, foto: res.data.foto }));
         }
       } catch { /* ignore */ }
+      window.dispatchEvent(new Event('admin-atualizado'));
     } catch {
       setErroFoto('Erro ao enviar foto. Tente novamente.');
     } finally { setEnviandoFoto(false); }

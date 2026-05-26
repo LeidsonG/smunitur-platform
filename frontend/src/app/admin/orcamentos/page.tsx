@@ -90,16 +90,29 @@ export default function OrcamentosPage() {
     const digits = selecionado.telefoneCliente.replace(/\D/g, '');
     const telefone = digits.startsWith('55') ? digits : `55${digits}`;
     const linkImagem = `${API_BASE}${selecionado.layoutFinal}`;
-    const msg = [
-      `Olá ${selecionado.nomeCliente}! 👋`,
+    const linkAcompanhar = `${window.location.origin}/#acompanhar`;
+
+    const valorFormatado = selecionado.valor != null
+      ? selecionado.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+      : null;
+
+    const partes: (string | null)[] = [
+      `Olá, ${selecionado.nomeCliente}.`,
       ``,
       `Segue o layout final do seu orçamento *#${selecionado.numero}*.`,
       ``,
-      `Visualizar: ${linkImagem}`,
+      `*Modelo:* ${selecionado.modeloDesejado}`,
+      `*Quantidade:* ${selecionado.quantidade} peças`,
+      valorFormatado ? `*Valor:* ${valorFormatado}` : null,
+      ``,
+      `*Visualizar layout:* ${linkImagem}`,
+      `*Acompanhar status:* ${linkAcompanhar} (informe o n° *#${selecionado.numero}* e o e-mail cadastrado)`,
       ``,
       `Qualquer ajuste, é só responder por aqui.`,
       `— Equipe SM Unitur`,
-    ].join('\n');
+    ];
+
+    const msg = partes.filter((l): l is string => l !== null).join('\n');
     window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   };
 
