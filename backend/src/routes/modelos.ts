@@ -234,4 +234,87 @@ router.delete('/:id/especificacoes/:meId', authMiddleware, async (req: Request, 
   return res.json({ ok: true });
 });
 
+// POST /api/modelos/:id/especificacoes/copiar — copia todas as especificações
+// de um modelo de origem para o modelo destino (:id). Não sobrescreve: se
+// uma especificação já estiver associada ao destino, é pulada para preservar
+// a configuração existente (variações habilitadas + obrigatório). Devolve o
+// snapshot completo de especificações do destino após a operação.
+router.post('/:id/especificacoes/copiar', authMiddleware, async (req: Request, res: Response) => {
+  const destinoId = parseInt(req.params.id);
+  const origemIdRaw = req.body?.origem_id;
+  if (!origemIdRaw) return res.status(400).json({ error: 'origem_id é obrigatório' });
+
+  const origemId = parseInt(origemIdRaw);
+  if (isNaN(origemId) || isNaN(destinoId)) return res.status(400).json({ error: 'IDs inválidos' });
+  if (origemId === destinoId) return res.status(400).json({ error: 'Modelo de origem deve ser diferente do destino' });
+
+  const [origemExiste, destinoExiste] = await Promise.all([
+    prisma.modelo.findUnique({ where: { id: origemId }, select: { id: true } }),
+    prisma.modelo.findUnique({ where: { id: destinoId }, select: { id: true } }),
+  ]);
+  if (!origemExiste) return res.status(404).json({ error: 'Modelo de origem não encontrado' });
+  if (!destinoExiste) return res.status(404).json({ error: 'Modelo de destino não encontrado' });
+
+  const origemEspecs = await prisma.modeloEspecificacao.findMany({
+    where: { modeloId: origemId },
+    include: { variacoes: true },
+    orderBy: { ordem: 'asc' },
+  });
+
+  const destinoExistentes = await prisma.modeloEspecificacao.findMany({
+    where: { modeloId: destinoId },
+    select: { especificacaoId: true },
+  });
+  const especIdsExistentes = new Set(destinoExistentes.map(e => e.especificacaoId));
+  const ordemInicial = destinoExistentes.length;
+
+  let criadas = 0;
+  let puladas = 0;
+  for (const me of origemEspecs) {
+    if (especIdsExistentes.has(me.especificacaoId)) {
+      puladas++;
+      continue;
+    }
+    await prisma.modeloEspecificacao.create({
+      data: {
+        modeloId: destinoId,
+        especificacaoId: me.especificacaoId,
+        obrigatorio: me.obrigatorio,
+        ordem: ordemInicial + criadas,
+        variacoes: {
+          create: me.variacoes.map(v => ({ variacaoId: v.variacaoId })),
+        },
+      },
+    });
+    criadas++;
+  }
+
+  // Devolve o estado completo das especificações do destino — mesmo shape
+  // usado por GET /:id/especificacoes para que o frontend possa substituir
+  // o array sem chamada extra.
+  const finais = await prisma.modeloEspecificacao.findMany({
+    where: { modeloId: destinoId },
+    orderBy: { ordem: 'asc' },
+    include: {
+      especificacao: { select: { nome: true } },
+      variacoes: {
+        include: { variacao: { select: { id: true, valor: true, imagem: true, ordem: true } } },
+        orderBy: { variacao: { ordem: 'asc' } },
+      },
+    },
+  });
+
+  return res.json({
+    criadas,
+    puladas,
+    especificacoes: finais.map(me => ({
+      id: me.id,
+      especificacaoId: me.especificacaoId,
+      nome: me.especificacao.nome,
+      obrigatorio: me.obrigatorio,
+      variacoes: me.variacoes.map(mev => ({ id: mev.variacao.id, valor: mev.variacao.valor, imagem: mev.variacao.imagem ?? null })),
+    })),
+  });
+});
+
 export default router;

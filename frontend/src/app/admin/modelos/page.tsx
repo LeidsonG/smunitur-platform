@@ -15,7 +15,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Plus, Edit2, Trash2, ToggleLeft, ToggleRight, X,
-  Upload, Loader2, ChevronDown, Check, Link2, Link2Off, Tag, ExternalLink,
+  Upload, Loader2, ChevronDown, Check, Link2, Link2Off, Tag, ExternalLink, Copy,
 } from 'lucide-react';
 import api, { API_BASE } from '@/lib/api';
 import ConfirmModal from '@/components/admin/ConfirmModal';
@@ -85,6 +85,13 @@ export default function ModelosPage() {
   const [obrigNovo, setObrigNovo] = useState(false);
   const [criandoAssoc, setCriandoAssoc] = useState(false);
   const [erroAssoc, setErroAssoc] = useState<string | null>(null);
+
+  // Painel "copiar especificacoes de outro modelo"
+  const [copiandoPara, setCopiandoPara] = useState<number | null>(null); // modeloId destino
+  const [origemEscolhido, setOrigemEscolhido] = useState<number | null>(null);
+  const [copiandoEspecs, setCopiandoEspecs] = useState(false);
+  const [erroCopiar, setErroCopiar] = useState<string | null>(null);
+  const [resultadoCopia, setResultadoCopia] = useState<{ criadas: number; puladas: number } | null>(null);
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -231,6 +238,42 @@ export default function ModelosPage() {
       obrigatorio: !pa.obrigatorio,
     });
     setEspecificações(modeloId, a => a.map(x => x.id === pa.id ? res.data.especificacao : x));
+  };
+
+  // ── Copiar especificações de outro modelo ──────────────────────────────────
+  const abrirCopiar = (modeloId: number) => {
+    setCopiandoPara(modeloId);
+    setAdicionandoAtrib(null);
+    setOrigemEscolhido(null);
+    setErroCopiar(null);
+    setResultadoCopia(null);
+  };
+
+  const fecharCopiar = () => {
+    setCopiandoPara(null);
+    setOrigemEscolhido(null);
+    setErroCopiar(null);
+    setResultadoCopia(null);
+  };
+
+  const executarCopiar = async (destinoId: number) => {
+    if (!origemEscolhido) return;
+    setCopiandoEspecs(true);
+    setErroCopiar(null);
+    setResultadoCopia(null);
+    try {
+      const res = await api.post(`/modelos/${destinoId}/especificacoes/copiar`, {
+        origem_id: origemEscolhido,
+      });
+      setEspecificações(destinoId, () => res.data.especificacoes);
+      setResultadoCopia({ criadas: res.data.criadas, puladas: res.data.puladas });
+      // Mantém o painel aberto ~1.5s com o resultado e depois fecha sozinho.
+      setTimeout(fecharCopiar, 1800);
+    } catch (e) {
+      setErroCopiar(errMsg(e));
+    } finally {
+      setCopiandoEspecs(false);
+    }
   };
 
   // ── Render ────────────────────────────────────────────────────────────────────
@@ -416,6 +459,79 @@ export default function ModelosPage() {
                             );
                           })}
 
+                          {/* Painel copiar de outro modelo */}
+                          {copiandoPara === p.id && (
+                            <div className="bg-white rounded-xl border border-dashed border-blue-300 p-3 space-y-3">
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs font-semibold text-gray-600">Copiar especificações de outro modelo</p>
+                                <button
+                                  onClick={fecharCopiar}
+                                  className="p-1 rounded hover:bg-gray-100 text-gray-400"
+                                  aria-label="Fechar"
+                                >
+                                  <X size={13} />
+                                </button>
+                              </div>
+
+                              <select
+                                value={origemEscolhido ?? ''}
+                                onChange={e => setOrigemEscolhido(e.target.value ? parseInt(e.target.value) : null)}
+                                disabled={copiandoEspecs}
+                                className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 bg-white"
+                              >
+                                <option value="">Selecionar modelo de origem…</option>
+                                {linhas.map(c => {
+                                  const modelosLinha = modelos.filter(m => m.linhaId === c.id && m.id !== p.id);
+                                  if (modelosLinha.length === 0) return null;
+                                  return (
+                                    <optgroup key={c.id} label={c.nome}>
+                                      {modelosLinha.map(m => (
+                                        <option key={m.id} value={m.id}>{m.nome}</option>
+                                      ))}
+                                    </optgroup>
+                                  );
+                                })}
+                              </select>
+
+                              {resultadoCopia && (
+                                <div className="text-xs px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-green-700 flex items-center gap-2">
+                                  <Check size={14} />
+                                  <span>
+                                    {resultadoCopia.criadas} {resultadoCopia.criadas === 1 ? 'especificação copiada' : 'especificações copiadas'}
+                                    {resultadoCopia.puladas > 0 && (
+                                      <> · {resultadoCopia.puladas} já {resultadoCopia.puladas === 1 ? 'estava' : 'estavam'} no modelo</>
+                                    )}
+                                  </span>
+                                </div>
+                              )}
+
+                              {erroCopiar && <p className="text-xs text-red-500">{erroCopiar}</p>}
+
+                              <p className="text-xs text-gray-400 leading-relaxed">
+                                Apenas especificações ainda não associadas serão copiadas — as existentes neste modelo são preservadas.
+                              </p>
+
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={fecharCopiar}
+                                  disabled={copiandoEspecs}
+                                  className="flex-1 py-2 rounded-xl text-xs font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  onClick={() => executarCopiar(p.id)}
+                                  disabled={!origemEscolhido || copiandoEspecs || !!resultadoCopia}
+                                  className="flex-1 py-2 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1 disabled:opacity-50 transition-all"
+                                  style={{ background: '#005ED5' }}
+                                >
+                                  {copiandoEspecs ? <Loader2 size={12} className="animate-spin" /> : <Copy size={12} />}
+                                  Copiar
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Painel adicionar especificacao */}
                           {adicionandoAtrib === p.id ? (
                             <div className="bg-white rounded-xl border border-dashed border-blue-300 p-3 space-y-3">
@@ -492,12 +608,19 @@ export default function ModelosPage() {
                                 </button>
                               </div>
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => abrirAdicionarAtrib(p.id)}
-                              className="w-full py-2 rounded-xl text-xs font-semibold border border-dashed border-gray-300 text-gray-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-1.5">
-                              <Plus size={13} /> Adicionar Especificacao
-                            </button>
+                          ) : copiandoPara !== p.id && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <button
+                                onClick={() => abrirAdicionarAtrib(p.id)}
+                                className="py-2 rounded-xl text-xs font-semibold border border-dashed border-gray-300 text-gray-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-1.5">
+                                <Plus size={13} /> Adicionar Especificação
+                              </button>
+                              <button
+                                onClick={() => abrirCopiar(p.id)}
+                                className="py-2 rounded-xl text-xs font-semibold border border-dashed border-gray-300 text-gray-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-1.5">
+                                <Copy size={13} /> Copiar de outro modelo
+                              </button>
+                            </div>
                           )}
                         </div>
                       )}
