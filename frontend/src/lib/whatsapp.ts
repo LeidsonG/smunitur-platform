@@ -1,6 +1,6 @@
 // ATENÇÃO: Número temporário para ambiente de testes.
 // Substituir pelo número oficial da empresa SM Unitur antes de ir para produção.
-const WHATSAPP_NUMBER = '5517981322215';
+export const WHATSAPP_NUMBER = '5517981322215';
 
 interface DadosOrcamento {
   numero: number;
@@ -81,6 +81,28 @@ export function gerarLinkWhatsApp(dados: DadosOrcamento): string {
   const texto = partes
     .filter((l): l is string => l !== null)
     .join('\n');
+
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(texto)}`;
+}
+
+/**
+ * Gera o link do WhatsApp para o botão "Outros" do formulário de orçamento.
+ * Abre uma conversa com mensagem pré-formatada para o cliente descrever o
+ * produto que deseja, sem precisar preencher o formulário completo.
+ */
+export function gerarLinkWhatsAppOutros(): string {
+  const texto = [
+    `Olá, SM Unitur! 😊`,
+    ``,
+    `Gostaria de solicitar um orçamento para um produto que não encontrei entre os modelos disponíveis no site.`,
+    ``,
+    `*Tipo de produto:* _(descreva aqui o que você precisa)_`,
+    `*Quantidade aproximada:* _(ex: 50 peças)_`,
+    `*Cores / detalhes:* _(ex: azul marinho com logo bordada)_`,
+    `*Observações:* _(qualquer informação adicional)_`,
+    ``,
+    `Aguardo o retorno. Obrigado(a)!`,
+  ].join('\n');
 
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(texto)}`;
 }

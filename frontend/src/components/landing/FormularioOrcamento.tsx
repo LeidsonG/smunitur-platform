@@ -11,7 +11,7 @@ import {
   CheckCircle, Check, AlertCircle, ChevronRight, ChevronLeft,
 } from 'lucide-react';
 import api, { API_BASE } from '@/lib/api';
-import { gerarLinkWhatsApp } from '@/lib/whatsapp';
+import { gerarLinkWhatsApp, gerarLinkWhatsAppOutros } from '@/lib/whatsapp';
 import Reveal from './Reveal';
 
 const TAMANHOS_PADRAO = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
@@ -425,15 +425,21 @@ function Etapa1({ linhas, catSelecionada, onSelectCat, modelos, modeloSelecionad
           );
         })}
 
-        {/* Card "Outros" */}
-        <button type="button" onClick={() => onSelectCat(null)}
+        {/* Card "Outros" — abre o WhatsApp com mensagem pré-formatada
+            para o cliente descrever o produto que deseja personalizar. */}
+        <a
+          href={gerarLinkWhatsAppOutros()}
+          target="_blank"
+          rel="noopener noreferrer"
           className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 text-center transition-all duration-200 hover:shadow-md"
-          style={{ borderColor: '#E5E7EB', background: '#fff' }}>
-          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#F3F4F6' }}>
-            <Plus size={22} style={{ color: '#6B7280' }} />
+          style={{ borderColor: '#E5E7EB', background: '#fff', textDecoration: 'none' }}
+        >
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(37,211,102,0.12)' }}>
+            <Plus size={22} style={{ color: '#25D366' }} />
           </div>
-          <span className="text-sm font-semibold text-gray-600">Outros</span>
-        </button>
+          <span className="text-sm font-semibold" style={{ color: '#374151' }}>Outros</span>
+          <span className="text-[10px] text-gray-400 leading-tight">via WhatsApp</span>
+        </a>
       </div>
 
       {erroModelo && <p className="text-xs text-red-500 mb-4">{erroModelo}</p>}
