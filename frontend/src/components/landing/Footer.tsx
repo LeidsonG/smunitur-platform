@@ -59,7 +59,7 @@ export default function Footer() {
               {[
                 { label: 'Início', href: '#inicio' },
                 { label: 'Serviços', href: '#servicos' },
-                { label: 'Produtos', href: '#produtos' },
+                { label: 'Modelos', href: '#modelos' },
                 { label: 'Orçamento', href: '#orcamento' },
                 { label: 'Acompanhar Pedido', href: '#acompanhar' },
                 { label: 'FAQ', href: '#faq' },

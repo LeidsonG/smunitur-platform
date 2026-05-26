@@ -86,3 +86,50 @@ section[id] {
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #005ED5; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #004AAA; }
+
+/* Carrossel infinito (marquee) — usado na seção "Nossos Modelos" da landing.
+   A lista de cards é duplicada no componente e o track desliza -50% em loop:
+   quando a primeira cópia termina, a segunda já ocupou a posição inicial,
+   criando movimento contínuo sem "salto" visual. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 60s) linear infinite;
+  will-change: transform;
+}
+
+.marquee-track:hover,
+.marquee-track:focus-within {
+  animation-play-state: paused;
+}
+
+/* Acessibilidade: respeita usuários com preferência por menos animação. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* Fade lateral suave nas bordas do carrossel para indicar que há mais
+   conteúdo "saindo de cena". */
+.marquee-fade {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 48px,
+    #000 calc(100% - 48px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 48px,
+    #000 calc(100% - 48px),
+    transparent 100%
+  );
+}

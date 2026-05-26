@@ -59,7 +59,7 @@ interface Historico {
 interface OrcamentoStatus {
   numero: number;
   nomeCliente: string;
-  produtoDesejado: string;
+  modeloDesejado: string;
   quantidade: number;
   status: string;
   imagemReferencia: string | null;
@@ -202,8 +202,8 @@ export default function Acompanhamento() {
                   <span className="ml-2 font-medium text-gray-800">{orcamento.nomeCliente}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Produto:</span>
-                  <span className="ml-2 font-medium text-gray-800">{orcamento.produtoDesejado}</span>
+                  <span className="text-gray-500">Modelo:</span>
+                  <span className="ml-2 font-medium text-gray-800">{orcamento.modeloDesejado}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">Quantidade:</span>

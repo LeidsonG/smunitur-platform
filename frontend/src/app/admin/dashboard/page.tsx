@@ -15,7 +15,7 @@ interface Stats {
   orcamentosRecebidos: number;
   orcamentosEmProducao: number;
   orcamentosFinalizados: number;
-  totalProdutos: number;
+  totalModelos: number;
 }
 
 interface PorMes { mes: string; total: number }
@@ -23,7 +23,7 @@ interface PorMes { mes: string; total: number }
 interface UltimoOrcamento {
   numero: number;
   nomeCliente: string;
-  produtoDesejado: string;
+  modeloDesejado: string;
   status: string;
   createdAt: string;
 }
@@ -82,7 +82,7 @@ export default function DashboardPage() {
     { label: 'Aguardando Análise', value: stats?.orcamentosRecebidos ?? 0, icon: Clock, cor: '#F59E0B' },
     { label: 'Em Produção', value: stats?.orcamentosEmProducao ?? 0, icon: Factory, cor: '#8B5CF6' },
     { label: 'Finalizados', value: stats?.orcamentosFinalizados ?? 0, icon: CheckCircle, cor: '#10B981' },
-    { label: 'Produtos Ativos', value: stats?.totalProdutos ?? 0, icon: Package, cor: '#FF9400' },
+    { label: 'Modelos Ativos', value: stats?.totalModelos ?? 0, icon: Package, cor: '#FF9400' },
   ];
 
   const dadosGrafico = porMes.map(p => ({ ...p, label: formatarMes(p.mes) }));
@@ -203,7 +203,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 text-sm truncate">{o.nomeCliente}</p>
-                  <p className="text-xs text-gray-500 truncate">{o.produtoDesejado}</p>
+                  <p className="text-xs text-gray-500 truncate">{o.modeloDesejado}</p>
                 </div>
                 <span
                   className="px-2.5 py-1 rounded-full text-xs font-medium flex-shrink-0 hidden sm:inline-block"

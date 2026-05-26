@@ -12,7 +12,7 @@ const STATUS_EM_PRODUCAO = ['em_analise', 'aguardando_aprovacao', 'em_producao']
 
 interface OrcProd {
   id: number; numero: number; nomeCliente: string;
-  produtoDesejado: string; quantidade: number; status: string;
+  modeloDesejado: string; quantidade: number; status: string;
   createdAt: string; updatedAt: string;
 }
 
@@ -115,7 +115,7 @@ export default function ProducaoPage() {
                   </div>
 
                   <h3 className="font-semibold text-gray-900 mb-1">{o.nomeCliente}</h3>
-                  <p className="text-sm text-gray-500 mb-3">{o.produtoDesejado} — {o.quantidade} un.</p>
+                  <p className="text-sm text-gray-500 mb-3">{o.modeloDesejado} — {o.quantidade} un.</p>
 
                   <div className="flex items-center justify-between text-xs text-gray-400">
                     <div className="flex items-center gap-1">
@@ -147,7 +147,7 @@ export default function ProducaoPage() {
             <div className="p-5 space-y-4 text-sm">
               <div>
                 <p className="font-semibold text-gray-900">{selecionado.nomeCliente}</p>
-                <p className="text-gray-500">{selecionado.produtoDesejado} — {selecionado.quantidade} un.</p>
+                <p className="text-gray-500">{selecionado.modeloDesejado} — {selecionado.quantidade} un.</p>
               </div>
 
               {/* Atualizar status */}

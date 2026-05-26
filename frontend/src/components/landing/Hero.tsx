@@ -63,12 +63,12 @@ export default function Hero() {
                 Solicitar Orçamento Grátis
               </a>
               <a
-                href="#produtos"
-                onClick={(e) => { e.preventDefault(); document.querySelector('#produtos')?.scrollIntoView({ behavior: 'smooth' }); }}
+                href="#modelos"
+                onClick={(e) => { e.preventDefault(); document.querySelector('#modelos')?.scrollIntoView({ behavior: 'smooth' }); }}
                 className="flex-1 py-3.5 sm:py-4 rounded-full text-base sm:text-lg font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95 text-center"
                 style={{ border: '2px solid rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.08)' }}
               >
-                Ver Produtos
+                Ver Modelos
               </a>
             </div>
           </div>

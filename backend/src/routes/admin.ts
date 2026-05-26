@@ -52,7 +52,7 @@ router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response
     prisma.orcamento.count({ where: { status: 'recebido' } }),
     prisma.orcamento.count({ where: { status: 'em_producao' } }),
     prisma.orcamento.count({ where: { status: 'finalizado' } }),
-    prisma.produto.count({ where: { ativo: true } }),
+    prisma.modelo.count({ where: { ativo: true } }),
     prisma.$queryRaw<{ mes: string; total: bigint }[]>`
       SELECT DATE_FORMAT(created_at, '%Y-%m') AS mes, COUNT(*) AS total
       FROM orcamentos
@@ -63,7 +63,7 @@ router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response
     prisma.orcamento.findMany({
       orderBy: { createdAt: 'desc' },
       take: 5,
-      select: { numero: true, nomeCliente: true, produtoDesejado: true, status: true, createdAt: true },
+      select: { numero: true, nomeCliente: true, modeloDesejado: true, status: true, createdAt: true },
     }),
   ]);
 

@@ -1,13 +1,13 @@
 'use client';
 
 /**
- * Página /admin/produtos
+ * Página /admin/modelos
  * --------------------------------------------------------------------------
- * CRUD de produtos + gestão de quais atributos (e quais opções de cada
- * atributo) cada produto expõe ao cliente no formulário de orçamento.
+ * CRUD de modelos + gestão de quais especificacoes (e quais opções de cada
+ * especificacao) cada modelo expõe ao cliente no formulário de orçamento.
  *
- * Categorias são apenas LISTADAS aqui (necessárias para criar/editar
- * produto). O CRUD completo de categorias vive em /admin/categorias —
+ * Linhas são apenas LISTADAS aqui (necessárias para criar/editar
+ * modelo). O CRUD completo de linhas vive em /admin/linhas —
  * para evitar duas fontes de verdade na UI.
  */
 
@@ -15,42 +15,42 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Plus, Edit2, Trash2, ToggleLeft, ToggleRight, X,
-  Upload, Loader2, ChevronDown, Check, Link2, Link2Off, Tag, ExternalLink,
+  Upload, Loader2, ChevronDown, Check, Link2, Link2Off, Tag, ExternalLink, Copy,
 } from 'lucide-react';
 import api, { API_BASE } from '@/lib/api';
 import ConfirmModal from '@/components/admin/ConfirmModal';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
-interface Categoria { id: number; nome: string; slug: string; ativo: boolean }
-interface OpcaoGlobal { id: number; valor: string }
-interface AtributoGlobal { id: number; nome: string; opcoes: OpcaoGlobal[] }
+interface Linha { id: number; nome: string; slug: string; ativo: boolean }
+interface VariacaoGlobal { id: number; valor: string }
+interface EspecificacaoGlobal { id: number; nome: string; variacoes: VariacaoGlobal[] }
 
-interface OpcaoProduto { id: number; valor: string }
-interface AtributoProduto {
-  id: number;          // ProdutoAtributo.id
-  atributoId: number;  // Atributo global.id
+interface VariacaoModelo { id: number; valor: string }
+interface EspecificacaoModelo {
+  id: number;          // ModeloEspecificacao.id
+  especificacaoId: number;  // Especificacao global.id
   nome: string;
   obrigatorio: boolean;
-  opcoes: OpcaoProduto[]; // opcoes habilitadas para este produto
+  variacoes: VariacaoModelo[]; // variacoes habilitadas para este modelo
 }
 
-interface Produto {
+interface Modelo {
   id: number; nome: string; descricao?: string; imagem?: string;
-  ativo: boolean; categoriaId: number; categoria: Categoria;
+  ativo: boolean; linhaId: number; linha: Linha;
 }
 
 const errMsg = (e: unknown) =>
   (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Erro inesperado.';
 
 // ─── Página ───────────────────────────────────────────────────────────────────
-export default function ProdutosPage() {
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [atributosGlobais, setAtributosGlobais] = useState<AtributoGlobal[]>([]);
+export default function ModelosPage() {
+  const [modelos, setModelos] = useState<Modelo[]>([]);
+  const [linhas, setLinhas] = useState<Linha[]>([]);
+  const [especificaçõesGlobais, setEspecificaçõesGlobais] = useState<EspecificacaoGlobal[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Modal de confirmação genérico (compartilhado entre exclusão de produto e
-  // remoção de associação de atributo).
+  // Modal de confirmação genérico (compartilhado entre exclusão de modelo e
+  // remoção de associação de especificacao).
   const [confirmar, setConfirmar] = useState<null | { titulo: string; mensagem: string; acao: () => Promise<void> }>(null);
   const [confirmCarregando, setConfirmCarregando] = useState(false);
 
@@ -66,66 +66,73 @@ export default function ProdutosPage() {
     }
   };
 
-  // Modal produto
+  // Modal modelo
   const [modal, setModal] = useState<'criar' | 'editar' | null>(null);
-  const [editando, setEditando] = useState<Produto | null>(null);
-  const [form, setForm] = useState({ nome: '', descricao: '', categoria_id: '' });
+  const [editando, setEditando] = useState<Modelo | null>(null);
+  const [form, setForm] = useState({ nome: '', descricao: '', linha_id: '' });
   const [imagem, setImagem] = useState<File | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [erroModal, setErroModal] = useState<string | null>(null);
 
-  // Expansão / atributos
+  // Expansão / especificacoes
   const [expandido, setExpandido] = useState<number | null>(null);
-  const [atributosPorProduto, setAtributosPorProduto] = useState<Record<number, AtributoProduto[]>>({});
+  const [especificaçõesPorModelo, setEspecificaçõesPorModelo] = useState<Record<number, EspecificacaoModelo[]>>({});
 
-  // Painel "adicionar atributo"
-  const [adicionandoAtrib, setAdicionandoAtrib] = useState<number | null>(null); // produtoId
-  const [atribEscolhido, setAtribEscolhido] = useState<AtributoGlobal | null>(null);
-  const [opcoesSel, setOpcoesSel] = useState<Set<number>>(new Set());
+  // Painel "adicionar especificacao"
+  const [adicionandoAtrib, setAdicionandoAtrib] = useState<number | null>(null); // modeloId
+  const [especEscolhido, setAtribEscolhido] = useState<EspecificacaoGlobal | null>(null);
+  const [variacoesSel, setOpcoesSel] = useState<Set<number>>(new Set());
   const [obrigNovo, setObrigNovo] = useState(false);
   const [criandoAssoc, setCriandoAssoc] = useState(false);
   const [erroAssoc, setErroAssoc] = useState<string | null>(null);
+
+  // Painel "copiar especificacoes de outro modelo"
+  const [copiandoPara, setCopiandoPara] = useState<number | null>(null); // modeloId destino
+  const [origemEscolhido, setOrigemEscolhido] = useState<number | null>(null);
+  const [copiandoEspecs, setCopiandoEspecs] = useState(false);
+  const [erroCopiar, setErroCopiar] = useState<string | null>(null);
+  const [resultadoCopia, setResultadoCopia] = useState<{ criadas: number; puladas: number } | null>(null);
 
   const carregar = useCallback(async () => {
     setLoading(true);
     try {
       const [pRes, cRes, aRes] = await Promise.all([
-        api.get('/produtos?apenasAtivos=false'),
-        api.get('/categorias?todos=true'),
-        api.get('/atributos'),
+        api.get('/modelos?apenasAtivos=false'),
+        api.get('/linhas?todos=true'),
+        api.get('/especificacoes'),
       ]);
-      setProdutos(pRes.data.produtos);
-      setCategorias(cRes.data.categorias);
-      setAtributosGlobais(aRes.data.atributos);
+      setModelos(pRes.data.modelos);
+      setLinhas(cRes.data.linhas);
+      setEspecificaçõesGlobais(aRes.data.especificacoes);
     } finally { setLoading(false); }
   }, []);
 
   useEffect(() => { carregar(); }, [carregar]);
 
-  // Carrega atributos ao expandir produto
-  const expandirProduto = async (id: number) => {
+  // Carrega especificacoes ao expandir modelo
+  const expandirModelo = async (id: number) => {
     if (expandido === id) { setExpandido(null); return; }
     setExpandido(id);
     setAdicionandoAtrib(null);
-    if (!atributosPorProduto[id]) {
-      const res = await api.get(`/produtos/${id}/atributos`);
-      setAtributosPorProduto(prev => ({ ...prev, [id]: res.data.atributos }));
+    if (!especificaçõesPorModelo[id]) {
+      const res = await api.get(`/modelos/${id}/especificacoes`);
+      setEspecificaçõesPorModelo(prev => ({ ...prev, [id]: res.data.especificacoes }));
     }
   };
 
-  const setAtributos = (produtoId: number, fn: (a: AtributoProduto[]) => AtributoProduto[]) =>
-    setAtributosPorProduto(prev => ({ ...prev, [produtoId]: fn(prev[produtoId] ?? []) }));
+  const setEspecificações = (modeloId: number, fn: (a: EspecificacaoModelo[]) => EspecificacaoModelo[]) =>
+    setEspecificaçõesPorModelo(prev => ({ ...prev, [modeloId]: fn(prev[modeloId] ?? []) }));
 
-  // ── CRUD produto ─────────────────────────────────────────────────────────────
+  // ── CRUD modelo ─────────────────────────────────────────────────────────────
   const abrirCriar = () => {
     setEditando(null);
-    setForm({ nome: '', descricao: '', categoria_id: categorias[0]?.id.toString() || '' });
+    setForm({ nome: '', descricao: '', linha_id: linhas[0]?.id.toString() || '' });
     setImagem(null); setErroModal(null); setModal('criar');
   };
 
-  const abrirEditar = (p: Produto) => {
+  const abrirEditar = (p: Modelo) => {
     setEditando(p);
-    setForm({ nome: p.nome, descricao: p.descricao || '', categoria_id: String(p.categoriaId) });
+    setForm({ nome: p.nome, descricao: p.descricao || '', linha_id: String(p.linhaId) });
     setImagem(null); setErroModal(null); setModal('editar');
   };
 
@@ -135,12 +142,12 @@ export default function ProdutosPage() {
       const fd = new FormData();
       fd.append('nome', form.nome);
       fd.append('descricao', form.descricao);
-      fd.append('categoria_id', form.categoria_id);
+      fd.append('linha_id', form.linha_id);
       if (imagem) fd.append('imagem', imagem);
       if (modal === 'criar') {
-        await api.post('/produtos', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        await api.post('/modelos', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       } else if (editando) {
-        await api.put(`/produtos/${editando.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        await api.put(`/modelos/${editando.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       }
       setModal(null); await carregar();
     } catch (e) {
@@ -148,35 +155,35 @@ export default function ProdutosPage() {
     } finally { setSalvando(false); }
   };
 
-  const toggleAtivo = async (p: Produto) => {
-    await api.patch(`/produtos/${p.id}/toggle`);
-    setProdutos(prev => prev.map(x => x.id === p.id ? { ...x, ativo: !x.ativo } : x));
+  const toggleAtivo = async (p: Modelo) => {
+    await api.patch(`/modelos/${p.id}/toggle`);
+    setModelos(prev => prev.map(x => x.id === p.id ? { ...x, ativo: !x.ativo } : x));
   };
 
-  const excluirProduto = async (p: Produto) => {
+  const excluirModelo = async (p: Modelo) => {
     pedirConfirmacao(
-      'Excluir Produto',
+      'Excluir Modelo',
       `Tem certeza que quer excluir "${p.nome}"? Esta ação não pode ser desfeita.`,
       async () => {
-        await api.delete(`/produtos/${p.id}`);
-        setProdutos(prev => prev.filter(x => x.id !== p.id));
+        await api.delete(`/modelos/${p.id}`);
+        setModelos(prev => prev.filter(x => x.id !== p.id));
         if (expandido === p.id) setExpandido(null);
       }
     );
   };
 
-  // ── Gerenciar associações de atributos ────────────────────────────────────────
-  const abrirAdicionarAtrib = (produtoId: number) => {
-    setAdicionandoAtrib(produtoId);
+  // ── Gerenciar associações de especificacoes ────────────────────────────────────────
+  const abrirAdicionarAtrib = (modeloId: number) => {
+    setAdicionandoAtrib(modeloId);
     setAtribEscolhido(null);
     setOpcoesSel(new Set());
     setObrigNovo(false);
     setErroAssoc(null);
   };
 
-  const selecionarAtrib = (atrib: AtributoGlobal) => {
+  const selecionarAtrib = (atrib: EspecificacaoGlobal) => {
     setAtribEscolhido(atrib);
-    setOpcoesSel(new Set(atrib.opcoes.map(o => o.id)));
+    setOpcoesSel(new Set(atrib.variacoes.map(o => o.id)));
   };
 
   const toggleOpcaoSel = (id: number) => {
@@ -187,50 +194,86 @@ export default function ProdutosPage() {
     });
   };
 
-  const confirmarAssociacao = async (produtoId: number) => {
-    if (!atribEscolhido) return;
+  const confirmarAssociacao = async (modeloId: number) => {
+    if (!especEscolhido) return;
     setCriandoAssoc(true); setErroAssoc(null);
     try {
-      const res = await api.post(`/produtos/${produtoId}/atributos`, {
-        atributo_id: atribEscolhido.id,
+      const res = await api.post(`/modelos/${modeloId}/especificacoes`, {
+        especificacao_id: especEscolhido.id,
         obrigatorio: obrigNovo,
-        opcao_ids: Array.from(opcoesSel),
+        variacao_ids: Array.from(variacoesSel),
       });
-      setAtributos(produtoId, a => [...a, res.data.atributo]);
+      setEspecificações(modeloId, a => [...a, res.data.especificacao]);
       setAdicionandoAtrib(null);
     } catch (e) {
       setErroAssoc(errMsg(e));
     } finally { setCriandoAssoc(false); }
   };
 
-  const removerAssociacao = (paId: number, produtoId: number) => {
+  const removerAssociacao = (paId: number, modeloId: number) => {
     pedirConfirmacao(
-      'Remover Atributo',
-      'Tem certeza que quer remover este atributo do produto?',
+      'Remover Especificacao',
+      'Tem certeza que quer remover este especificacao do modelo?',
       async () => {
-        await api.delete(`/produtos/${produtoId}/atributos/${paId}`);
-        setAtributos(produtoId, a => a.filter(x => x.id !== paId));
+        await api.delete(`/modelos/${modeloId}/especificacoes/${paId}`);
+        setEspecificações(modeloId, a => a.filter(x => x.id !== paId));
       }
     );
   };
 
-  const toggleOpcaoProduto = async (pa: AtributoProduto, opcaoId: number, produtoId: number) => {
-    const jaAtivo = pa.opcoes.some(o => o.id === opcaoId);
+  const toggleOpcaoModelo = async (pa: EspecificacaoModelo, variacaoId: number, modeloId: number) => {
+    const jaAtivo = pa.variacoes.some(o => o.id === variacaoId);
     const novasOpcoes = jaAtivo
-      ? pa.opcoes.filter(o => o.id !== opcaoId).map(o => o.id)
-      : [...pa.opcoes.map(o => o.id), opcaoId];
+      ? pa.variacoes.filter(o => o.id !== variacaoId).map(o => o.id)
+      : [...pa.variacoes.map(o => o.id), variacaoId];
 
-    const res = await api.put(`/produtos/${produtoId}/atributos/${pa.id}`, {
-      opcao_ids: novasOpcoes,
+    const res = await api.put(`/modelos/${modeloId}/especificacoes/${pa.id}`, {
+      variacao_ids: novasOpcoes,
     });
-    setAtributos(produtoId, a => a.map(x => x.id === pa.id ? res.data.atributo : x));
+    setEspecificações(modeloId, a => a.map(x => x.id === pa.id ? res.data.especificacao : x));
   };
 
-  const toggleObrigatorio = async (pa: AtributoProduto, produtoId: number) => {
-    const res = await api.put(`/produtos/${produtoId}/atributos/${pa.id}`, {
+  const toggleObrigatorio = async (pa: EspecificacaoModelo, modeloId: number) => {
+    const res = await api.put(`/modelos/${modeloId}/especificacoes/${pa.id}`, {
       obrigatorio: !pa.obrigatorio,
     });
-    setAtributos(produtoId, a => a.map(x => x.id === pa.id ? res.data.atributo : x));
+    setEspecificações(modeloId, a => a.map(x => x.id === pa.id ? res.data.especificacao : x));
+  };
+
+  // ── Copiar especificações de outro modelo ──────────────────────────────────
+  const abrirCopiar = (modeloId: number) => {
+    setCopiandoPara(modeloId);
+    setAdicionandoAtrib(null);
+    setOrigemEscolhido(null);
+    setErroCopiar(null);
+    setResultadoCopia(null);
+  };
+
+  const fecharCopiar = () => {
+    setCopiandoPara(null);
+    setOrigemEscolhido(null);
+    setErroCopiar(null);
+    setResultadoCopia(null);
+  };
+
+  const executarCopiar = async (destinoId: number) => {
+    if (!origemEscolhido) return;
+    setCopiandoEspecs(true);
+    setErroCopiar(null);
+    setResultadoCopia(null);
+    try {
+      const res = await api.post(`/modelos/${destinoId}/especificacoes/copiar`, {
+        origem_id: origemEscolhido,
+      });
+      setEspecificações(destinoId, () => res.data.especificacoes);
+      setResultadoCopia({ criadas: res.data.criadas, puladas: res.data.puladas });
+      // Mantém o painel aberto ~1.5s com o resultado e depois fecha sozinho.
+      setTimeout(fecharCopiar, 1800);
+    } catch (e) {
+      setErroCopiar(errMsg(e));
+    } finally {
+      setCopiandoEspecs(false);
+    }
   };
 
   // ── Render ────────────────────────────────────────────────────────────────────
@@ -238,44 +281,44 @@ export default function ProdutosPage() {
     <div className="flex-1 p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Produtos</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Modelos</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {produtos.length} produto{produtos.length !== 1 ? 's' : ''}
+            {modelos.length} modelo{modelos.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button onClick={abrirCriar}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white text-sm transition-all hover:scale-105"
           style={{ background: '#005ED5' }}>
-          <Plus size={18} /> Novo Produto
+          <Plus size={18} /> Novo Modelo
         </button>
       </div>
 
       {/*
-        Painel resumo de categorias.
+        Painel resumo de linhas.
         Apenas listagem — para criar/editar/desativar, segue link para
-        /admin/categorias (fonte da verdade única).
+        /admin/linhas (fonte da verdade única).
       */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
         <div className="flex items-center gap-3 flex-wrap mb-3">
           <Tag size={16} style={{ color: '#005ED5' }} />
-          <h2 className="font-semibold text-gray-900 text-sm">Categorias</h2>
+          <h2 className="font-semibold text-gray-900 text-sm">Linhas</h2>
           <span className="text-xs text-gray-400">
-            {categorias.length} cadastrada{categorias.length !== 1 ? 's' : ''}
+            {linhas.length} cadastrada{linhas.length !== 1 ? 's' : ''}
           </span>
           <Link
-            href="/admin/categorias"
+            href="/admin/linhas"
             className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:underline"
           >
-            Gerenciar categorias <ExternalLink size={12} />
+            Gerenciar linhas <ExternalLink size={12} />
           </Link>
         </div>
-        {categorias.length === 0 ? (
+        {linhas.length === 0 ? (
           <p className="text-sm text-gray-400">
-            Nenhuma categoria cadastrada. <Link href="/admin/categorias" className="text-blue-600 hover:underline">Cadastre a primeira</Link> para criar produtos.
+            Nenhuma linha cadastrada. <Link href="/admin/linhas" className="text-blue-600 hover:underline">Cadastre a primeira</Link> para criar modelos.
           </p>
         ) : (
           <div className="flex flex-wrap gap-2">
-            {categorias.map(c => (
+            {linhas.map(c => (
               <span key={c.id}
                 className="px-3 py-1.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-800">
                 {c.nome}
@@ -289,27 +332,27 @@ export default function ProdutosPage() {
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 rounded-full border-4 border-blue-200 animate-spin" style={{ borderTopColor: '#005ED5' }} />
         </div>
-      ) : produtos.length === 0 ? (
+      ) : modelos.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
-          <p className="text-lg font-semibold mb-2">Nenhum produto cadastrado</p>
-          <p className="text-sm">Clique em "Novo Produto" para começar</p>
+          <p className="text-lg font-semibold mb-2">Nenhum modelo cadastrado</p>
+          <p className="text-sm">Clique em "Novo Modelo" para começar</p>
         </div>
       ) : (
         <div className="space-y-8">
-          {categorias
-            .filter(c => produtos.some(p => p.categoriaId === c.id))
+          {linhas
+            .filter(c => modelos.some(p => p.linhaId === c.id))
             .map(cat => (
               <div key={cat.id}>
                 <div className="flex items-center gap-3 mb-4">
                   <h2 className="text-base font-bold text-gray-700">{cat.nome}</h2>
                   <div className="flex-1 h-px bg-gray-200" />
                   <span className="text-xs text-gray-400">
-                    {produtos.filter(p => p.categoriaId === cat.id).length} produto{produtos.filter(p => p.categoriaId === cat.id).length !== 1 ? 's' : ''}
+                    {modelos.filter(p => p.linhaId === cat.id).length} modelo{modelos.filter(p => p.linhaId === cat.id).length !== 1 ? 's' : ''}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {produtos.filter(p => p.categoriaId === cat.id).map(p => (
+                  {modelos.filter(p => p.linhaId === cat.id).map(p => (
                     <div key={p.id}
                       className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${p.ativo ? 'border-gray-100' : 'border-gray-200 opacity-60'}`}>
 
@@ -325,9 +368,9 @@ export default function ProdutosPage() {
                           <p className="font-semibold text-gray-900 text-sm truncate">{p.nome}</p>
                           {p.descricao && <p className="text-xs text-gray-500 truncate mt-0.5">{p.descricao}</p>}
                         </div>
-                        <button onClick={() => excluirProduto(p)}
+                        <button onClick={() => excluirModelo(p)}
                           className="flex-shrink-0 p-1.5 rounded-lg text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors"
-                          title="Excluir produto">
+                          title="Excluir modelo">
                           <Trash2 size={15} />
                         </button>
                       </div>
@@ -346,33 +389,33 @@ export default function ProdutosPage() {
                         <div className="flex-1" />
                         <button onClick={() => abrirEditar(p)}
                           className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-blue-600 transition-colors"
-                          title="Editar produto">
+                          title="Editar modelo">
                           <Edit2 size={14} />
                         </button>
-                        <button onClick={() => expandirProduto(p.id)}
+                        <button onClick={() => expandirModelo(p.id)}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
                           style={{
                             background: expandido === p.id ? 'rgba(0,94,213,0.08)' : '#F3F4F6',
                             color: expandido === p.id ? '#005ED5' : '#6B7280',
                           }}>
                           <ChevronDown size={15} className={`transition-transform duration-200 ${expandido === p.id ? 'rotate-180' : ''}`} />
-                          Atributos
+                          Especificacoes
                         </button>
                       </div>
 
-                      {/* Painel de atributos */}
+                      {/* Painel de especificacoes */}
                       {expandido === p.id && (
                         <div className="border-t border-gray-100 px-4 py-4 bg-gray-50 space-y-3">
-                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Atributos do Produto</p>
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Especificacoes do Modelo</p>
 
-                          {/* Atributos associados */}
-                          {(atributosPorProduto[p.id] ?? []).length === 0 && adicionandoAtrib !== p.id && (
-                            <p className="text-sm text-gray-400">Nenhum atributo associado.</p>
+                          {/* Especificacoes associados */}
+                          {(especificaçõesPorModelo[p.id] ?? []).length === 0 && adicionandoAtrib !== p.id && (
+                            <p className="text-sm text-gray-400">Nenhum especificacao associado.</p>
                           )}
 
-                          {(atributosPorProduto[p.id] ?? []).map(pa => {
-                            const global = atributosGlobais.find(a => a.id === pa.atributoId);
-                            const todasOpcoes = global?.opcoes ?? [];
+                          {(especificaçõesPorModelo[p.id] ?? []).map(pa => {
+                            const global = especificaçõesGlobais.find(a => a.id === pa.especificacaoId);
+                            const todasOpcoes = global?.variacoes ?? [];
                             return (
                               <div key={pa.id} className="bg-white rounded-xl border border-gray-200 p-3">
                                 <div className="flex items-center gap-2 mb-2">
@@ -385,18 +428,18 @@ export default function ProdutosPage() {
                                   </button>
                                   <button onClick={() => removerAssociacao(pa.id, p.id)}
                                     className="p-1 rounded text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                    title="Remover atributo do produto">
+                                    title="Remover especificacao do modelo">
                                     <Link2Off size={13} />
                                   </button>
                                 </div>
 
                                 {todasOpcoes.length > 0 ? (
                                   <div className="flex flex-wrap gap-1.5">
-                                    {todasOpcoes.map(opcao => {
-                                      const ativa = pa.opcoes.some(o => o.id === opcao.id);
+                                    {todasOpcoes.map(variacao => {
+                                      const ativa = pa.variacoes.some(o => o.id === variacao.id);
                                       return (
-                                        <button key={opcao.id}
-                                          onClick={() => toggleOpcaoProduto(pa, opcao.id, p.id)}
+                                        <button key={variacao.id}
+                                          onClick={() => toggleOpcaoModelo(pa, variacao.id, p.id)}
                                           className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all border"
                                           style={{
                                             background: ativa ? 'rgba(0,94,213,0.1)' : 'transparent',
@@ -404,64 +447,137 @@ export default function ProdutosPage() {
                                             borderColor: ativa ? 'rgba(0,94,213,0.3)' : '#E5E7EB',
                                           }}>
                                           {ativa && <Check size={9} />}
-                                          {opcao.valor}
+                                          {variacao.valor}
                                         </button>
                                       );
                                     })}
                                   </div>
                                 ) : (
-                                  <p className="text-xs text-gray-400">Sem opções cadastradas neste atributo.</p>
+                                  <p className="text-xs text-gray-400">Sem opções cadastradas neste especificacao.</p>
                                 )}
                               </div>
                             );
                           })}
 
-                          {/* Painel adicionar atributo */}
+                          {/* Painel copiar de outro modelo */}
+                          {copiandoPara === p.id && (
+                            <div className="bg-white rounded-xl border border-dashed border-blue-300 p-3 space-y-3">
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs font-semibold text-gray-600">Copiar especificações de outro modelo</p>
+                                <button
+                                  onClick={fecharCopiar}
+                                  className="p-1 rounded hover:bg-gray-100 text-gray-400"
+                                  aria-label="Fechar"
+                                >
+                                  <X size={13} />
+                                </button>
+                              </div>
+
+                              <select
+                                value={origemEscolhido ?? ''}
+                                onChange={e => setOrigemEscolhido(e.target.value ? parseInt(e.target.value) : null)}
+                                disabled={copiandoEspecs}
+                                className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 bg-white"
+                              >
+                                <option value="">Selecionar modelo de origem…</option>
+                                {linhas.map(c => {
+                                  const modelosLinha = modelos.filter(m => m.linhaId === c.id && m.id !== p.id);
+                                  if (modelosLinha.length === 0) return null;
+                                  return (
+                                    <optgroup key={c.id} label={c.nome}>
+                                      {modelosLinha.map(m => (
+                                        <option key={m.id} value={m.id}>{m.nome}</option>
+                                      ))}
+                                    </optgroup>
+                                  );
+                                })}
+                              </select>
+
+                              {resultadoCopia && (
+                                <div className="text-xs px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-green-700 flex items-center gap-2">
+                                  <Check size={14} />
+                                  <span>
+                                    {resultadoCopia.criadas} {resultadoCopia.criadas === 1 ? 'especificação copiada' : 'especificações copiadas'}
+                                    {resultadoCopia.puladas > 0 && (
+                                      <> · {resultadoCopia.puladas} já {resultadoCopia.puladas === 1 ? 'estava' : 'estavam'} no modelo</>
+                                    )}
+                                  </span>
+                                </div>
+                              )}
+
+                              {erroCopiar && <p className="text-xs text-red-500">{erroCopiar}</p>}
+
+                              <p className="text-xs text-gray-400 leading-relaxed">
+                                Apenas especificações ainda não associadas serão copiadas — as existentes neste modelo são preservadas.
+                              </p>
+
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={fecharCopiar}
+                                  disabled={copiandoEspecs}
+                                  className="flex-1 py-2 rounded-xl text-xs font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  onClick={() => executarCopiar(p.id)}
+                                  disabled={!origemEscolhido || copiandoEspecs || !!resultadoCopia}
+                                  className="flex-1 py-2 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1 disabled:opacity-50 transition-all"
+                                  style={{ background: '#005ED5' }}
+                                >
+                                  {copiandoEspecs ? <Loader2 size={12} className="animate-spin" /> : <Copy size={12} />}
+                                  Copiar
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Painel adicionar especificacao */}
                           {adicionandoAtrib === p.id ? (
                             <div className="bg-white rounded-xl border border-dashed border-blue-300 p-3 space-y-3">
-                              <p className="text-xs font-semibold text-gray-600">Selecionar atributo</p>
+                              <p className="text-xs font-semibold text-gray-600">Selecionar especificacao</p>
 
-                              {/* Picker de atributo */}
+                              {/* Picker de especificacao */}
                               <div className="flex flex-wrap gap-2">
-                                {atributosGlobais
-                                  .filter(ag => !(atributosPorProduto[p.id] ?? []).some(pa => pa.atributoId === ag.id))
+                                {especificaçõesGlobais
+                                  .filter(ag => !(especificaçõesPorModelo[p.id] ?? []).some(pa => pa.especificacaoId === ag.id))
                                   .map(ag => (
                                     <button key={ag.id}
                                       onClick={() => selecionarAtrib(ag)}
                                       className="px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-all"
                                       style={{
-                                        borderColor: atribEscolhido?.id === ag.id ? '#005ED5' : '#E5E7EB',
-                                        background: atribEscolhido?.id === ag.id ? 'rgba(0,94,213,0.1)' : '#fff',
-                                        color: atribEscolhido?.id === ag.id ? '#005ED5' : '#374151',
+                                        borderColor: especEscolhido?.id === ag.id ? '#005ED5' : '#E5E7EB',
+                                        background: especEscolhido?.id === ag.id ? 'rgba(0,94,213,0.1)' : '#fff',
+                                        color: especEscolhido?.id === ag.id ? '#005ED5' : '#374151',
                                       }}>
                                       {ag.nome}
                                     </button>
                                   ))}
-                                {atributosGlobais.filter(ag => !(atributosPorProduto[p.id] ?? []).some(pa => pa.atributoId === ag.id)).length === 0 && (
-                                  <p className="text-xs text-gray-400">Todos os atributos já estão associados a este produto.</p>
+                                {especificaçõesGlobais.filter(ag => !(especificaçõesPorModelo[p.id] ?? []).some(pa => pa.especificacaoId === ag.id)).length === 0 && (
+                                  <p className="text-xs text-gray-400">Todos os especificacoes já estão associados a este modelo.</p>
                                 )}
                               </div>
 
-                              {/* Opcoes do atributo escolhido */}
-                              {atribEscolhido && (
+                              {/* Variacoes do especificacao escolhido */}
+                              {especEscolhido && (
                                 <div>
                                   <p className="text-xs font-semibold text-gray-500 mb-1.5">
-                                    Opções habilitadas para este produto:
+                                    Opções habilitadas para este modelo:
                                   </p>
-                                  {atribEscolhido.opcoes.length === 0 ? (
-                                    <p className="text-xs text-gray-400">Este atributo não tem opções cadastradas.</p>
+                                  {especEscolhido.variacoes.length === 0 ? (
+                                    <p className="text-xs text-gray-400">Este especificacao não tem opções cadastradas.</p>
                                   ) : (
                                     <div className="flex flex-wrap gap-2">
-                                      {atribEscolhido.opcoes.map(op => (
+                                      {especEscolhido.variacoes.map(op => (
                                         <button key={op.id}
                                           onClick={() => toggleOpcaoSel(op.id)}
                                           className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border-2 transition-all"
                                           style={{
-                                            borderColor: opcoesSel.has(op.id) ? '#005ED5' : '#E5E7EB',
-                                            background: opcoesSel.has(op.id) ? 'rgba(0,94,213,0.1)' : '#fff',
-                                            color: opcoesSel.has(op.id) ? '#005ED5' : '#9CA3AF',
+                                            borderColor: variacoesSel.has(op.id) ? '#005ED5' : '#E5E7EB',
+                                            background: variacoesSel.has(op.id) ? 'rgba(0,94,213,0.1)' : '#fff',
+                                            color: variacoesSel.has(op.id) ? '#005ED5' : '#9CA3AF',
                                           }}>
-                                          {opcoesSel.has(op.id) && <Check size={9} />}
+                                          {variacoesSel.has(op.id) && <Check size={9} />}
                                           {op.valor}
                                         </button>
                                       ))}
@@ -484,7 +600,7 @@ export default function ProdutosPage() {
                                 </button>
                                 <button
                                   onClick={() => confirmarAssociacao(p.id)}
-                                  disabled={!atribEscolhido || criandoAssoc}
+                                  disabled={!especEscolhido || criandoAssoc}
                                   className="flex-1 py-2 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1 disabled:opacity-50 transition-all"
                                   style={{ background: '#005ED5' }}>
                                   {criandoAssoc ? <Loader2 size={12} className="animate-spin" /> : <Link2 size={12} />}
@@ -492,12 +608,19 @@ export default function ProdutosPage() {
                                 </button>
                               </div>
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => abrirAdicionarAtrib(p.id)}
-                              className="w-full py-2 rounded-xl text-xs font-semibold border border-dashed border-gray-300 text-gray-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-1.5">
-                              <Plus size={13} /> Adicionar Atributo
-                            </button>
+                          ) : copiandoPara !== p.id && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <button
+                                onClick={() => abrirAdicionarAtrib(p.id)}
+                                className="py-2 rounded-xl text-xs font-semibold border border-dashed border-gray-300 text-gray-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-1.5">
+                                <Plus size={13} /> Adicionar Especificação
+                              </button>
+                              <button
+                                onClick={() => abrirCopiar(p.id)}
+                                className="py-2 rounded-xl text-xs font-semibold border border-dashed border-gray-300 text-gray-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-1.5">
+                                <Copy size={13} /> Copiar de outro modelo
+                              </button>
+                            </div>
                           )}
                         </div>
                       )}
@@ -520,14 +643,14 @@ export default function ProdutosPage() {
         />
       )}
 
-      {/* Modal criar/editar produto */}
+      {/* Modal criar/editar modelo */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.4)' }}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h2 className="font-bold text-gray-900">
-                {modal === 'criar' ? 'Novo Produto' : 'Editar Produto'}
+                {modal === 'criar' ? 'Novo Modelo' : 'Editar Modelo'}
               </h2>
               <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-gray-100">
                 <X size={18} />
@@ -546,10 +669,10 @@ export default function ProdutosPage() {
                   placeholder="Ex: Camiseta Polo" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Categoria *</label>
-                <select value={form.categoria_id} onChange={e => setForm({ ...form, categoria_id: e.target.value })}
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Linha *</label>
+                <select value={form.linha_id} onChange={e => setForm({ ...form, linha_id: e.target.value })}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 bg-white">
-                  {categorias.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                  {linhas.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
                 </select>
               </div>
               <div>
@@ -572,11 +695,11 @@ export default function ProdutosPage() {
                 <input id="prod-img" type="file" accept="image/*" className="hidden"
                   onChange={e => setImagem(e.target.files?.[0] ?? null)} />
               </div>
-              <button onClick={salvar} disabled={salvando || !form.nome || !form.categoria_id}
+              <button onClick={salvar} disabled={salvando || !form.nome || !form.linha_id}
                 className="w-full py-2.5 rounded-xl font-semibold text-white text-sm flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02]"
                 style={{ background: '#005ED5' }}>
                 {salvando ? <Loader2 size={16} className="animate-spin" /> : null}
-                {salvando ? 'Salvando...' : 'Salvar Produto'}
+                {salvando ? 'Salvando...' : 'Salvar Modelo'}
               </button>
             </div>
           </div>

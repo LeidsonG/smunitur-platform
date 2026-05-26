@@ -8,7 +8,7 @@ const faqs = [
   {
     pergunta: 'Qual é a quantidade mínima para pedido?',
     resposta:
-      'Aceitamos pedidos a partir de 1 peça para a maioria dos produtos. Para técnicas como silk screen, recomendamos pedidos acima de 50 unidades para melhor custo-benefício. Entre em contato para verificar a disponibilidade do seu pedido.',
+      'Aceitamos pedidos a partir de 1 peça para a maioria dos modelos. Para técnicas como silk screen, recomendamos pedidos acima de 50 unidades para melhor custo-benefício. Entre em contato para verificar a disponibilidade do seu pedido.',
   },
   {
     pergunta: 'Como funciona o processo de orçamento?',
@@ -18,7 +18,7 @@ const faqs = [
   {
     pergunta: 'Qual é o prazo de produção?',
     resposta:
-      'O prazo varia conforme o tipo de produto, técnica e quantidade. Em média, pedidos simples levam de 7 a 15 dias úteis após aprovação. Casos urgentes podem ser analisados — fale conosco.',
+      'O prazo varia conforme o tipo de modelo, técnica e quantidade. Em média, pedidos simples levam de 7 a 15 dias úteis após aprovação. Casos urgentes podem ser analisados — fale conosco.',
   },
   {
     pergunta: 'Posso enviar minha arte/logo?',

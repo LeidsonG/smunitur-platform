@@ -54,9 +54,9 @@ frontend/src/
 │       ├── dashboard/page.tsx
 │       ├── orcamentos/page.tsx
 │       ├── producao/page.tsx
-│       ├── produtos/page.tsx
-│       ├── categorias/page.tsx
-│       ├── atributos/page.tsx
+│       ├── modelos/page.tsx
+│       ├── linhas/page.tsx
+│       ├── especificações/page.tsx
 │       ├── usuarios/page.tsx
 │       └── perfil/page.tsx
 ├── components/
@@ -65,7 +65,7 @@ frontend/src/
 │   │   └── ConfirmModal.tsx
 │   └── landing/
 │       ├── Hero.tsx           Header, Sobre, FAQ, Footer,
-│       ├── Produtos.tsx       Acompanhamento, Contato,
+│       ├── Modelos.tsx       Acompanhamento, Contato,
 │       ├── FormularioOrcamento.tsx  Servicos, Reveal (anim wrapper)
 │       └── ...
 └── lib/
@@ -94,9 +94,9 @@ backend/src/
 │   ├── auth.ts         → login, /me, foto perfil, change-password
 │   ├── orcamentos.ts   → POST público, GET acompanhar, CRUD admin
 │   ├── producao.ts     → lista esteira + histórico (status via /orcamentos)
-│   ├── produtos.ts     → CRUD + gestão de atributos por produto
-│   ├── categorias.ts   → CRUD
-│   ├── atributos.ts    → biblioteca global de atributos e opções
+│   ├── modelos.ts     → CRUD + gestão de especificações por modelo
+│   ├── linhas.ts   → CRUD
+│   ├── especificações.ts    → biblioteca global de especificações e variações
 │   └── admin.ts        → dashboard + CRUD de usuários
 └── utils/
     ├── env.ts          → valida e expõe variáveis de ambiente
@@ -112,22 +112,22 @@ backend/src/
 ```mermaid
 erDiagram
     UsuarioAdmin ||--o{ OrcamentoStatusHistorico : autor
-    Categoria ||--o{ Produto : "1..N"
-    Produto ||--o{ ProdutoAtributo : "1..N"
-    Atributo ||--o{ OpcaoAtributo : "1..N"
-    Atributo ||--o{ ProdutoAtributo : "1..N"
-    ProdutoAtributo ||--o{ ProdutoAtributoOpcao : "1..N"
-    OpcaoAtributo ||--o{ ProdutoAtributoOpcao : "1..N"
-    Orcamento ||--o{ OrcamentoAtributo : "1..N"
+    Linha ||--o{ Modelo : "1..N"
+    Modelo ||--o{ ModeloEspecificacao : "1..N"
+    Especificação ||--o{ Variacao : "1..N"
+    Especificação ||--o{ ModeloEspecificacao : "1..N"
+    ModeloEspecificacao ||--o{ ModeloEspecificacaoVariacao : "1..N"
+    Variacao ||--o{ ModeloEspecificacaoVariacao : "1..N"
+    Orcamento ||--o{ OrcamentoEspecificacao : "1..N"
     Orcamento ||--o{ OrcamentoStatusHistorico : "1..N"
-    ProdutoAtributo ||--o{ OrcamentoAtributo : "0..N (SetNull)"
-    OpcaoAtributo ||--o{ OrcamentoAtributo : "0..N (SetNull)"
+    ModeloEspecificacao ||--o{ OrcamentoEspecificacao : "0..N (SetNull)"
+    Variacao ||--o{ OrcamentoEspecificacao : "0..N (SetNull)"
 ```
 
 **Decisões importantes**:
 
-- **Atributos globais reutilizáveis**: "Tipo de Gola" é cadastrado uma vez e associado a Camiseta Polo, Camiseta Básica etc. Cada produto escolhe **quais opções** daquele atributo expõe ao cliente (via `ProdutoAtributoOpcao`).
-- **`OrcamentoAtributo` com FKs em `SetNull`**: se uma opção for excluída no futuro, o orçamento antigo perde a referência mas o registro permanece — auditoria preservada. Use o campo `valorLivre` como snapshot textual quando precisar dessa garantia.
+- **Especificações globais reutilizáveis**: "Tipo de Gola" é cadastrado uma vez e associado a Camiseta Polo, Camiseta Básica etc. Cada modelo escolhe **quais variações** daquele especificação expõe ao cliente (via `ModeloEspecificacaoVariacao`).
+- **`OrcamentoEspecificacao` com FKs em `SetNull`**: se uma variação for excluída no futuro, o orçamento antigo perde a referência mas o registro permanece — auditoria preservada. Use o campo `valorLivre` como snapshot textual quando precisar dessa garantia.
 - **Sem entidade Cliente**: nome/e-mail/telefone são copiados em cada orçamento. Trade-off conhecido — virou item para uma próxima versão (ver [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md)).
 - **`Orcamento.numero`**: começa em 100, auto-incrementado pela aplicação (não pelo banco), para gerar IDs amigáveis ao cliente.
 - **`Orcamento.tamanhos`** e **`Orcamento.cores`**: strings concatenadas (`"PP: 5, P: 10"`). O frontend já estrutura no momento da entrada — normalizar isso virou item para uma próxima versão.
@@ -138,18 +138,18 @@ erDiagram
 ## Fluxo: cliente envia orçamento
 
 ```
-1. Cliente abre /  →  Hero, Produtos, Formulário, Contato, FAQ
+1. Cliente abre /  →  Hero, Modelos, Formulário, Contato, FAQ
 2. Clica "Solicitar orçamento" → FormularioOrcamento (3 etapas)
-   Etapa 1 — Produto:    GET /api/categorias (apenas ativas com produtos)
-                         GET /api/produtos?categoria=ID
-                         GET /api/produtos/:id/atributos
+   Etapa 1 — Modelo:    GET /api/linhas (apenas ativas com modelos)
+                         GET /api/modelos?linha=ID
+                         GET /api/modelos/:id/especificações
    Etapa 2 — Detalhes:   tamanhos (matriz local), cores, imagens
    Etapa 3 — Dados:      nome, email, telefone, CPF/CNPJ opcional
 3. Submit:               POST /api/orcamentos  (multipart/form-data)
                          → validação: nome, email, qtd >= 1
                          → magic bytes nas imagens
                          → resize via sharp (max 2000px)
-                         → cria Orcamento + OrcamentoAtributo[] +
+                         → cria Orcamento + OrcamentoEspecificacao[] +
                            OrcamentoStatusHistorico("recebido")
 4. Resposta:             retorna `{orcamento: {numero, ...}}`
 5. Front gera:           link wa.me/NUMERO?text=mensagem_codificada
@@ -196,7 +196,7 @@ requireNivel(['super_admin'])
 
 **Níveis**:
 - `super_admin` — full access (CRUD usuários, redefinir senhas)
-- `admin` — gerencia conteúdo (categorias, atributos, produtos, lê usuários)
+- `admin` — gerencia conteúdo (linhas, especificações, modelos, lê usuários)
 - `operador` — apenas orçamentos e produção
 
 ---
@@ -224,7 +224,7 @@ Decisões registradas em [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-
 - Prazo de entrega no orçamento
 - Etapas granulares de produção (corte/costura/acabamento)
 - Notificação automática por e-mail/WhatsApp ao mudar status
-- FK forte de produto/categoria no orçamento
+- FK forte de modelo/linha no orçamento
 - Anexar "layout final" para o cliente visualizar
 
 A versão atual foca em estabilidade, segurança e operação. Features de negócio adicionais entram em branches separadas após o lançamento e validação com o cliente real.

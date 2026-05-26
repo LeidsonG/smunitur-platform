@@ -24,7 +24,7 @@ router.get('/', authMiddleware, async (_req: AuthRequest, res: Response) => {
     orderBy: { updatedAt: 'asc' },
     select: {
       id: true, numero: true, nomeCliente: true,
-      produtoDesejado: true, quantidade: true, status: true,
+      modeloDesejado: true, quantidade: true, status: true,
       createdAt: true, updatedAt: true,
     },
   });

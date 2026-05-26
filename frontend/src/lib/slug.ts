@@ -1,5 +1,5 @@
 /**
- * Gera um slug seguro a partir de um texto livre (ex.: nome de categoria).
+ * Gera um slug seguro a partir de um texto livre (ex.: nome de linha).
  *
  * Regras:
  *   - tudo em minúsculas

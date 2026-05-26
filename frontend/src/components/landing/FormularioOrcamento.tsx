@@ -17,10 +17,10 @@ import Reveal from './Reveal';
 const TAMANHOS_PADRAO = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
-interface Categoria { id: number; nome: string; slug: string }
-interface Produto { id: number; nome: string; descricao?: string }
-interface Opcao { id: number; valor: string; imagem?: string | null }
-interface Atributo { id: number; nome: string; obrigatorio: boolean; opcoes: Opcao[] }
+interface Linha { id: number; nome: string; slug: string }
+interface Modelo { id: number; nome: string; descricao?: string }
+interface Variacao { id: number; valor: string; imagem?: string | null }
+interface Especificacao { id: number; nome: string; obrigatorio: boolean; variacoes: Variacao[] }
 
 const ICONE_CATEGORIA: Record<string, React.ElementType> = {
   camisetas: Shirt,
@@ -36,7 +36,7 @@ const schema = z.object({
   // when the user has not typed anything yet.
   email_cliente: z.string().min(1, 'E-mail obrigatório').email('E-mail inválido'),
   cpf_cnpj: z.string().optional(),
-  produto_desejado: z.string().min(1, 'Selecione um produto'),
+  modelo_desejado: z.string().min(1, 'Selecione um modelo'),
   quantidade: z.string(),
   tamanhos: z.string().optional(),
   cores: z.string().optional(),
@@ -58,13 +58,13 @@ export default function FormularioOrcamento() {
   const [step, setStep] = useState(1);
   const [dir, setDir] = useState(1); // 1=avança, -1=volta
 
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [catSelecionada, setCatSelecionada] = useState<Categoria | null>(null);
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
-  const [atributos, setAtributos] = useState<Atributo[]>([]);
-  const [atributoValues, setAtributoValues] = useState<Record<number, string>>({});
-  const [atributoErrors, setAtributoErrors] = useState<Record<number, string>>({});
+  const [linhas, setLinhas] = useState<Linha[]>([]);
+  const [catSelecionada, setCatSelecionada] = useState<Linha | null>(null);
+  const [modelos, setModelos] = useState<Modelo[]>([]);
+  const [modeloSelecionado, setModeloSelecionado] = useState<Modelo | null>(null);
+  const [especificacoes, setEspecificações] = useState<Especificacao[]>([]);
+  const [especificaçãoValues, setEspecificaçãoValues] = useState<Record<number, string>>({});
+  const [especificaçãoErrors, setEspecificaçãoErrors] = useState<Record<number, string>>({});
   const [quantidade, setQuantidade] = useState(0);
   const [imagemFiles, setImagemFiles] = useState<File[]>([]);
   const [estado, setEstado] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -77,7 +77,7 @@ export default function FormularioOrcamento() {
       telefone_cliente: '',
       email_cliente: '',
       cpf_cnpj: '',
-      produto_desejado: '',
+      modelo_desejado: '',
       quantidade: '0',
       tamanhos: '',
       cores: '',
@@ -87,55 +87,55 @@ export default function FormularioOrcamento() {
   });
 
   useEffect(() => {
-    api.get('/categorias').then(r => setCategorias(r.data.categorias)).catch(() => {});
+    api.get('/linhas').then(r => setLinhas(r.data.linhas)).catch(() => {});
   }, []);
 
-  // Busca produtos quando uma categoria é selecionada
+  // Busca modelos quando uma linha é selecionada
   useEffect(() => {
-    setProdutoSelecionado(null);
-    setAtributos([]);
-    setAtributoValues({});
-    setAtributoErrors({});
+    setModeloSelecionado(null);
+    setEspecificações([]);
+    setEspecificaçãoValues({});
+    setEspecificaçãoErrors({});
     if (catSelecionada) {
-      api.get(`/produtos?categoria=${catSelecionada.id}`)
-        .then(r => setProdutos(r.data.produtos))
-        .catch(() => setProdutos([]));
+      api.get(`/modelos?linha=${catSelecionada.id}`)
+        .then(r => setModelos(r.data.modelos))
+        .catch(() => setModelos([]));
     } else {
-      setProdutos([]);
+      setModelos([]);
     }
   }, [catSelecionada]);
 
-  // Busca atributos quando um produto é selecionado
+  // Busca especificacoes quando um modelo é selecionado
   useEffect(() => {
-    setAtributoValues({});
-    setAtributoErrors({});
-    if (produtoSelecionado) {
-      api.get(`/produtos/${produtoSelecionado.id}/atributos`)
-        .then(r => setAtributos(r.data.atributos))
-        .catch(() => setAtributos([]));
+    setEspecificaçãoValues({});
+    setEspecificaçãoErrors({});
+    if (modeloSelecionado) {
+      api.get(`/modelos/${modeloSelecionado.id}/especificacoes`)
+        .then(r => setEspecificações(r.data.especificacoes))
+        .catch(() => setEspecificações([]));
     } else {
-      setAtributos([]);
+      setEspecificações([]);
     }
-  }, [produtoSelecionado]);
+  }, [modeloSelecionado]);
 
-  const selecionarCategoria = (cat: Categoria | null) => {
+  const selecionarLinha = (cat: Linha | null) => {
     setCatSelecionada(cat);
-    setValue('produto_desejado', cat ? cat.nome : 'Outros (especificar nos detalhes)');
+    setValue('modelo_desejado', cat ? cat.nome : 'Outros (especificar nos detalhes)');
   };
 
-  const selecionarProduto = (produto: Produto) => {
-    setProdutoSelecionado(produto);
-    setValue('produto_desejado', produto.nome);
+  const selecionarModelo = (modelo: Modelo) => {
+    setModeloSelecionado(modelo);
+    setValue('modelo_desejado', modelo.nome);
   };
 
   const avancar = async () => {
     if (step === 1) {
-      const valido = await trigger('produto_desejado');
+      const valido = await trigger('modelo_desejado');
       const errosAtrib: Record<number, string> = {};
-      atributos.forEach(a => {
-        if (a.obrigatorio && !atributoValues[a.id]) errosAtrib[a.id] = 'Obrigatório';
+      especificacoes.forEach(a => {
+        if (a.obrigatorio && !especificaçãoValues[a.id]) errosAtrib[a.id] = 'Obrigatório';
       });
-      if (Object.keys(errosAtrib).length) { setAtributoErrors(errosAtrib); return; }
+      if (Object.keys(errosAtrib).length) { setEspecificaçãoErrors(errosAtrib); return; }
       if (!valido) return;
     }
     setValue('quantidade', String(quantidade));
@@ -152,19 +152,19 @@ export default function FormularioOrcamento() {
       Object.entries(data).forEach(([k, v]) => { if (v) formData.append(k, v as string); });
       imagemFiles.forEach(f => formData.append('imagem_referencia', f));
 
-      const atributosData = atributos
-        .filter(a => atributoValues[a.id])
-        .map(a => ({ atributo_id: a.id, opcao_id: parseInt(atributoValues[a.id]) }));
-      if (atributosData.length) formData.append('atributos', JSON.stringify(atributosData));
+      const especificaçõesData = especificacoes
+        .filter(a => especificaçãoValues[a.id])
+        .map(a => ({ especificacao_id: a.id, variacao_id: parseInt(especificaçãoValues[a.id]) }));
+      if (especificaçõesData.length) formData.append('especificacoes', JSON.stringify(especificaçõesData));
 
       const res = await api.post('/orcamentos', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       const orc = res.data.orcamento;
-      const atributosTexto = atributos
-        .filter(a => atributoValues[a.id])
-        .map(a => `${a.nome}: ${a.opcoes.find(o => o.id === parseInt(atributoValues[a.id]))?.valor ?? ''}`)
+      const especificaçõesTexto = especificacoes
+        .filter(a => especificaçãoValues[a.id])
+        .map(a => `${a.nome}: ${a.variacoes.find(o => o.id === parseInt(especificaçãoValues[a.id]))?.valor ?? ''}`)
         .join('\n');
 
       const link = gerarLinkWhatsApp({
@@ -173,12 +173,12 @@ export default function FormularioOrcamento() {
         telefoneCliente: data.telefone_cliente,
         emailCliente: data.email_cliente,
         cpfCnpj: data.cpf_cnpj || undefined,
-        categoria: catSelecionada?.nome,
-        produtoDesejado: produtoSelecionado?.nome ?? data.produto_desejado,
+        linha: catSelecionada?.nome,
+        modeloDesejado: modeloSelecionado?.nome ?? data.modelo_desejado,
         quantidade: parseInt(data.quantidade),
         tamanhos: data.tamanhos || undefined,
         cores: data.cores || undefined,
-        especificacoes: atributosTexto || undefined,
+        especificacoes: especificaçõesTexto || undefined,
         detalhes: data.detalhes || undefined,
         observacoes: data.observacoes || undefined,
       });
@@ -215,7 +215,7 @@ export default function FormularioOrcamento() {
                 💬 Confirmar pelo WhatsApp
               </a>
               <button type="button"
-                onClick={() => { setEstado('idle'); setResultado(null); setStep(1); setCatSelecionada(null); setProdutoSelecionado(null); setImagemFiles([]); }}
+                onClick={() => { setEstado('idle'); setResultado(null); setStep(1); setCatSelecionada(null); setModeloSelecionado(null); setImagemFiles([]); }}
                 className="px-6 py-3 rounded-full font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50">
                 Novo Orçamento
               </button>
@@ -262,18 +262,18 @@ export default function FormularioOrcamento() {
                   <motion.div key={step} {...stepAnim(dir)}>
                     {step === 1 && (
                       <Etapa1
-                        categorias={categorias}
+                        linhas={linhas}
                         catSelecionada={catSelecionada}
-                        onSelectCat={selecionarCategoria}
-                        produtos={produtos}
-                        produtoSelecionado={produtoSelecionado}
-                        onSelectProduto={selecionarProduto}
-                        atributos={atributos}
-                        atributoValues={atributoValues}
-                        setAtributoValues={setAtributoValues}
-                        atributoErrors={atributoErrors}
-                        setAtributoErrors={setAtributoErrors}
-                        erroProduto={errors.produto_desejado?.message}
+                        onSelectCat={selecionarLinha}
+                        modelos={modelos}
+                        modeloSelecionado={modeloSelecionado}
+                        onSelectModelo={selecionarModelo}
+                        especificacoes={especificacoes}
+                        especificaçãoValues={especificaçãoValues}
+                        setEspecificaçãoValues={setEspecificaçãoValues}
+                        especificaçãoErrors={especificaçãoErrors}
+                        setEspecificaçãoErrors={setEspecificaçãoErrors}
+                        erroModelo={errors.modelo_desejado?.message}
                         register={register}
                       />
                     )}
@@ -291,9 +291,9 @@ export default function FormularioOrcamento() {
                         register={register}
                         errors={errors}
                         catSelecionada={catSelecionada}
-                        produtoSelecionado={produtoSelecionado}
-                        atributos={atributos}
-                        atributoValues={atributoValues}
+                        modeloSelecionado={modeloSelecionado}
+                        especificacoes={especificacoes}
+                        especificaçãoValues={especificaçãoValues}
                         quantidade={quantidade}
                       />
                     )}
@@ -340,7 +340,7 @@ export default function FormularioOrcamento() {
 
 // ─── Indicador de passos ──────────────────────────────────────────────────────
 function StepIndicator({ step }: { step: number }) {
-  const labels = ['Produto', 'Detalhes', 'Seus Dados'];
+  const labels = ['Modelo', 'Detalhes', 'Seus Dados'];
   return (
     <div className="px-6 sm:px-8 pt-7 pb-5">
       <div className="flex items-center gap-0">
@@ -377,33 +377,33 @@ function StepIndicator({ step }: { step: number }) {
   );
 }
 
-// ─── Etapa 1: Produto ─────────────────────────────────────────────────────────
-function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSelecionado, onSelectProduto,
-  atributos, atributoValues, setAtributoValues, atributoErrors, setAtributoErrors, erroProduto, register }:
+// ─── Etapa 1: Modelo ─────────────────────────────────────────────────────────
+function Etapa1({ linhas, catSelecionada, onSelectCat, modelos, modeloSelecionado, onSelectModelo,
+  especificacoes, especificaçãoValues, setEspecificaçãoValues, especificaçãoErrors, setEspecificaçãoErrors, erroModelo, register }:
 {
-  categorias: Categoria[];
-  catSelecionada: Categoria | null;
-  onSelectCat: (c: Categoria | null) => void;
-  produtos: Produto[];
-  produtoSelecionado: Produto | null;
-  onSelectProduto: (p: Produto) => void;
-  atributos: Atributo[];
-  atributoValues: Record<number, string>;
-  setAtributoValues: React.Dispatch<React.SetStateAction<Record<number, string>>>;
-  atributoErrors: Record<number, string>;
-  setAtributoErrors: React.Dispatch<React.SetStateAction<Record<number, string>>>;
-  erroProduto?: string;
+  linhas: Linha[];
+  catSelecionada: Linha | null;
+  onSelectCat: (c: Linha | null) => void;
+  modelos: Modelo[];
+  modeloSelecionado: Modelo | null;
+  onSelectModelo: (p: Modelo) => void;
+  especificacoes: Especificacao[];
+  especificaçãoValues: Record<number, string>;
+  setEspecificaçãoValues: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+  especificaçãoErrors: Record<number, string>;
+  setEspecificaçãoErrors: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+  erroModelo?: string;
   register: ReturnType<typeof useForm<FormData>>['register'];
 }) {
   return (
     <div>
       <p className="text-sm font-semibold text-gray-500 mb-1">Etapa 1 de 3</p>
-      <h3 className="text-xl font-black text-gray-900 mb-5">Qual produto você precisa?</h3>
+      <h3 className="text-xl font-black text-gray-900 mb-5">Qual modelo você precisa?</h3>
 
-      {/* Cards de categoria */}
-      <input type="hidden" {...register('produto_desejado')} />
+      {/* Cards de linha */}
+      <input type="hidden" {...register('modelo_desejado')} />
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
-        {categorias.map(cat => {
+        {linhas.map(cat => {
           const Icon = ICONE_CATEGORIA[cat.slug] ?? Package;
           const ativo = catSelecionada?.id === cat.id;
           return (
@@ -436,27 +436,27 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSele
         </button>
       </div>
 
-      {erroProduto && <p className="text-xs text-red-500 mb-4">{erroProduto}</p>}
+      {erroModelo && <p className="text-xs text-red-500 mb-4">{erroModelo}</p>}
 
-      {/* Seleção de produto dentro da categoria */}
+      {/* Seleção de modelo dentro da linha */}
       <AnimatePresence>
-        {catSelecionada && produtos.length > 0 && (
+        {catSelecionada && modelos.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 6 }} transition={{ duration: 0.18 }}
             className="border-t border-gray-100 pt-4 mb-4">
             <p className="text-sm font-semibold text-gray-600 mb-2">Qual modelo?</p>
             <div className="flex flex-wrap gap-2">
-              {produtos.map(produto => {
-                const sel = produtoSelecionado?.id === produto.id;
+              {modelos.map(modelo => {
+                const sel = modeloSelecionado?.id === modelo.id;
                 return (
-                  <button key={produto.id} type="button" onClick={() => onSelectProduto(produto)}
+                  <button key={modelo.id} type="button" onClick={() => onSelectModelo(modelo)}
                     className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
                     style={{
                       borderColor: sel ? '#005ED5' : '#E5E7EB',
                       background: sel ? '#005ED5' : '#fff',
                       color: sel ? '#fff' : '#374151',
                     }}>
-                    {produto.nome}
+                    {modelo.nome}
                   </button>
                 );
               })}
@@ -465,27 +465,27 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSele
         )}
       </AnimatePresence>
 
-      {/* Atributos dinâmicos */}
+      {/* Especificacoes dinâmicos */}
       <AnimatePresence>
-        {atributos.length > 0 && (
+        {especificacoes.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.2 }}
             className="space-y-4 border-t border-gray-100 pt-4">
-            {atributos.map(atributo => (
-              <div key={atributo.id}>
+            {especificacoes.map(especificacao => (
+              <div key={especificacao.id}>
                 <p className="text-sm font-semibold text-gray-700 mb-2">
-                  {atributo.nome}
-                  {atributo.obrigatorio && <span className="text-red-500 ml-1">*</span>}
+                  {especificacao.nome}
+                  {especificacao.obrigatorio && <span className="text-red-500 ml-1">*</span>}
                 </p>
-                {atributo.opcoes.some(o => o.imagem) ? (
+                {especificacao.variacoes.some(o => o.imagem) ? (
                   <div className="flex flex-wrap gap-2">
-                    {atributo.opcoes.map(opcao => {
-                      const sel = atributoValues[atributo.id] === String(opcao.id);
+                    {especificacao.variacoes.map(variacao => {
+                      const sel = especificaçãoValues[especificacao.id] === String(variacao.id);
                       return (
-                        <button key={opcao.id} type="button"
+                        <button key={variacao.id} type="button"
                           onClick={() => {
-                            setAtributoValues(p => ({ ...p, [atributo.id]: String(opcao.id) }));
-                            setAtributoErrors(p => { const n = { ...p }; delete n[atributo.id]; return n; });
+                            setEspecificaçãoValues(p => ({ ...p, [especificacao.id]: String(variacao.id) }));
+                            setEspecificaçãoErrors(p => { const n = { ...p }; delete n[especificacao.id]; return n; });
                           }}
                           className="relative flex flex-col rounded-xl border-2 overflow-hidden transition-all duration-150 hover:shadow-md"
                           style={{
@@ -493,9 +493,9 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSele
                             borderColor: sel ? '#005ED5' : '#E5E7EB',
                           }}>
                           <div className="w-full h-16 bg-white flex items-center justify-center">
-                            {opcao.imagem
+                            {variacao.imagem
                               // eslint-disable-next-line @next/next/no-img-element
-                              ? <img src={`${API_BASE}${opcao.imagem}`} alt={opcao.valor} className="w-full h-full object-contain p-1" />
+                              ? <img src={`${API_BASE}${variacao.imagem}`} alt={variacao.valor} className="w-full h-full object-contain p-1" />
                               : <span className="text-gray-300 text-xs">—</span>}
                           </div>
                           {sel && (
@@ -508,7 +508,7 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSele
                             style={{ background: sel ? 'rgba(0,94,213,0.07)' : '#F9FAFB' }}>
                             <span className="text-xs font-semibold truncate block"
                               style={{ color: sel ? '#005ED5' : '#374151' }}>
-                              {opcao.valor}
+                              {variacao.valor}
                             </span>
                           </div>
                         </button>
@@ -517,13 +517,13 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSele
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-2">
-                    {atributo.opcoes.map(opcao => {
-                      const sel = atributoValues[atributo.id] === String(opcao.id);
+                    {especificacao.variacoes.map(variacao => {
+                      const sel = especificaçãoValues[especificacao.id] === String(variacao.id);
                       return (
-                        <button key={opcao.id} type="button"
+                        <button key={variacao.id} type="button"
                           onClick={() => {
-                            setAtributoValues(p => ({ ...p, [atributo.id]: String(opcao.id) }));
-                            setAtributoErrors(p => { const n = { ...p }; delete n[atributo.id]; return n; });
+                            setEspecificaçãoValues(p => ({ ...p, [especificacao.id]: String(variacao.id) }));
+                            setEspecificaçãoErrors(p => { const n = { ...p }; delete n[especificacao.id]; return n; });
                           }}
                           className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
                           style={{
@@ -531,14 +531,14 @@ function Etapa1({ categorias, catSelecionada, onSelectCat, produtos, produtoSele
                             background: sel ? '#005ED5' : '#fff',
                             color: sel ? '#fff' : '#374151',
                           }}>
-                          {opcao.valor}
+                          {variacao.valor}
                         </button>
                       );
                     })}
                   </div>
                 )}
-                {atributoErrors[atributo.id] && (
-                  <p className="mt-1 text-xs text-red-500">{atributoErrors[atributo.id]}</p>
+                {especificaçãoErrors[especificacao.id] && (
+                  <p className="mt-1 text-xs text-red-500">{especificaçãoErrors[especificacao.id]}</p>
                 )}
               </div>
             ))}
@@ -761,22 +761,22 @@ function Etapa2({ setQuantidade, register, setValue, imagemFiles, setImagemFiles
 }
 
 // ─── Etapa 3: Dados do cliente ────────────────────────────────────────────────
-function Etapa3({ register, errors, catSelecionada, produtoSelecionado, atributos, atributoValues, quantidade }:
+function Etapa3({ register, errors, catSelecionada, modeloSelecionado, especificacoes, especificaçãoValues, quantidade }:
 {
   register: ReturnType<typeof useForm<FormData>>['register'];
   errors: ReturnType<typeof useForm<FormData>>['formState']['errors'];
-  catSelecionada: Categoria | null;
-  produtoSelecionado: Produto | null;
-  atributos: Atributo[];
-  atributoValues: Record<number, string>;
+  catSelecionada: Linha | null;
+  modeloSelecionado: Modelo | null;
+  especificacoes: Especificacao[];
+  especificaçãoValues: Record<number, string>;
   quantidade: number;
 }) {
-  const atributosTexto = atributos
-    .filter(a => atributoValues[a.id])
-    .map(a => `${a.nome}: ${a.opcoes.find(o => o.id === parseInt(atributoValues[a.id]))?.valor ?? ''}`)
+  const especificaçõesTexto = especificacoes
+    .filter(a => especificaçãoValues[a.id])
+    .map(a => `${a.nome}: ${a.variacoes.find(o => o.id === parseInt(especificaçãoValues[a.id]))?.valor ?? ''}`)
     .join(' · ');
 
-  const nomeProduto = produtoSelecionado?.nome ?? catSelecionada?.nome ?? 'Outros';
+  const nomeModelo = modeloSelecionado?.nome ?? catSelecionada?.nome ?? 'Outros';
 
   return (
     <div className="space-y-4">
@@ -786,7 +786,7 @@ function Etapa3({ register, errors, catSelecionada, produtoSelecionado, atributo
       </div>
 
       {/* Resumo do pedido */}
-      {(catSelecionada || produtoSelecionado || atributosTexto) && (
+      {(catSelecionada || modeloSelecionado || especificaçõesTexto) && (
         <div className="flex items-start gap-3 p-3 rounded-xl text-sm"
           style={{ background: 'rgba(0,94,213,0.05)', border: '1px solid rgba(0,94,213,0.12)' }}>
           <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
@@ -795,9 +795,9 @@ function Etapa3({ register, errors, catSelecionada, produtoSelecionado, atributo
           </div>
           <div>
             <p className="font-semibold text-gray-800">
-              {nomeProduto} — {quantidade} peças
+              {nomeModelo} — {quantidade} peças
             </p>
-            {atributosTexto && <p className="text-gray-500 text-xs mt-0.5">{atributosTexto}</p>}
+            {especificaçõesTexto && <p className="text-gray-500 text-xs mt-0.5">{especificaçõesTexto}</p>}
           </div>
         </div>
       )}

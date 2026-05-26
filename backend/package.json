@@ -13,6 +13,7 @@
     "db:migrate:status": "prisma migrate status",
     "db:migrate:baseline": "prisma migrate resolve --applied 20260524000000_init",
     "db:seed": "ts-node prisma/seed.ts",
+    "db:seed:demo": "ts-node prisma/seed-demo.ts",
     "db:studio": "prisma studio"
   },
   "prisma": {

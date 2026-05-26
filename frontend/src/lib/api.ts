@@ -31,7 +31,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Redireciona para login se token expirar
+// Redireciona para login se token expirar.
+//
+// Quando o redirect acontece, retornamos uma Promise pendente (que nunca
+// resolve nem rejeita) em vez de Promise.reject. O componente que fez a
+// chamada será desmontado pelo navigation imediatamente em seguida, então
+// não há ninguém para receber o erro — propagar a rejeição apenas geraria
+// `unhandledRejection` em qualquer chamada `useEffect` sem `.catch()`.
+// Fora desse caso (401 fora do /admin, ou outros status) seguimos rejeitando
+// normalmente para que o chamador possa tratar.
 api.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -41,6 +49,7 @@ api.interceptors.response.use(
         localStorage.removeItem('smunitur_token');
         localStorage.removeItem('smunitur_admin');
         window.location.href = '/admin/login';
+        return new Promise(() => { /* nunca resolve — redirect destruirá o componente */ });
       }
     }
     return Promise.reject(err);
