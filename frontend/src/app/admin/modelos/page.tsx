@@ -12,13 +12,13 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
 import {
   Plus, Edit2, Trash2, ToggleLeft, ToggleRight, X,
-  Upload, Loader2, ChevronDown, Check, Link2, Link2Off, Tag, ExternalLink, Copy,
+  Upload, Loader2, ChevronDown, Check, Link2, Link2Off, Copy,
 } from 'lucide-react';
 import api, { API_BASE } from '@/lib/api';
 import ConfirmModal from '@/components/admin/ConfirmModal';
+import LinhasAdmin from '@/components/admin/LinhasAdmin';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 interface Linha { id: number; nome: string; slug: string; ativo: boolean }
@@ -48,6 +48,7 @@ export default function ModelosPage() {
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [especificaçõesGlobais, setEspecificaçõesGlobais] = useState<EspecificacaoGlobal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [aba, setAba] = useState<'modelos' | 'linhas'>('modelos');
 
   // Modal de confirmação genérico (compartilhado entre exclusão de modelo e
   // remoção de associação de especificacao).
@@ -108,6 +109,15 @@ export default function ModelosPage() {
   }, []);
 
   useEffect(() => { carregar(); }, [carregar]);
+
+  // Atualiza linhas ao voltar para a aba Modelos (usuário pode ter editado via LinhasAdmin)
+  useEffect(() => {
+    if (aba === 'modelos') {
+      api.get('/linhas?todos=true')
+        .then(r => setLinhas(r.data.linhas))
+        .catch(() => {});
+    }
+  }, [aba]);
 
   // Carrega especificacoes ao expandir modelo
   const expandirModelo = async (id: number) => {
@@ -279,56 +289,45 @@ export default function ModelosPage() {
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="flex-1 p-6 lg:p-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Modelos</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {modelos.length} modelo{modelos.length !== 1 ? 's' : ''}
-          </p>
+          {aba === 'modelos' && (
+            <p className="text-gray-500 text-sm mt-1">
+              {modelos.length} modelo{modelos.length !== 1 ? 's' : ''}
+            </p>
+          )}
         </div>
-        <button onClick={abrirCriar}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white text-sm transition-all hover:scale-105"
-          style={{ background: '#005ED5' }}>
-          <Plus size={18} /> Novo Modelo
-        </button>
-      </div>
-
-      {/*
-        Painel resumo de linhas.
-        Apenas listagem — para criar/editar/desativar, segue link para
-        /admin/linhas (fonte da verdade única).
-      */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
-        <div className="flex items-center gap-3 flex-wrap mb-3">
-          <Tag size={16} style={{ color: '#005ED5' }} />
-          <h2 className="font-semibold text-gray-900 text-sm">Linhas</h2>
-          <span className="text-xs text-gray-400">
-            {linhas.length} cadastrada{linhas.length !== 1 ? 's' : ''}
-          </span>
-          <Link
-            href="/admin/linhas"
-            className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:underline"
-          >
-            Gerenciar linhas <ExternalLink size={12} />
-          </Link>
-        </div>
-        {linhas.length === 0 ? (
-          <p className="text-sm text-gray-400">
-            Nenhuma linha cadastrada. <Link href="/admin/linhas" className="text-blue-600 hover:underline">Cadastre a primeira</Link> para criar modelos.
-          </p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {linhas.map(c => (
-              <span key={c.id}
-                className="px-3 py-1.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-800">
-                {c.nome}
-              </span>
-            ))}
-          </div>
+        {aba === 'modelos' && (
+          <button onClick={abrirCriar}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white text-sm transition-all hover:scale-105"
+            style={{ background: '#005ED5' }}>
+            <Plus size={18} /> Novo Modelo
+          </button>
         )}
       </div>
 
-      {loading ? (
+      {/* Seletor de abas */}
+      <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 w-fit mb-6">
+        {(['modelos', 'linhas'] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => setAba(t)}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              aba === t
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {t === 'modelos' ? 'Modelos' : 'Linhas'}
+          </button>
+        ))}
+      </div>
+
+      {/* Aba Linhas */}
+      {aba === 'linhas' ? (
+        <LinhasAdmin />
+      ) : loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 rounded-full border-4 border-blue-200 animate-spin" style={{ borderTopColor: '#005ED5' }} />
         </div>

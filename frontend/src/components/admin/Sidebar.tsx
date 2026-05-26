@@ -155,9 +155,9 @@ export default function Sidebar() {
         <Menu size={18} className="text-gray-700" />
       </button>
 
-      {/* Sidebar desktop */}
+      {/* Sidebar desktop — sticky para não rolar com o conteúdo */}
       <aside
-        className="hidden lg:flex flex-col w-64 min-h-screen"
+        className="hidden lg:flex flex-col w-64 h-screen sticky top-0 flex-shrink-0"
         style={{ background: '#0A1628' }}
       >
         {conteudoSidebar}

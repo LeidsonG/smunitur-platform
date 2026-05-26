@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
 import api from '@/lib/api';
 
 export default function LoginPage() {
@@ -36,10 +37,14 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-1 mb-2">
-            <span className="text-3xl font-black text-white">SM</span>
-            <span className="text-3xl font-black" style={{ color: '#FF9400' }}>UNITUR</span>
-          </div>
+          <Image
+            src="/logo.png"
+            alt="SM Unitur"
+            width={180}
+            height={60}
+            className="h-14 w-auto object-contain brightness-0 invert mx-auto mb-3"
+            priority
+          />
           <p className="text-blue-200 text-sm">Painel Administrativo</p>
         </div>
 
@@ -65,7 +70,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
-                  placeholder="admin@smunitur.com.br"
+                  placeholder="Seu e-mail"
                 />
               </div>
             </div>

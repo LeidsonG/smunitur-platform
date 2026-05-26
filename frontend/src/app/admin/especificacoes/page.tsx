@@ -15,14 +15,14 @@ export default function EspecificaçõesPage() {
   const [especificacoes, setEspecificações] = useState<Especificacao[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Modal criar/editar especificacao
+  // Modal criar/editar especificação
   const [modal, setModal] = useState<'criar' | 'editar' | null>(null);
   const [editando, setEditando] = useState<Especificacao | null>(null);
   const [nomeModal, setNomeModal] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [erroModal, setErroModal] = useState<string | null>(null);
 
-  // Variacoes inline
+  // Variações inline
   const [novaOpcao, setNovaOpcao] = useState<Record<number, string>>({});
   const [erroOpcao, setErroOpcao] = useState<Record<number, string>>({});
   const [criandoOpcao, setCriandoOpcao] = useState<number | null>(null);
@@ -59,7 +59,7 @@ export default function EspecificaçõesPage() {
 
   useEffect(() => { carregar(); }, [carregar]);
 
-  // ── CRUD especificacao ─────────────────────────────────────────────────────────────
+  // ── CRUD especificação ─────────────────────────────────────────────────────────
   const abrirCriar = () => {
     setEditando(null); setNomeModal(''); setErroModal(null); setModal('criar');
   };
@@ -89,8 +89,8 @@ export default function EspecificaçõesPage() {
 
   const excluir = (id: number) => {
     pedirConfirmacao(
-      'Excluir Especificacao',
-      'Isso vai excluir o especificacao e todas as suas opções, removendo-o de todos os modelos associados.',
+      'Excluir Especificação',
+      'Isso vai excluir a especificação e todas as suas opções, removendo-a de todos os modelos associados.',
       async () => {
         await api.delete(`/especificacoes/${id}`);
         setEspecificações(prev => prev.filter(a => a.id !== id));
@@ -98,7 +98,7 @@ export default function EspecificaçõesPage() {
     );
   };
 
-  // ── CRUD variacoes ───────────────────────────────────────────────────────────────
+  // ── CRUD variações ────────────────────────────────────────────────────────────
   const criarOpcao = async (especificacaoId: number) => {
     const valor = novaOpcao[especificacaoId]?.trim();
     if (!valor) return;
@@ -170,9 +170,9 @@ export default function EspecificaçõesPage() {
     <div className="flex-1 p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Especificacoes</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Especificações</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Biblioteca global — crie especificacoes aqui e reutilize em qualquer modelo
+            Biblioteca global — crie especificações aqui e reutilize em qualquer modelo
           </p>
         </div>
         <button
@@ -180,7 +180,7 @@ export default function EspecificaçõesPage() {
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white text-sm transition-all hover:scale-105"
           style={{ background: '#005ED5' }}
         >
-          <Plus size={18} /> Novo Especificacao
+          <Plus size={18} /> Nova Especificação
         </button>
       </div>
 
@@ -190,109 +190,138 @@ export default function EspecificaçõesPage() {
         </div>
       ) : especificacoes.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
-          <p className="text-lg font-semibold mb-2">Nenhum especificacao cadastrado</p>
-          <p className="text-sm">Crie especificacoes como "Gola", "Tamanho", "Cor" e depois associe-os a modelos.</p>
+          <p className="text-lg font-semibold mb-2">Nenhuma especificação cadastrada</p>
+          <p className="text-sm">Crie especificações como &quot;Gola&quot;, &quot;Tamanho&quot;, &quot;Cor&quot; e depois associe-as a modelos.</p>
         </div>
       ) : (
         <div className="space-y-4">
           {especificacoes.map(especificacao => (
             <div key={especificacao.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-              {/* Header */}
+
+              {/* Cabeçalho da especificação */}
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(0,94,213,0.1)' }}>
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(0,94,213,0.1)' }}
+                >
                   <Tag size={16} style={{ color: '#005ED5' }} />
                 </div>
                 <h2 className="font-bold text-gray-900 flex-1 text-base">{especificacao.nome}</h2>
                 <span className="text-xs text-gray-400 mr-1">
                   {especificacao.variacoes.length} opç{especificacao.variacoes.length !== 1 ? 'ões' : 'ão'}
                 </span>
-                <button onClick={() => abrirEditar(especificacao)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-blue-600 transition-colors">
-                  <Pencil size={14} />
+                <button
+                  onClick={() => abrirEditar(especificacao)}
+                  className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-blue-600 transition-colors"
+                  title="Editar nome"
+                >
+                  <Pencil size={15} />
                 </button>
-                <button onClick={() => excluir(especificacao.id)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors">
-                  <Trash2 size={14} />
+                <button
+                  onClick={() => excluir(especificacao.id)}
+                  className="p-1.5 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                  title="Excluir especificação"
+                >
+                  <Trash2 size={15} />
                 </button>
               </div>
 
-              {/* Opções existentes — cards com imagem */}
+              {/* Lista de variações — cada opção é uma linha horizontal */}
               {especificacao.variacoes.length > 0 && (
-                <div className="flex flex-wrap gap-3 mb-3">
+                <div className="space-y-1.5 mb-3">
                   {especificacao.variacoes.map(variacao => {
-                    const editando = editandoOpcao?.id === variacao.id && editandoOpcao.especificacaoId === especificacao.id;
+                    const estaEditando = editandoOpcao?.id === variacao.id && editandoOpcao.especificacaoId === especificacao.id;
                     const carregando = enviandoImagem === variacao.id;
                     return (
-                      <div key={variacao.id}
-                        className="group relative flex flex-col rounded-xl border border-gray-200 overflow-hidden bg-white"
-                        style={{ width: 80 }}>
-
-                        {/* Área da imagem */}
-                        <div className="relative h-16 bg-white flex items-center justify-center">
+                      <div
+                        key={variacao.id}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-gray-100 bg-gray-50 hover:border-gray-200 transition-all"
+                      >
+                        {/* Miniatura da imagem — clicável para fazer upload */}
+                        <button
+                          onClick={() => abrirUploadImagem(variacao.id)}
+                          disabled={carregando}
+                          title="Clique para trocar imagem"
+                          className="relative w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 group/img hover:border-blue-300 transition-colors"
+                        >
                           {variacao.imagem
                             // eslint-disable-next-line @next/next/no-img-element
-                            ? <img src={`${API_BASE}${variacao.imagem}`} alt={variacao.valor}
-                                className="w-full h-full object-contain p-1" />
-                            : <div className="text-gray-200 text-xs text-center leading-tight px-1">sem<br/>imagem</div>
+                            ? <img src={`${API_BASE}${variacao.imagem}`} alt={variacao.valor} className="w-full h-full object-contain p-0.5" />
+                            : <div className="text-gray-300 text-[9px] text-center leading-tight select-none">sem<br />img</div>
                           }
-                          {/* Botão câmera sobre a imagem */}
-                          <button
-                            onClick={() => abrirUploadImagem(variacao.id)}
-                            disabled={carregando}
-                            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-100"
-                            style={{ background: 'rgba(0,0,0,0.35)' }}
-                            title="Adicionar/trocar imagem"
+                          <div
+                            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity rounded-lg"
+                            style={{ background: 'rgba(0,0,0,0.38)' }}
                           >
                             {carregando
-                              ? <Loader2 size={16} className="text-white animate-spin" />
-                              : <Camera size={16} className="text-white" />}
-                          </button>
-                        </div>
+                              ? <Loader2 size={13} className="text-white animate-spin" />
+                              : <Camera size={13} className="text-white" />}
+                          </div>
+                        </button>
 
-                        {/* Label / edição */}
-                        <div className="px-1 py-1.5 border-t border-gray-100 bg-gray-50 min-h-[32px] flex items-center justify-center">
-                          {editando ? (
-                            <div className="flex items-center gap-0.5 w-full">
-                              <input
-                                value={editOpcaoValor}
-                                onChange={e => setEditOpcaoValor(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && salvarOpcao(variacao.id, especificacao.id)}
-                                className="w-full text-xs border-b border-blue-400 outline-none bg-transparent text-center"
-                                autoFocus
-                              />
-                              <button onClick={() => salvarOpcao(variacao.id, especificacao.id)} className="text-green-500 flex-shrink-0">
-                                <Check size={11} />
+                        {/* Nome / edição inline */}
+                        {estaEditando ? (
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <input
+                              value={editOpcaoValor}
+                              onChange={e => setEditOpcaoValor(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') salvarOpcao(variacao.id, especificacao.id);
+                                if (e.key === 'Escape') setEditandoOpcao(null);
+                              }}
+                              className="flex-1 text-sm border-b-2 border-blue-400 outline-none bg-transparent text-gray-900 py-0.5"
+                              autoFocus
+                            />
+                            <button
+                              onClick={() => salvarOpcao(variacao.id, especificacao.id)}
+                              className="p-1.5 rounded-lg text-green-600 hover:bg-green-50 transition-colors flex-shrink-0"
+                              title="Confirmar"
+                            >
+                              <Check size={14} />
+                            </button>
+                            <button
+                              onClick={() => setEditandoOpcao(null)}
+                              className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors flex-shrink-0"
+                              title="Cancelar"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="flex-1 min-w-0 text-sm font-medium text-gray-800 truncate">
+                              {variacao.valor}
+                            </span>
+
+                            {/* Botões sempre visíveis */}
+                            <div className="flex items-center gap-0.5 flex-shrink-0">
+                              <button
+                                onClick={() => {
+                                  setEditandoOpcao({ id: variacao.id, especificacaoId: especificacao.id });
+                                  setEditOpcaoValor(variacao.valor);
+                                }}
+                                className="p-1.5 rounded-lg text-gray-400 hover:bg-white hover:text-blue-600 transition-colors"
+                                title="Editar opção"
+                              >
+                                <Pencil size={14} />
                               </button>
-                              <button onClick={() => setEditandoOpcao(null)} className="text-gray-400 flex-shrink-0">
-                                <X size={11} />
+                              <button
+                                onClick={() => excluirOpcao(variacao.id, especificacao.id)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:bg-white hover:text-red-500 transition-colors"
+                                title="Excluir opção"
+                              >
+                                <Trash2 size={14} />
                               </button>
                             </div>
-                          ) : (
-                            <div className="flex items-center justify-between w-full px-0.5 gap-0.5">
-                              <span className="text-xs font-semibold text-gray-700 truncate flex-1 text-center">{variacao.valor}</span>
-                              <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                                <button
-                                  onClick={() => { setEditandoOpcao({ id: variacao.id, especificacaoId: especificacao.id }); setEditOpcaoValor(variacao.valor); }}
-                                  className="p-0.5 rounded hover:text-blue-500 text-gray-400">
-                                  <Pencil size={10} />
-                                </button>
-                                <button
-                                  onClick={() => excluirOpcao(variacao.id, especificacao.id)}
-                                  className="p-0.5 rounded hover:text-red-500 text-gray-400">
-                                  <X size={10} />
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                          </>
+                        )}
                       </div>
                     );
                   })}
                 </div>
               )}
 
-              {/* Nova opção */}
+              {/* Adicionar nova opção */}
               <div className="flex gap-2">
                 <input
                   value={novaOpcao[especificacao.id] ?? ''}
@@ -308,7 +337,8 @@ export default function EspecificaçõesPage() {
                   onClick={() => criarOpcao(especificacao.id)}
                   disabled={criandoOpcao === especificacao.id || !novaOpcao[especificacao.id]?.trim()}
                   className="px-3 py-2 rounded-xl text-sm font-medium text-white disabled:opacity-50 transition-all flex items-center"
-                  style={{ background: '#005ED5' }}>
+                  style={{ background: '#005ED5' }}
+                >
                   {criandoOpcao === especificacao.id
                     ? <Loader2 size={14} className="animate-spin" />
                     : <Plus size={14} />}
@@ -345,14 +375,16 @@ export default function EspecificaçõesPage() {
         />
       )}
 
-      {/* Modal criar/editar */}
+      {/* Modal criar/editar especificação */}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.4)' }}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.4)' }}
+        >
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h2 className="font-bold text-gray-900">
-                {modal === 'criar' ? 'Novo Especificacao' : 'Editar Especificacao'}
+                {modal === 'criar' ? 'Nova Especificação' : 'Editar Especificação'}
               </h2>
               <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-gray-100">
                 <X size={18} />
@@ -379,7 +411,8 @@ export default function EspecificaçõesPage() {
                 onClick={salvar}
                 disabled={salvando || !nomeModal.trim()}
                 className="w-full py-2.5 rounded-xl font-semibold text-white text-sm flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:scale-[1.02]"
-                style={{ background: '#005ED5' }}>
+                style={{ background: '#005ED5' }}
+              >
                 {salvando ? <Loader2 size={16} className="animate-spin" /> : null}
                 {salvando ? 'Salvando...' : 'Salvar'}
               </button>
