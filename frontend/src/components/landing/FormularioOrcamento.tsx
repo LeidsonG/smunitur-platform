@@ -438,113 +438,111 @@ function Etapa1({ linhas, catSelecionada, onSelectCat, modelos, modeloSelecionad
 
       {erroModelo && <p className="text-xs text-red-500 mb-4">{erroModelo}</p>}
 
-      {/* Seleção de modelo dentro da linha */}
-      <AnimatePresence>
-        {catSelecionada && modelos.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }} transition={{ duration: 0.18 }}
-            className="border-t border-gray-100 pt-4 mb-4">
-            <p className="text-sm font-semibold text-gray-600 mb-2">Qual modelo?</p>
-            <div className="flex flex-wrap gap-2">
-              {modelos.map(modelo => {
-                const sel = modeloSelecionado?.id === modelo.id;
-                return (
-                  <button key={modelo.id} type="button" onClick={() => onSelectModelo(modelo)}
-                    className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
-                    style={{
-                      borderColor: sel ? '#005ED5' : '#E5E7EB',
-                      background: sel ? '#005ED5' : '#fff',
-                      color: sel ? '#fff' : '#374151',
-                    }}>
-                    {modelo.nome}
-                  </button>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Seleção de modelo dentro da linha.
+          Render direto (sem AnimatePresence aninhada) — o framer-motion
+          externo da etapa já cuida da transição entre etapas; mais uma
+          camada de animação aqui causava cliques perdidos durante o
+          fade-in dos botões. */}
+      {catSelecionada && modelos.length > 0 && (
+        <div className="border-t border-gray-100 pt-4 mb-4">
+          <p className="text-sm font-semibold text-gray-600 mb-2">Qual modelo?</p>
+          <div className="flex flex-wrap gap-2">
+            {modelos.map(modelo => {
+              const sel = modeloSelecionado?.id === modelo.id;
+              return (
+                <button key={modelo.id} type="button" onClick={() => onSelectModelo(modelo)}
+                  className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
+                  style={{
+                    borderColor: sel ? '#005ED5' : '#E5E7EB',
+                    background: sel ? '#005ED5' : '#fff',
+                    color: sel ? '#fff' : '#374151',
+                  }}>
+                  {modelo.nome}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-      {/* Especificacoes dinâmicos */}
-      <AnimatePresence>
-        {especificacoes.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.2 }}
-            className="space-y-4 border-t border-gray-100 pt-4">
-            {especificacoes.map(especificacao => (
-              <div key={especificacao.id}>
-                <p className="text-sm font-semibold text-gray-700 mb-2">
-                  {especificacao.nome}
-                  {especificacao.obrigatorio && <span className="text-red-500 ml-1">*</span>}
-                </p>
-                {especificacao.variacoes.some(o => o.imagem) ? (
-                  <div className="flex flex-wrap gap-2">
-                    {especificacao.variacoes.map(variacao => {
-                      const sel = especificaçãoValues[especificacao.id] === String(variacao.id);
-                      return (
-                        <button key={variacao.id} type="button"
-                          onClick={() => {
-                            setEspecificaçãoValues(p => ({ ...p, [especificacao.id]: String(variacao.id) }));
-                            setEspecificaçãoErrors(p => { const n = { ...p }; delete n[especificacao.id]; return n; });
-                          }}
-                          className="relative flex flex-col rounded-xl border-2 overflow-hidden transition-all duration-150 hover:shadow-md"
-                          style={{
-                            width: 80,
-                            borderColor: sel ? '#005ED5' : '#E5E7EB',
-                          }}>
-                          <div className="w-full h-16 bg-white flex items-center justify-center">
-                            {variacao.imagem
-                              // eslint-disable-next-line @next/next/no-img-element
-                              ? <img src={`${API_BASE}${variacao.imagem}`} alt={variacao.valor} className="w-full h-full object-contain p-1" />
-                              : <span className="text-gray-300 text-xs">—</span>}
+      {/* Especificações do modelo. Render direto pelo mesmo motivo acima:
+          AnimatePresence interna estava interceptando os primeiros cliques
+          enquanto a animação de entrada terminava. */}
+      {especificacoes.length > 0 && (
+        <div className="space-y-4 border-t border-gray-100 pt-4">
+          {especificacoes.map(especificacao => (
+            <div key={especificacao.id}>
+              <p className="text-sm font-semibold text-gray-700 mb-2">
+                {especificacao.nome}
+                {especificacao.obrigatorio && <span className="text-red-500 ml-1">*</span>}
+              </p>
+              {especificacao.variacoes.some(o => o.imagem) ? (
+                <div className="flex flex-wrap gap-2">
+                  {especificacao.variacoes.map(variacao => {
+                    const sel = especificaçãoValues[especificacao.id] === String(variacao.id);
+                    return (
+                      <button key={variacao.id} type="button"
+                        onClick={() => {
+                          setEspecificaçãoValues(p => ({ ...p, [especificacao.id]: String(variacao.id) }));
+                          setEspecificaçãoErrors(p => { const n = { ...p }; delete n[especificacao.id]; return n; });
+                        }}
+                        className="relative flex flex-col rounded-xl border-2 overflow-hidden transition-all duration-150 hover:shadow-md"
+                        style={{
+                          width: 80,
+                          borderColor: sel ? '#005ED5' : '#E5E7EB',
+                        }}>
+                        <div className="w-full h-16 bg-white flex items-center justify-center">
+                          {variacao.imagem
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={`${API_BASE}${variacao.imagem}`} alt={variacao.valor} className="w-full h-full object-contain p-1" />
+                            : <span className="text-gray-300 text-xs">—</span>}
+                        </div>
+                        {sel && (
+                          <div className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center"
+                            style={{ background: '#005ED5' }}>
+                            <Check size={10} className="text-white" />
                           </div>
-                          {sel && (
-                            <div className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center"
-                              style={{ background: '#005ED5' }}>
-                              <Check size={10} className="text-white" />
-                            </div>
-                          )}
-                          <div className="w-full px-1 py-1.5 border-t border-gray-100 text-center"
-                            style={{ background: sel ? 'rgba(0,94,213,0.07)' : '#F9FAFB' }}>
-                            <span className="text-xs font-semibold truncate block"
-                              style={{ color: sel ? '#005ED5' : '#374151' }}>
-                              {variacao.valor}
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {especificacao.variacoes.map(variacao => {
-                      const sel = especificaçãoValues[especificacao.id] === String(variacao.id);
-                      return (
-                        <button key={variacao.id} type="button"
-                          onClick={() => {
-                            setEspecificaçãoValues(p => ({ ...p, [especificacao.id]: String(variacao.id) }));
-                            setEspecificaçãoErrors(p => { const n = { ...p }; delete n[especificacao.id]; return n; });
-                          }}
-                          className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
-                          style={{
-                            borderColor: sel ? '#005ED5' : '#E5E7EB',
-                            background: sel ? '#005ED5' : '#fff',
-                            color: sel ? '#fff' : '#374151',
-                          }}>
-                          {variacao.valor}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-                {especificaçãoErrors[especificacao.id] && (
-                  <p className="mt-1 text-xs text-red-500">{especificaçãoErrors[especificacao.id]}</p>
-                )}
-              </div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+                        )}
+                        <div className="w-full px-1 py-1.5 border-t border-gray-100 text-center"
+                          style={{ background: sel ? 'rgba(0,94,213,0.07)' : '#F9FAFB' }}>
+                          <span className="text-xs font-semibold truncate block"
+                            style={{ color: sel ? '#005ED5' : '#374151' }}>
+                            {variacao.valor}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {especificacao.variacoes.map(variacao => {
+                    const sel = especificaçãoValues[especificacao.id] === String(variacao.id);
+                    return (
+                      <button key={variacao.id} type="button"
+                        onClick={() => {
+                          setEspecificaçãoValues(p => ({ ...p, [especificacao.id]: String(variacao.id) }));
+                          setEspecificaçãoErrors(p => { const n = { ...p }; delete n[especificacao.id]; return n; });
+                        }}
+                        className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
+                        style={{
+                          borderColor: sel ? '#005ED5' : '#E5E7EB',
+                          background: sel ? '#005ED5' : '#fff',
+                          color: sel ? '#fff' : '#374151',
+                        }}>
+                        {variacao.valor}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {especificaçãoErrors[especificacao.id] && (
+                <p className="mt-1 text-xs text-red-500">{especificaçãoErrors[especificacao.id]}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -563,36 +561,42 @@ function Etapa2({ setQuantidade, register, setValue, imagemFiles, setImagemFiles
   imagemFiles: File[];
   setImagemFiles: React.Dispatch<React.SetStateAction<File[]>>;
 }) {
+  // tamQtd guarda a quantidade por tamanho. Um tamanho está "selecionado"
+  // quando existe como chave (mesmo com qtd 0 enquanto o usuário digita).
   const [tamQtd, setTamQtd] = useState<Record<string, number>>({});
-  const [tamEspecialAberto, setTamEspecialAberto] = useState(false);
-  const [tamEspecialNome, setTamEspecialNome] = useState('');
-  const [tamEspecialQtd, setTamEspecialQtd] = useState<number>(0);
-  const [tamLivre, setTamLivre] = useState('');
   const [imgErro, setImgErro] = useState('');
 
-  const totalTam = TAMANHOS_PADRAO.reduce((s, t) => s + (tamQtd[t] ?? 0), 0) + (tamEspecialQtd || 0);
+  const tamanhosSelecionados = TAMANHOS_PADRAO.filter(t => tamQtd[t] !== undefined);
+  const totalTam = tamanhosSelecionados.reduce((s, t) => s + (tamQtd[t] || 0), 0);
 
-  // Sincroniza tamanhos e quantidade com o form
+  const toggleTamanho = (tam: string) => {
+    setTamQtd(p => {
+      if (p[tam] !== undefined) {
+        // Estava selecionado → remove
+        const novo = { ...p };
+        delete novo[tam];
+        return novo;
+      }
+      // Não estava → inclui com qtd inicial 1
+      return { ...p, [tam]: 1 };
+    });
+  };
+
+  const ajustarQtd = (tam: string, delta: number) => {
+    setTamQtd(p => ({ ...p, [tam]: Math.max(1, (p[tam] || 0) + delta) }));
+  };
+
+  // Sincroniza tamanhos e quantidade total com o form sempre que muda.
   useEffect(() => {
     const partes: string[] = [];
     TAMANHOS_PADRAO.forEach(t => {
-      const q = tamQtd[t] ?? 0;
-      if (q > 0) partes.push(`${t}: ${q}`);
+      const q = tamQtd[t];
+      if (q !== undefined && q > 0) partes.push(`${t}: ${q}`);
     });
-    if (tamEspecialNome.trim()) {
-      partes.push(tamEspecialQtd > 0
-        ? `${tamEspecialNome.trim()}: ${tamEspecialQtd}`
-        : tamEspecialNome.trim());
-    }
-    if (tamLivre.trim()) partes.push(tamLivre.trim());
     setValue('tamanhos', partes.join(', ') || '');
-
-    const total = TAMANHOS_PADRAO.reduce((s, t) => s + (tamQtd[t] ?? 0), 0) + (tamEspecialQtd || 0);
-    if (total > 0) {
-      setQuantidade(total);
-      setValue('quantidade', String(total));
-    }
-  }, [tamQtd, tamEspecialNome, tamEspecialQtd, tamLivre, setValue, setQuantidade]);
+    setQuantidade(totalTam);
+    setValue('quantidade', String(totalTam));
+  }, [tamQtd, totalTam, setValue, setQuantidade]);
 
   const adicionarImagens = (files: FileList | null) => {
     if (!files) return;
@@ -622,86 +626,95 @@ function Etapa2({ setQuantidade, register, setValue, imagemFiles, setImagemFiles
         </div>
       )}
 
-      {/* Tamanhos */}
+      {/* Tamanhos: passo 1 = seleção, passo 2 = quantidade */}
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-2">
-          Tamanhos <span className="font-normal text-gray-400 text-xs">— clique para selecionar</span>
+        <p className="text-sm font-semibold text-gray-700 mb-1">
+          Quais tamanhos você precisa?
         </p>
-        <div className="flex flex-wrap gap-2 mb-3">
+        <p className="text-xs text-gray-400 mb-3">
+          Toque para escolher — o campo de quantidade aparece em seguida.
+        </p>
+        <div className="flex flex-wrap gap-2">
           {TAMANHOS_PADRAO.map(tam => {
-            const qtd = tamQtd[tam] ?? 0;
-            const ativo = qtd > 0;
-            return ativo ? (
-              <div key={tam}
-                className="flex items-center rounded-xl border-2 overflow-hidden transition-all duration-150"
-                style={{ borderColor: '#005ED5' }}>
-                <button type="button"
-                  onClick={() => setTamQtd(p => ({ ...p, [tam]: 0 }))}
-                  className="px-3 py-2 text-sm font-bold text-white"
-                  style={{ background: '#005ED5' }}
-                  title="Clique para remover">
-                  {tam}
-                </button>
-                <input
-                  type="number" min={1} value={qtd}
-                  onChange={e => setTamQtd(p => ({ ...p, [tam]: Math.max(1, parseInt(e.target.value) || 1) }))}
-                  className="w-12 text-center text-sm font-bold outline-none py-2 border-l-2"
-                  style={{ background: 'rgba(0,94,213,0.07)', color: '#005ED5', borderColor: 'rgba(0,94,213,0.25)' }}
-                />
-              </div>
-            ) : (
-              <button key={tam} type="button"
-                onClick={() => setTamQtd(p => ({ ...p, [tam]: 1 }))}
-                className="px-4 py-2 rounded-xl border-2 border-gray-200 text-sm font-bold text-gray-400 bg-gray-50 hover:border-blue-300 hover:text-blue-500 transition-all duration-150">
+            const ativo = tamQtd[tam] !== undefined;
+            return (
+              <button
+                key={tam}
+                type="button"
+                onClick={() => toggleTamanho(tam)}
+                aria-pressed={ativo}
+                className="px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all duration-150"
+                style={{
+                  borderColor: ativo ? '#005ED5' : '#E5E7EB',
+                  background: ativo ? '#005ED5' : '#fff',
+                  color: ativo ? '#fff' : '#9CA3AF',
+                }}
+              >
                 {tam}
               </button>
             );
           })}
         </div>
 
-        {/* Tamanho especial — colapsável */}
-        <div className="mt-3">
-          <button type="button"
-            onClick={() => {
-              setTamEspecialAberto(v => !v);
-              if (tamEspecialAberto) { setTamEspecialNome(''); setTamEspecialQtd(0); setTamLivre(''); }
-            }}
-            className="flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-blue-500 transition-colors">
-            <Plus size={13} className={`transition-transform duration-200 ${tamEspecialAberto ? 'rotate-45' : ''}`} />
-            {tamEspecialAberto ? 'Fechar tamanho especial' : 'Adicionar tamanho especial'}
-          </button>
-
-          {tamEspecialAberto && (
-            <div className="mt-2 space-y-2">
-              <div className="flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 transition-colors"
-                style={{ borderColor: tamEspecialNome.trim() ? '#005ED5' : '#E5E7EB', background: tamEspecialNome.trim() ? 'rgba(0,94,213,0.04)' : '#fff' }}>
-                <input type="text" placeholder="Ex: 42, 44, Único, Infantil..."
-                  value={tamEspecialNome}
-                  onChange={e => setTamEspecialNome(e.target.value)}
-                  className="flex-1 text-sm outline-none bg-transparent font-medium placeholder-gray-400"
-                  style={{ color: tamEspecialNome.trim() ? '#005ED5' : undefined }}
-                  autoFocus />
-                {tamEspecialNome.trim() && (
-                  <>
-                    <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
-                    <input type="number" min={1} placeholder="Qtd"
-                      value={tamEspecialQtd || ''}
-                      onChange={e => setTamEspecialQtd(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-14 text-center text-sm font-bold outline-none bg-transparent flex-shrink-0"
-                      style={{ color: '#005ED5' }} />
-                  </>
-                )}
-              </div>
-              <textarea
-                placeholder="Outras especificações de tamanho..."
-                value={tamLivre}
-                onChange={e => setTamLivre(e.target.value)}
-                rows={2}
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 resize-none transition-colors"
-              />
-            </div>
-          )}
-        </div>
+        {/* Lista de quantidade — só aparece para os selecionados */}
+        {tamanhosSelecionados.length > 0 && (
+          <div className="mt-4 space-y-2 rounded-2xl border border-gray-100 bg-gray-50/50 p-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-1 mb-1">
+              Quantidade por tamanho
+            </p>
+            {tamanhosSelecionados.map(tam => {
+              const qtd = tamQtd[tam] ?? 0;
+              return (
+                <div key={tam}
+                  className="flex items-center gap-3 bg-white rounded-xl px-3 py-2 border border-gray-100">
+                  <span
+                    className="w-10 h-8 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    style={{ background: 'rgba(0,94,213,0.1)', color: '#005ED5' }}
+                  >
+                    {tam}
+                  </span>
+                  <div className="flex-1" />
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => ajustarQtd(tam, -1)}
+                      aria-label={`Diminuir ${tam}`}
+                      disabled={qtd <= 1}
+                      className="w-8 h-8 rounded-lg border border-gray-200 text-gray-500 font-bold flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      min={1}
+                      value={qtd || ''}
+                      onChange={e => setTamQtd(p => ({ ...p, [tam]: Math.max(1, parseInt(e.target.value) || 1) }))}
+                      className="w-14 h-8 text-center text-sm font-bold outline-none rounded-lg border border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
+                      style={{ color: '#005ED5' }}
+                      aria-label={`Quantidade ${tam}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => ajustarQtd(tam, 1)}
+                      aria-label={`Aumentar ${tam}`}
+                      className="w-8 h-8 rounded-lg border border-gray-200 text-gray-500 font-bold flex items-center justify-center hover:bg-gray-100 transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleTamanho(tam)}
+                    aria-label={`Remover ${tam}`}
+                    className="ml-1 w-7 h-7 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Cores */}

@@ -40,6 +40,12 @@ const LINHAS: Array<{ nome: string; cor: string; icone: string }> = [
 ];
 
 // ─── Especificações + Variações ─────────────────────────────────────────────
+//
+// NOTA: "Tamanho" NÃO entra aqui de propósito. O tamanho do pedido é
+// resolvido em uma etapa dedicada do formulário de orçamento (cliente
+// escolhe quais tamanhos quer e a quantidade de cada). Especificações ficam
+// reservadas para atributos estruturais do modelo (tecido, gola, manga,
+// cor predominante, estampa, etc.).
 
 const ESPECIFICACOES: Array<{
   nome: string;
@@ -50,10 +56,9 @@ const ESPECIFICACOES: Array<{
   { nome: 'Tecido',          ordem: 2, variacoes: ['PV (Poliviscose)', '100% Algodão', 'Dry Fit', 'Moletom Flanelado', 'Oxford', 'Microfibra'] },
   { nome: 'Manga',           ordem: 3, variacoes: ['Curta', 'Longa', 'Cavada (Regata)', '3/4'] },
   { nome: 'Cor Principal',   ordem: 4, variacoes: ['Branco', 'Preto', 'Azul Marinho', 'Cinza Mescla', 'Vermelho', 'Verde Bandeira', 'Amarelo', 'Rosa', 'Bege'] },
-  { nome: 'Tamanho',         ordem: 5, variacoes: ['PP', 'P', 'M', 'G', 'GG', 'XG', 'XXG', 'Infantil 4', 'Infantil 6', 'Infantil 8', 'Infantil 10', 'Infantil 12'] },
-  { nome: 'Tipo de Estampa', ordem: 6, variacoes: ['Silk Screen', 'Sublimação', 'Bordado', 'Termocolante', 'Sem estampa'] },
-  { nome: 'Bolso',           ordem: 7, variacoes: ['Sem bolso', 'Bolso frontal', 'Bolso lateral', 'Dois bolsos'] },
-  { nome: 'Punho',           ordem: 8, variacoes: ['Sem punho', 'Ribana', 'Elástico'] },
+  { nome: 'Tipo de Estampa', ordem: 5, variacoes: ['Silk Screen', 'Sublimação', 'Bordado', 'Termocolante', 'Sem estampa'] },
+  { nome: 'Bolso',           ordem: 6, variacoes: ['Sem bolso', 'Bolso frontal', 'Bolso lateral', 'Dois bolsos'] },
+  { nome: 'Punho',           ordem: 7, variacoes: ['Sem punho', 'Ribana', 'Elástico'] },
 ];
 
 // ─── Modelos ────────────────────────────────────────────────────────────────
@@ -73,7 +78,6 @@ const MODELOS: Array<{
       { nome: 'Tipo de Gola', obrigatorio: true },
       { nome: 'Manga', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
     ],
   },
@@ -85,7 +89,6 @@ const MODELOS: Array<{
       { nome: 'Tipo de Gola', obrigatorio: true },
       { nome: 'Manga', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
       { nome: 'Bolso' },
     ],
@@ -98,7 +101,6 @@ const MODELOS: Array<{
       { nome: 'Tipo de Gola', obrigatorio: true },
       { nome: 'Manga', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
     ],
   },
@@ -109,7 +111,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Punho' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -121,7 +122,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
     ],
   },
@@ -134,7 +134,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Manga', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
       { nome: 'Bolso' },
     ],
@@ -146,7 +145,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Manga', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
       { nome: 'Bolso' },
     ],
@@ -159,7 +157,6 @@ const MODELOS: Array<{
       { nome: 'Tecido', obrigatorio: true },
       { nome: 'Manga', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
     ],
   },
@@ -170,7 +167,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Punho' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -183,7 +179,6 @@ const MODELOS: Array<{
     descricao: 'Moletom flanelado com capuz e bolso canguru frontal. Excelente para outono e inverno.',
     especificacoes: [
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
       { nome: 'Punho' },
     ],
@@ -194,7 +189,6 @@ const MODELOS: Array<{
     descricao: 'Modelo aberto com zíper frontal. Pode ser usado como jaqueta esportiva.',
     especificacoes: [
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Punho' },
       { nome: 'Tipo de Estampa' },
       { nome: 'Bolso' },
@@ -206,7 +200,6 @@ const MODELOS: Array<{
     descricao: 'Moletom fechado com gola careca tradicional. Visual clássico, sem capuz.',
     especificacoes: [
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Punho' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -220,7 +213,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Bolso' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -232,7 +224,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Bolso' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -257,7 +248,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Tipo de Gola', obrigatorio: true },
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa', obrigatorio: true },
     ],
   },
@@ -267,7 +257,6 @@ const MODELOS: Array<{
     descricao: 'Shorts em dry fit com elástico e cordão. Combina com camisas esportivas.',
     especificacoes: [
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
     ],
   },
@@ -277,7 +266,6 @@ const MODELOS: Array<{
     descricao: 'Kit conjunto camiseta + bermuda em dry fit. Personalização de número e nome incluída.',
     especificacoes: [
       { nome: 'Cor Principal', obrigatorio: true },
-      { nome: 'Tamanho', obrigatorio: true },
       { nome: 'Tipo de Estampa', obrigatorio: true },
     ],
   },
