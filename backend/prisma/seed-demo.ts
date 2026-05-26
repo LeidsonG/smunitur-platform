@@ -465,7 +465,7 @@ async function main() {
     const linha = await prisma.linha.upsert({
       where: { nome: l.nome },
       create: { nome: l.nome, slug: slug(l.nome), cor: l.cor, icone: l.icone },
-      update: { cor: l.cor, icone: l.icone },
+      update: { cor: l.cor, icone: l.icone, ativo: true },
     });
     linhaMap.set(l.nome, linha.id);
   }
@@ -479,7 +479,7 @@ async function main() {
     const espec = await prisma.especificacao.upsert({
       where: { nome: e.nome },
       create: { nome: e.nome, ordem: e.ordem },
-      update: { ordem: e.ordem },
+      update: { ordem: e.ordem, ativo: true },
     });
     especMap.set(e.nome, espec.id);
 
@@ -509,7 +509,7 @@ async function main() {
     const modelo = await prisma.modelo.upsert({
       where: { linhaId_nome: { linhaId, nome: m.nome } },
       create: { linhaId, nome: m.nome, descricao: m.descricao },
-      update: { descricao: m.descricao },
+      update: { descricao: m.descricao, ativo: true },
     });
     modelosCriados++;
 
