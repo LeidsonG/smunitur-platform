@@ -55,10 +55,9 @@ const ESPECIFICACOES: Array<{
   { nome: 'Tipo de Gola',    ordem: 1, variacoes: ['Careca', 'Polo', 'V', 'Henley'] },
   { nome: 'Tecido',          ordem: 2, variacoes: ['PV (Poliviscose)', '100% Algodão', 'Dry Fit', 'Moletom Flanelado', 'Oxford', 'Microfibra'] },
   { nome: 'Manga',           ordem: 3, variacoes: ['Curta', 'Longa', 'Cavada (Regata)', '3/4'] },
-  { nome: 'Cor Principal',   ordem: 4, variacoes: ['Branco', 'Preto', 'Azul Marinho', 'Cinza Mescla', 'Vermelho', 'Verde Bandeira', 'Amarelo', 'Rosa', 'Bege'] },
-  { nome: 'Tipo de Estampa', ordem: 5, variacoes: ['Silk Screen', 'Sublimação', 'Bordado', 'Termocolante', 'Sem estampa'] },
-  { nome: 'Bolso',           ordem: 6, variacoes: ['Sem bolso', 'Bolso frontal', 'Bolso lateral', 'Dois bolsos'] },
-  { nome: 'Punho',           ordem: 7, variacoes: ['Sem punho', 'Ribana', 'Elástico'] },
+  { nome: 'Tipo de Estampa', ordem: 4, variacoes: ['Silk Screen', 'Sublimação', 'Bordado', 'Termocolante', 'Sem estampa'] },
+  { nome: 'Bolso',           ordem: 5, variacoes: ['Sem bolso', 'Bolso frontal', 'Bolso lateral', 'Dois bolsos'] },
+  { nome: 'Punho',           ordem: 6, variacoes: ['Sem punho', 'Ribana', 'Elástico'] },
 ];
 
 // ─── Modelos ────────────────────────────────────────────────────────────────
@@ -77,7 +76,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Tipo de Gola', obrigatorio: true },
       { nome: 'Manga', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
     ],
   },
@@ -88,7 +86,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Tipo de Gola', obrigatorio: true },
       { nome: 'Manga', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
       { nome: 'Bolso' },
     ],
@@ -100,7 +97,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Tipo de Gola', obrigatorio: true },
       { nome: 'Manga', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
     ],
   },
@@ -110,7 +106,6 @@ const MODELOS: Array<{
     descricao: 'Modelo com mangas longas e ribana nos punhos. Ideal para inverno ou proteção solar.',
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Punho' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -121,7 +116,6 @@ const MODELOS: Array<{
     descricao: 'Regata com cava esportiva. Disponível em algodão ou dry fit.',
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
     ],
   },
@@ -133,7 +127,6 @@ const MODELOS: Array<{
     descricao: 'Polo em malha piquet PV com punho e gola tricotados. Excelente custo-benefício para uniformes corporativos.',
     especificacoes: [
       { nome: 'Manga', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
       { nome: 'Bolso' },
     ],
@@ -144,7 +137,6 @@ const MODELOS: Array<{
     descricao: 'Piquet 100% algodão de gramatura superior. Acabamento refinado para ambientes corporativos.',
     especificacoes: [
       { nome: 'Manga', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
       { nome: 'Bolso' },
     ],
@@ -156,7 +148,6 @@ const MODELOS: Array<{
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
       { nome: 'Manga', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
     ],
   },
@@ -166,7 +157,6 @@ const MODELOS: Array<{
     descricao: 'Polo de manga longa com punho ribana. Indicada para inverno ou ambientes refrigerados.',
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Punho' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -178,7 +168,6 @@ const MODELOS: Array<{
     nome: 'Moletom Canguru com Capuz',
     descricao: 'Moletom flanelado com capuz e bolso canguru frontal. Excelente para outono e inverno.',
     especificacoes: [
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
       { nome: 'Punho' },
     ],
@@ -188,7 +177,6 @@ const MODELOS: Array<{
     nome: 'Moletom Aberto com Zíper',
     descricao: 'Modelo aberto com zíper frontal. Pode ser usado como jaqueta esportiva.',
     especificacoes: [
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Punho' },
       { nome: 'Tipo de Estampa' },
       { nome: 'Bolso' },
@@ -199,7 +187,6 @@ const MODELOS: Array<{
     nome: 'Moletom Gola Careca',
     descricao: 'Moletom fechado com gola careca tradicional. Visual clássico, sem capuz.',
     especificacoes: [
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Punho' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -212,7 +199,6 @@ const MODELOS: Array<{
     descricao: 'Jaleco profissional manga longa com bolsos. Tecido oxford ou microfibra. Ideal para área da saúde.',
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Bolso' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -223,7 +209,6 @@ const MODELOS: Array<{
     descricao: 'Versão manga curta para ambientes quentes. Mesmo padrão de tecido do jaleco longo.',
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Bolso' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -234,7 +219,6 @@ const MODELOS: Array<{
     descricao: 'Avental curto até a cintura com amarração nas costas. Ideal para cozinha, atendimento e área de alimentos.',
     especificacoes: [
       { nome: 'Tecido', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Bolso' },
       { nome: 'Tipo de Estampa' },
     ],
@@ -247,7 +231,6 @@ const MODELOS: Array<{
     descricao: 'Camisa esportiva em dry fit com gola V ou polo. Sublimação total disponível para escudo, números e patrocínios.',
     especificacoes: [
       { nome: 'Tipo de Gola', obrigatorio: true },
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa', obrigatorio: true },
     ],
   },
@@ -256,7 +239,6 @@ const MODELOS: Array<{
     nome: 'Shorts Esportivo',
     descricao: 'Shorts em dry fit com elástico e cordão. Combina com camisas esportivas.',
     especificacoes: [
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa' },
     ],
   },
@@ -265,7 +247,6 @@ const MODELOS: Array<{
     nome: 'Conjunto Bermuda e Camisa',
     descricao: 'Kit conjunto camiseta + bermuda em dry fit. Personalização de número e nome incluída.',
     especificacoes: [
-      { nome: 'Cor Principal', obrigatorio: true },
       { nome: 'Tipo de Estampa', obrigatorio: true },
     ],
   },
@@ -348,7 +329,6 @@ const ORCAMENTOS: Array<{
     observacoes: 'Aguardando confirmação de tonalidade de azul.',
     especs: [
       { nome: 'Manga', variacao: 'Curta' },
-      { nome: 'Cor Principal', variacao: 'Branco' },
       { nome: 'Tipo de Estampa', variacao: 'Bordado' },
       { nome: 'Bolso', variacao: 'Sem bolso' },
     ],
@@ -371,7 +351,6 @@ const ORCAMENTOS: Array<{
     especs: [
       { nome: 'Tipo de Gola', variacao: 'Careca' },
       { nome: 'Manga', variacao: 'Curta' },
-      { nome: 'Cor Principal', variacao: 'Branco' },
       { nome: 'Tipo de Estampa', variacao: 'Silk Screen' },
     ],
   },
@@ -393,7 +372,6 @@ const ORCAMENTOS: Array<{
     especs: [
       { nome: 'Tipo de Gola', variacao: 'V' },
       { nome: 'Manga', variacao: 'Curta' },
-      { nome: 'Cor Principal', variacao: 'Preto' },
       { nome: 'Tipo de Estampa', variacao: 'Sublimação' },
     ],
   },
@@ -413,7 +391,6 @@ const ORCAMENTOS: Array<{
     observacoes: 'Produção concluída. Aguardando retirada/envio.',
     especs: [
       { nome: 'Tecido', variacao: 'Microfibra' },
-      { nome: 'Cor Principal', variacao: 'Branco' },
       { nome: 'Bolso', variacao: 'Dois bolsos' },
       { nome: 'Tipo de Estampa', variacao: 'Bordado' },
     ],
@@ -434,7 +411,6 @@ const ORCAMENTOS: Array<{
     observacoes: 'Entregue ao cliente em 22/04. Cliente satisfeito.',
     especs: [
       { nome: 'Tipo de Gola', variacao: 'V' },
-      { nome: 'Cor Principal', variacao: 'Azul Marinho' },
       { nome: 'Tipo de Estampa', variacao: 'Sublimação' },
     ],
   },
