@@ -40,9 +40,9 @@ export default function LoginPage() {
           <Image
             src="/logo.png"
             alt="SM Unitur"
-            width={180}
-            height={60}
-            className="h-14 w-auto object-contain brightness-0 invert mx-auto mb-3"
+            width={260}
+            height={86}
+            className="h-20 w-auto object-contain brightness-0 invert mx-auto mb-3"
             priority
           />
           <p className="text-blue-200 text-sm">Painel Administrativo</p>
