@@ -18,12 +18,29 @@ router.get('/', async (req: Request, res: Response) => {
   return res.json({ linhas });
 });
 
+// Aceita "#RRGGBB" ou "#RGB" (case-insensitive). Validação simples — basta
+// para impedir lixo entrar no banco; a UI sempre envia formato canônico.
+const COR_HEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+// Sanitiza cor/icone vindos do body: trim, normaliza vazio para null.
+function normalizarOpcional(v: unknown): string | null {
+  if (typeof v !== 'string') return null;
+  const trim = v.trim();
+  return trim === '' ? null : trim;
+}
+
 router.post('/', authMiddleware, async (req: Request, res: Response) => {
   const { nome, slug } = req.body;
   if (!nome || !slug) return res.status(400).json({ error: 'Nome e slug são obrigatórios' });
 
+  const cor = normalizarOpcional(req.body.cor);
+  const icone = normalizarOpcional(req.body.icone);
+  if (cor && !COR_HEX.test(cor)) {
+    return res.status(400).json({ error: 'Cor deve estar no formato hexadecimal (#RRGGBB).' });
+  }
+
   try {
-    const linha = await prisma.linha.create({ data: { nome, slug } });
+    const linha = await prisma.linha.create({ data: { nome, slug, cor, icone } });
     return res.status(201).json({ linha });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
@@ -40,6 +57,18 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
   if (nome) data.nome = nome;
   if (slug) data.slug = slug;
   if (ativo !== undefined) data.ativo = ativo;
+
+  // cor/icone: null explicito limpa, undefined ignora.
+  if (req.body.cor !== undefined) {
+    const cor = normalizarOpcional(req.body.cor);
+    if (cor && !COR_HEX.test(cor)) {
+      return res.status(400).json({ error: 'Cor deve estar no formato hexadecimal (#RRGGBB).' });
+    }
+    data.cor = cor;
+  }
+  if (req.body.icone !== undefined) {
+    data.icone = normalizarOpcional(req.body.icone);
+  }
 
   try {
     const linha = await prisma.linha.update({

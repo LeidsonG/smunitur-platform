@@ -1,11 +1,17 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Shirt, Wind, FlaskConical, Package, Briefcase, Trophy } from 'lucide-react';
 import Reveal from './Reveal';
 import api, { API_BASE } from '@/lib/api';
+import { iconePorNome } from '@/lib/linhaIcones';
 
-interface Linha { id: number; nome: string; slug: string }
+interface Linha {
+  id: number;
+  nome: string;
+  slug: string;
+  cor: string | null;
+  icone: string | null;
+}
 interface Modelo {
   id: number;
   nome: string;
@@ -14,15 +20,7 @@ interface Modelo {
   linha: Linha;
 }
 
-// Mapeia slugs de linhas para ícones distintos no card; fallback genérico
-// para slugs que ainda não têm ícone dedicado.
-const ICONE_LINHA: Record<string, React.ElementType> = {
-  'camisetas': Shirt,
-  'polos': Briefcase,
-  'moletons': Wind,
-  'jalecos-e-aventais': FlaskConical,
-  'uniformes-esportivos': Trophy,
-};
+const COR_PADRAO = '#005ED5';
 
 // Tempo por modelo para a animação completa do marquee. Multiplicado pela
 // quantidade de modelos para que listas maiores rolem proporcionalmente
@@ -132,17 +130,21 @@ export default function Modelos() {
 // ─── Card individual do carrossel ──────────────────────────────────────────
 
 function ModeloCard({ modelo, ariaHidden = false }: { modelo: Modelo; ariaHidden?: boolean }) {
-  const Icon = ICONE_LINHA[modelo.linha.slug] ?? Package;
+  const Icon = iconePorNome(modelo.linha.icone);
+  const cor = modelo.linha.cor ?? COR_PADRAO;
+  // `${cor}1A` = cor com alpha ~10% (1A em hex). Usado para o fundo tênue do
+  // badge e placeholder.
+  const corBg = `${cor}1A`;
 
   return (
     <li
       aria-hidden={ariaHidden}
-      className="bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 group border border-gray-100 hover:border-blue-200 overflow-hidden flex-shrink-0 w-56 sm:w-64 lg:w-72"
+      className="bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 group border border-gray-100 overflow-hidden flex-shrink-0 w-56 sm:w-64 lg:w-72"
     >
       <div
         className="h-40 sm:h-48 lg:h-56"
         style={{
-          background: 'linear-gradient(135deg, rgba(0,94,213,0.08), rgba(255,148,0,0.08))',
+          background: `linear-gradient(135deg, ${corBg}, rgba(255,148,0,0.08))`,
           overflow: 'hidden',
           transform: 'translateZ(0)',
         }}
@@ -156,7 +158,7 @@ function ModeloCard({ modelo, ariaHidden = false }: { modelo: Modelo; ariaHidden
               loading="lazy"
             />
           : <div className="w-full h-full flex items-center justify-center">
-              <Icon size={32} className="sm:w-12 sm:h-12" style={{ color: '#005ED5', opacity: 0.25 }} />
+              <Icon size={32} className="sm:w-12 sm:h-12" style={{ color: cor, opacity: 0.35 }} />
             </div>
         }
       </div>
@@ -164,7 +166,7 @@ function ModeloCard({ modelo, ariaHidden = false }: { modelo: Modelo; ariaHidden
       <div className="p-3 sm:p-4 lg:p-5">
         <span
           className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium mb-2 sm:mb-3 inline-block"
-          style={{ background: 'rgba(0,94,213,0.08)', color: '#005ED5' }}
+          style={{ background: corBg, color: cor }}
         >
           {modelo.linha.nome}
         </span>

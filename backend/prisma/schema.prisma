@@ -40,6 +40,13 @@ model Linha {
   id      Int      @id @default(autoincrement())
   nome    String   @unique @db.VarChar(100)
   slug    String   @unique @db.VarChar(100)
+  // Cor de destaque exibida no badge da linha (landing + admin). Formato
+  // hexadecimal `#RRGGBB`. Quando nulo, o frontend usa o azul padrão da marca.
+  cor     String?  @db.VarChar(7)
+  // Nome do ícone Lucide (ex.: "Shirt", "Briefcase") exibido no card do
+  // carrossel. Lista curada definida em `frontend/src/lib/linhaIcones.ts`.
+  // Quando nulo ou inválido, cai no fallback `Package`.
+  icone   String?  @db.VarChar(50)
   ativo   Boolean  @default(true)
   modelos Modelo[]
 

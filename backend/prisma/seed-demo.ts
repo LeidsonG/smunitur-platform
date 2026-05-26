@@ -28,13 +28,15 @@ function slug(s: string): string {
 }
 
 // ─── Linhas ─────────────────────────────────────────────────────────────────
+// Cada linha tem uma cor de marca e um ícone Lucide (curados na lista do
+// frontend em `lib/linhaIcones.ts`).
 
-const LINHAS = [
-  'Camisetas',
-  'Polos',
-  'Moletons',
-  'Jalecos e Aventais',
-  'Uniformes Esportivos',
+const LINHAS: Array<{ nome: string; cor: string; icone: string }> = [
+  { nome: 'Camisetas',            cor: '#005ED5', icone: 'Shirt' },
+  { nome: 'Polos',                cor: '#7C3AED', icone: 'Briefcase' },
+  { nome: 'Moletons',             cor: '#0EA5E9', icone: 'Wind' },
+  { nome: 'Jalecos e Aventais',   cor: '#10B981', icone: 'FlaskConical' },
+  { nome: 'Uniformes Esportivos', cor: '#FF9400', icone: 'Trophy' },
 ];
 
 // ─── Especificações + Variações ─────────────────────────────────────────────
@@ -471,13 +473,13 @@ async function main() {
 
   // 1. Linhas
   const linhaMap = new Map<string, number>();
-  for (const nome of LINHAS) {
+  for (const l of LINHAS) {
     const linha = await prisma.linha.upsert({
-      where: { nome },
-      create: { nome, slug: slug(nome) },
-      update: {},
+      where: { nome: l.nome },
+      create: { nome: l.nome, slug: slug(l.nome), cor: l.cor, icone: l.icone },
+      update: { cor: l.cor, icone: l.icone },
     });
-    linhaMap.set(nome, linha.id);
+    linhaMap.set(l.nome, linha.id);
   }
   // eslint-disable-next-line no-console
   console.log(`[seed-demo] ${linhaMap.size} linhas garantidas.`);
