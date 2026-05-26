@@ -89,11 +89,13 @@ export default function OrcamentosPage() {
     if (!selecionado?.layoutFinal) return;
     const digits = selecionado.telefoneCliente.replace(/\D/g, '');
     const telefone = digits.startsWith('55') ? digits : `55${digits}`;
-    const linkImagem = `${API_BASE}${selecionado.layoutFinal}`;
-    const linkAcompanhar = `${window.location.origin}/#acompanhar`;
+    const origem = window.location.origin;
+    const linkImagem = `${origem}${selecionado.layoutFinal}`;
+    const linkAcompanhar = `${origem}/#acompanhar`;
 
-    const valorFormatado = selecionado.valor != null
-      ? selecionado.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+    const valorNum = selecionado.valor != null ? Number(selecionado.valor) : null;
+    const valorFormatado = valorNum != null && !isNaN(valorNum)
+      ? valorNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
       : null;
 
     const partes: (string | null)[] = [
