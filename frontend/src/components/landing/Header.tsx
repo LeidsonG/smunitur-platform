@@ -96,8 +96,7 @@ export default function Header() {
                 alt="SM Unitur"
                 width={140}
                 height={48}
-                className="h-10 lg:h-12 object-contain pointer-events-none"
-                style={{ width: 'auto' }}
+                className="h-10 lg:h-12 w-auto object-contain pointer-events-none"
                 priority
               />
               <span className="text-xl lg:text-2xl font-black tracking-wide pointer-events-none">
@@ -190,8 +189,7 @@ export default function Header() {
               alt="SM Unitur"
               width={120}
               height={40}
-              className="h-9 object-contain"
-              style={{ width: 'auto' }}
+              className="h-9 w-auto object-contain"
             />
             <button
               type="button"
