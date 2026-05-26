@@ -474,6 +474,8 @@ async function main() {
 
   // 2. Especificações + variações
   const especMap = new Map<string, number>();
+  // Guarda os IDs de variação por especificacaoId para habilitar tudo nos modelos
+  const variacaoIdsMap = new Map<number, number[]>();
   let totalVariacoes = 0;
   for (const e of ESPECIFICACOES) {
     const espec = await prisma.especificacao.upsert({
@@ -482,13 +484,15 @@ async function main() {
       update: { ordem: e.ordem, ativo: true },
     });
     especMap.set(e.nome, espec.id);
+    variacaoIdsMap.set(espec.id, []);
 
     for (let i = 0; i < e.variacoes.length; i++) {
-      await prisma.modeloVariacao.upsert({
+      const variacao = await prisma.modeloVariacao.upsert({
         where: { especificacaoId_valor: { especificacaoId: espec.id, valor: e.variacoes[i] } },
         create: { especificacaoId: espec.id, valor: e.variacoes[i], ordem: i },
         update: { ordem: i },
       });
+      variacaoIdsMap.get(espec.id)!.push(variacao.id);
       totalVariacoes++;
     }
   }
@@ -521,7 +525,7 @@ async function main() {
         console.warn(`[seed-demo] Especificação "${e.nome}" não encontrada (modelo "${m.nome}").`);
         continue;
       }
-      await prisma.modeloEspecificacao.upsert({
+      const modeloEspec = await prisma.modeloEspecificacao.upsert({
         where: { modeloId_especificacaoId: { modeloId: modelo.id, especificacaoId } },
         create: {
           modeloId: modelo.id,
@@ -532,6 +536,21 @@ async function main() {
         update: { obrigatorio: e.obrigatorio ?? false, ordem: i },
       });
       associacoes++;
+
+      // Habilitar todas as variações desta especificação para este modelo
+      const variacaoIds = variacaoIdsMap.get(especificacaoId) ?? [];
+      for (const variacaoId of variacaoIds) {
+        await prisma.modeloEspecificacaoVariacao.upsert({
+          where: {
+            modeloEspecificacaoId_variacaoId: {
+              modeloEspecificacaoId: modeloEspec.id,
+              variacaoId,
+            },
+          },
+          create: { modeloEspecificacaoId: modeloEspec.id, variacaoId },
+          update: {},
+        });
+      }
     }
   }
   // eslint-disable-next-line no-console
