@@ -44,7 +44,7 @@ router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response
     orcamentosRecebidos,
     orcamentosEmProducao,
     orcamentosFinalizados,
-    totalProdutos,
+    totalModelos,
     porMesRaw,
     ultimosOrcamentos,
   ] = await Promise.all([
@@ -84,7 +84,7 @@ router.get('/dashboard', authMiddleware, async (_req: AuthRequest, res: Response
       orcamentosRecebidos,
       orcamentosEmProducao,
       orcamentosFinalizados,
-      totalProdutos,
+      totalModelos,
     },
     orcamentosPorMes,
     ultimosOrcamentos,
