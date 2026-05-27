@@ -218,6 +218,29 @@ docker compose exec backend npm run db:studio
 # Acesse: http://localhost:5555
 ```
 
+### Expor o projeto para testes externos (Cloudflare Tunnel)
+
+Para compartilhar o projeto com outras pessoas sem precisar fazer deploy, use o script `tunnel.sh`:
+
+```bash
+./tunnel.sh
+```
+
+O script inicia dois tunnels (frontend e backend), configura as variáveis automaticamente e exibe os links gerados:
+
+```
+==================================
+ Tunnels ativos!
+==================================
+ Frontend: https://xxxx.trycloudflare.com
+ Backend:  https://yyyy.trycloudflare.com
+==================================
+```
+
+Compartilhe o link do **Frontend** com quem for testar. Pressione `Ctrl+C` para encerrar.
+
+> Os links mudam a cada execução. Enquanto o script estiver rodando, qualquer pessoa com o link consegue acessar o projeto.
+
 ---
 
 ## Convenções de commit

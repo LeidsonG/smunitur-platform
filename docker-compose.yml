@@ -84,7 +84,7 @@ services:
       - backend
     environment:
       # Acessado pelo NAVEGADOR — usa localhost (porta mapeada pelo Docker).
-      NEXT_PUBLIC_API_URL: http://localhost:3001/api
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
       # Polling para hot reload via bind mount Windows → Docker.
       # Desative se trabalhar direto do filesystem WSL2 (~/).
       WATCHPACK_POLLING:   "true"

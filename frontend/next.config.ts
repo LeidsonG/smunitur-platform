@@ -33,6 +33,7 @@ const nextConfig: NextConfig = {
     '*.ngrok-free.dev',
     '*.ngrok.app',
     '*.ngrok.io',
+    '*.trycloudflare.com',
   ],
   images: {
     remotePatterns: [
