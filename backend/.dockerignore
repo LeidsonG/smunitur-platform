@@ -1,0 +1,31 @@
+# Dependências — reinstaladas dentro do container (Linux, compatível com sharp)
+node_modules/
+
+# Build anterior
+dist/
+
+# Arquivos de ambiente — injetados pelo docker-compose via environment:
+.env
+.env.*
+!.env.example
+
+# Uploads do usuário — gerenciados por volume nomeado
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore

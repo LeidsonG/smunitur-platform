@@ -1,0 +1,28 @@
+# Dependências — reinstaladas dentro do container
+node_modules/
+
+# Build anterior do Next.js
+.next/
+out/
+
+# Arquivos de ambiente — injetados via environment: no docker-compose
+.env
+.env.*
+!.env.local.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore

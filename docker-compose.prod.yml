@@ -1,0 +1,48 @@
+# ─── SM Unitur — Docker Compose (Produção) ───────────────────────────────────
+#
+# Sobrepõe o docker-compose.yml para produção.
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Diferenças em relação ao dev:
+#   - Usa os stages `production` nos Dockerfiles (TypeScript compilado)
+#   - NODE_ENV=production em todos os serviços
+#   - Sem bind mounts de código-fonte (imagem self-contained)
+#   - Sem polling de filesystem
+#   - NEXT_PUBLIC_API_URL aponta para o domínio real
+#   - Backend não expõe porta 3001 ao host (Nginx faz o roteamento)
+#   - restart: always
+
+services:
+
+  db:
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+      target: production
+    restart: always
+    environment:
+      NODE_ENV: production
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+      CHOKIDAR_USEPOLLING: "false"
+    # Em produção o Nginx faz proxy reverso — backend não precisa expor
+    # a porta diretamente ao host.
+    ports: !reset []
+    volumes:
+      # Sem bind mount de código em produção — apenas uploads persistidos
+      - uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      target: production
+      args:
+        # URL pública da API embutida no bundle em tempo de build
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL_PROD:-https://smunitur.com.br/api}
+    restart: always
+    environment:
+      NODE_ENV: production
+      WATCHPACK_POLLING: "false"
+      CHOKIDAR_USEPOLLING: "false"
+    volumes: !reset []

@@ -1,0 +1,105 @@
+# ─── SM Unitur — Docker Compose (Desenvolvimento) ────────────────────────────
+#
+# Serviços:
+#   db       — MySQL 8.0
+#   backend  — API Node.js/Express (ts-node-dev, hot reload)
+#   frontend — Next.js dev server (hot reload)
+#
+# Pré-requisitos:
+#   1. Copiar .env.docker.example → .env  (na raiz do projeto)
+#   2. Preencher os valores no .env criado
+#   3. docker compose up -d
+#
+# Volumes nomeados para node_modules garantem que os binários Linux (ex.: sharp)
+# não sejam sobrescritos pelo node_modules Windows do host.
+
+services:
+
+  # ── Banco de dados ──────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: smunitur_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE:      ${DB_NAME}
+      MYSQL_USER:          ${DB_USER}
+      MYSQL_PASSWORD:      ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "root", "--password=${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── Backend (API) ───────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    container_name: smunitur_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # DATABASE_URL aponta para o serviço "db" dentro da rede Docker.
+      # Substitui o localhost do backend/.env quando rodando em container.
+      DATABASE_URL:    "mysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}"
+      NODE_ENV:        development
+      PORT:            3001
+      JWT_SECRET:      ${JWT_SECRET}
+      JWT_EXPIRES_IN:  ${JWT_EXPIRES_IN:-7d}
+      BCRYPT_ROUNDS:   ${BCRYPT_ROUNDS:-10}
+      FRONTEND_URL:    ${FRONTEND_URL:-http://localhost:3000}
+      MAX_FILE_SIZE:   ${MAX_FILE_SIZE:-10485760}
+      MAX_IMAGE_DIM:   ${MAX_IMAGE_DIM:-2000}
+      # Polling garante detecção de mudanças de arquivos via bind mount
+      # (necessário quando os fontes estão no filesystem Windows).
+      # Desative se trabalhar direto do filesystem WSL2 (~/).
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "3001:3001"
+    volumes:
+      # Código-fonte montado do host (hot reload)
+      - ./backend:/app
+      # Volume nomeado protege o node_modules Linux do host Windows
+      - backend_modules:/app/node_modules
+      # Uploads persistidos entre reinicializações
+      - uploads:/app/uploads
+
+  # ── Frontend (Next.js) ──────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    container_name: smunitur_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      # Acessado pelo NAVEGADOR — usa localhost (porta mapeada pelo Docker).
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api
+      # Polling para hot reload via bind mount Windows → Docker.
+      # Desative se trabalhar direto do filesystem WSL2 (~/).
+      WATCHPACK_POLLING:   "true"
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - frontend_modules:/app/node_modules
+      - frontend_next:/app/.next
+
+# ── Volumes persistentes ────────────────────────────────────────────────────
+volumes:
+  db_data:          # dados do MySQL
+  backend_modules:  # node_modules Linux do backend
+  frontend_modules: # node_modules Linux do frontend
+  frontend_next:    # cache de build do Next.js
+  uploads:          # imagens enviadas pelos usuários
