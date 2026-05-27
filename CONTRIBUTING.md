@@ -71,7 +71,7 @@ No terminal do **Ubuntu** (não no PowerShell do Windows):
 # Crie a pasta de projetos (se não existir) e clone
 mkdir -p ~/projetos
 cd ~/projetos
-git clone https://github.com/<org>/smunitur-platform.git
+git clone https://github.com/LeidsonG/smunitur-platform.git
 cd smunitur-platform
 ```
 
@@ -109,6 +109,27 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 O resultado vai ser uma string longa com letras e números — é isso que você cola em `JWT_SECRET`.
 
 > ⚠️ O `.env` já está no `.gitignore`. **Nunca commite esse arquivo** — ele contém senhas reais.
+
+---
+
+## Atalho — Subir tudo com um único comando
+
+> ⚠️ **Somente no terminal do WSL2 (Ubuntu).** O script usa bash e não funciona no PowerShell ou CMD do Windows.
+
+Com o `.env` configurado, você pode pular os Passos 5, 6 e 7 rodando:
+
+```bash
+# Ambiente básico (só o admin)
+./scripts/setup-dev.sh
+
+# Com dados de demonstração (linhas, modelos, orçamentos de exemplo)
+./scripts/setup-dev.sh --demo
+```
+
+O script faz o build, aguarda o banco ficar pronto, roda as seeds e exibe os links e credenciais no final. Se preferir fazer passo a passo, continue abaixo.
+
+> [!TIP]
+> **Se usou o script, pule direto para o [Fluxo de trabalho diário](#fluxo-de-trabalho-diário).**
 
 ---
 
