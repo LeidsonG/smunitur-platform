@@ -16,6 +16,13 @@ interface Orcamento {
   imagemReferencia?: string; layoutFinal?: string | null; valor?: number | null;
 }
 
+interface EspecificacaoOrc {
+  id: number;
+  modeloEspecificacao?: { especificacao?: { nome: string } } | null;
+  variacao?: { valor: string } | null;
+  valorLivre?: string | null;
+}
+
 export default function OrcamentosPage() {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
   const [total, setTotal] = useState(0);
@@ -24,6 +31,7 @@ export default function OrcamentosPage() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
   const [selecionado, setSelecionado] = useState<Orcamento | null>(null);
+  const [especs, setEspecs] = useState<EspecificacaoOrc[]>([]);
   const [novoStatus, setNovoStatus] = useState('');
   const [obs, setObs] = useState('');
   const [atualizando, setAtualizando] = useState(false);
@@ -50,10 +58,17 @@ export default function OrcamentosPage() {
 
   useEffect(() => { carregar(); }, [carregar]);
 
-  const abrirModal = (o: Orcamento) => {
+  const abrirModal = async (o: Orcamento) => {
     setSelecionado(o);
     setNovoStatus(o.status);
     setNovoValor(o.valor != null ? String(o.valor) : '');
+    // Busca o detalhe completo para exibir as especificações escolhidas pelo
+    // cliente (a listagem não as traz).
+    setEspecs([]);
+    try {
+      const res = await api.get(`/orcamentos/${o.id}`);
+      setEspecs(res.data.orcamento.especificacoesOrcament ?? []);
+    } catch { /* detalhe é complementar — ignora falha */ }
   };
 
   const salvarValor = async () => {
@@ -267,6 +282,24 @@ export default function OrcamentosPage() {
               {selecionado.cores && <InfoRow label="Cores" value={selecionado.cores} />}
               {selecionado.detalhes && <InfoRow label="Detalhes" value={selecionado.detalhes} />}
               {selecionado.observacoes && <InfoRow label="Observações" value={selecionado.observacoes} />}
+
+              {/* Especificações escolhidas pelo cliente */}
+              {especs.length > 0 && (
+                <div className="border-t border-gray-100 pt-4 mt-4">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    Especificações escolhidas
+                  </label>
+                  <div className="space-y-2">
+                    {especs.map((e) => (
+                      <InfoRow
+                        key={e.id}
+                        label={e.modeloEspecificacao?.especificacao?.nome ?? 'Especificação'}
+                        value={e.variacao?.valor ?? e.valorLivre ?? '—'}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Valor do orçamento */}
               <div className="border-t border-gray-100 pt-4 mt-4">

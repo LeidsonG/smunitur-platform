@@ -66,6 +66,7 @@ export default function FormularioOrcamento() {
   const [especificaçãoValues, setEspecificaçãoValues] = useState<Record<number, string>>({});
   const [especificaçãoErrors, setEspecificaçãoErrors] = useState<Record<number, string>>({});
   const [quantidade, setQuantidade] = useState(0);
+  const [erroQtd, setErroQtd] = useState('');
   const [imagemFiles, setImagemFiles] = useState<File[]>([]);
   const [estado, setEstado] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [resultado, setResultado] = useState<{ numero: number; linkWhatsApp: string } | null>(null);
@@ -128,6 +129,9 @@ export default function FormularioOrcamento() {
     setValue('modelo_desejado', modelo.nome);
   };
 
+  // Limpa o erro de quantidade assim que o cliente seleciona algum tamanho.
+  useEffect(() => { if (quantidade > 0) setErroQtd(''); }, [quantidade]);
+
   const avancar = async () => {
     if (step === 1) {
       const valido = await trigger('modelo_desejado');
@@ -137,6 +141,10 @@ export default function FormularioOrcamento() {
       });
       if (Object.keys(errosAtrib).length) { setEspecificaçãoErrors(errosAtrib); return; }
       if (!valido) return;
+    }
+    if (step === 2 && quantidade < 1) {
+      setErroQtd('Selecione ao menos um tamanho e a quantidade desejada.');
+      return;
     }
     setValue('quantidade', String(quantidade));
     setDir(1);
@@ -154,7 +162,13 @@ export default function FormularioOrcamento() {
 
       const especificaçõesData = especificacoes
         .filter(a => especificaçãoValues[a.id])
-        .map(a => ({ especificacao_id: a.id, variacao_id: parseInt(especificaçãoValues[a.id]) }));
+        .map(a => {
+          const variacaoId = parseInt(especificaçãoValues[a.id]);
+          // valor_livre = snapshot textual da variação, para o histórico
+          // continuar legível mesmo se a variação for excluída no futuro.
+          const valor = a.variacoes.find(o => o.id === variacaoId)?.valor;
+          return { modelo_especificacao_id: a.id, variacao_id: variacaoId, valor_livre: valor };
+        });
       if (especificaçõesData.length) formData.append('especificacoes', JSON.stringify(especificaçõesData));
 
       const res = await api.post('/orcamentos', formData, {
@@ -300,6 +314,13 @@ export default function FormularioOrcamento() {
                   </motion.div>
                 </AnimatePresence>
               </div>
+
+              {/* Erro de validação da etapa 2 (quantidade) */}
+              {step === 2 && erroQtd && (
+                <div className="px-6 sm:px-8 -mt-2 mb-1">
+                  <p className="text-xs text-red-500">{erroQtd}</p>
+                </div>
+              )}
 
               {/* ── Navegação ── */}
               <div className="px-6 sm:px-8 pb-6 sm:pb-8 flex items-center gap-3">
