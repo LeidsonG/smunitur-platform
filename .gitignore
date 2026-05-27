@@ -33,6 +33,10 @@ Thumbs.db
 .claude/
 CLAUDE.md
 
+# Docker — variáveis de ambiente (gerado a partir de .env.docker.example)
+# O .env na raiz é lido automaticamente pelo docker-compose
+.env
+
 # Uploads (manter pasta, ignorar arquivos)
 backend/uploads/*
 !backend/uploads/.gitkeep
