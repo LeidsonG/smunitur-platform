@@ -39,6 +39,13 @@ Visão de alto nível para quem precisa entender ou modificar o sistema.
                                       (montado em backend/uploads)
 ```
 
+> **Produção × Desenvolvimento.** O diagrama acima é a **produção** (nativa: Nginx +
+> PM2 + MySQL na VM Ubuntu — ver [`docs/2-deploy.md`](docs/2-deploy.md)). Em
+> **desenvolvimento**, os três serviços (MySQL 8, backend e frontend) sobem em
+> containers via `docker-compose.yml`, com hot reload e migrations aplicadas no
+> boot — ver [`docs/DOCKER.md`](docs/DOCKER.md). O código é idêntico; muda apenas
+> a forma de empacotar e executar.
+
 ---
 
 ## Frontend (Next.js 16, App Router)

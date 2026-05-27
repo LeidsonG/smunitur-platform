@@ -1,105 +1,101 @@
 # Como Rodar o Projeto — SM Unitur
 
+O ambiente de desenvolvimento roda em **Docker + WSL2 (Ubuntu)**. Todos os
+serviços (MySQL, backend e frontend) sobem em containers — não é preciso
+instalar MySQL nem XAMPP na máquina.
+
+> Guia detalhado de Docker (comandos, performance no WSL2, troubleshooting):
+> [`docs/DOCKER.md`](docs/DOCKER.md).
+
+---
+
 ## Pré-requisitos
 
-- **Node.js 22 LTS** (mínimo obrigatório: Node 20 — versões anteriores quebram o `sharp` e o `thread-stream`)
-- Baixar o XAMPP
+- **Docker Desktop** com integração **WSL2** habilitada (Settings → Resources → WSL Integration).
+- **Ubuntu no WSL2** (recomendado: clonar o repositório dentro do filesystem do
+  Ubuntu, em `~/projetos/`, para hot reload rápido — ver `docs/DOCKER.md`).
+- **Node.js 22 LTS** no host (opcional): só é necessário para rodar ferramentas
+  fora do container (ex.: lint no editor). A versão está fixada em [`.nvmrc`](.nvmrc).
 
-> **Como verificar sua versão:** `node -v`
->
-> **Como trocar a versão com nvm (recomendado):**
-> ```bash
-> nvm list          # ver versões instaladas
-> nvm install 22    # instalar Node 22 (se não tiver)
-> nvm use 22        # ativar Node 22
-> ```
->
-> Baixe o nvm: Windows → [nvm-windows](https://github.com/coreybutler/nvm-windows/releases) | macOS/Linux → [nvm.sh](https://github.com/nvm-sh/nvm)
+> **Verificar a versão do Node no host:** `node -v`
+> **Trocar com nvm:** `nvm install 22 && nvm use 22` (o `.nvmrc` permite só `nvm use`).
+> Baixe o nvm: [nvm.sh](https://github.com/nvm-sh/nvm) (Linux/WSL2).
 
 ---
 
-## 1. Banco de Dados
-
-1. Abra o XAMPP e inicie o **MySQL e o Apache**
-2. Acesse o "**Admin**" e depois o **phpMyAdmin** em `http://localhost/phpmyadmin`
-3. Crie o banco:
-   ```sql
-   CREATE DATABASE smunitur CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   ```
-4. As tabelas são criadas pelo Prisma no próximo passo
-
----
-
-## 2. Backend
+## Setup rápido (Docker)
 
 ```bash
-cd backend
+# 1. Na raiz do projeto, crie o .env a partir do modelo
+cp .env.docker.example .env
 
-# Instalar dependências
-npm install
+# 2. Edite o .env e preencha as senhas e o JWT_SECRET
+#    Gere um JWT_SECRET forte com:
+#    node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
-# Copiar variáveis de ambiente
-cp .env.example .env
-# Ajuste DATABASE_URL, JWT_SECRET, etc. no .env
-
-# Gerar o cliente Prisma
-npm run db:generate
-
-# Aplicar schema no banco (desenvolvimento)
-npx prisma db push
-
-# Popular dados iniciais (admin padrão)
-npm run db:seed
-
-# Rodar em desenvolvimento
-npm run dev
+# 3. Suba todos os serviços
+docker compose up -d
 ```
 
-API disponível em `http://localhost:3001`
-Health check: `http://localhost:3001/api/health`
+Na primeira execução o Docker instala as dependências, gera o cliente Prisma e
+aplica as migrations automaticamente (via `docker-entrypoint.sh`). Quando os
+containers estiverem de pé:
+
+- **Site:** http://localhost:3000
+- **Painel admin:** http://localhost:3000/admin
+- **API:** http://localhost:3001 — health em http://localhost:3001/api/health
+
+Para popular dados iniciais (admin padrão + linhas):
+
+```bash
+docker compose exec backend npm run db:seed
+```
 
 ### Credenciais padrão do admin
 
-| Campo  | Valor                     |
-| ------ | ------------------------- |
+| Campo  | Valor                   |
+| ------ | ----------------------- |
 | E-mail | `admin@smunitur.com.br` |
 | Senha  | `admin123`              |
 
-> **Altere a senha após o primeiro acesso.**
-
-### Sobre migrations
-
-| Ambiente        | Comando                       | Comportamento                                     |
-| --------------- | ----------------------------- | ------------------------------------------------- |
-| Desenvolvimento | `npx prisma db push`        | Aplica o schema sem criar histórico de migration |
-| Produção      | `npm run db:migrate:deploy` | Aplica migrations versionadas                     |
-
-Para criar uma nova migration antes do deploy:
-
-```bash
-npm run db:migrate:dev -- --name descricao_da_mudanca
-```
+> **Altere a senha após o primeiro acesso** (em `/admin/perfil`). Em produção,
+> defina `SEED_ADMIN_PASSWORD` no `.env` — o sistema recusa subir com senha fraca.
 
 ---
 
-## 3. Frontend
+## Migrations (Prisma)
+
+O projeto usa **migrations versionadas** (commitadas em
+`backend/prisma/migrations/`). Não usamos `prisma db push`.
+
+| Situação | Comando | O que faz |
+| --- | --- | --- |
+| Criar uma migration após mudar o `schema.prisma` | `docker compose exec backend npm run db:migrate:dev -- --name descricao` | Gera o SQL versionado e aplica no banco de dev |
+| Aplicar migrations existentes (dev recém-clonado / produção) | `docker compose exec backend npm run db:migrate:deploy` | Aplica as migrations pendentes em ordem |
+| Conferir o estado | `docker compose exec backend npm run db:migrate:status` | Mostra migrations aplicadas/pendentes |
+
+---
+
+## Comandos úteis
 
 ```bash
-cd frontend
+# Logs em tempo real
+docker compose logs -f backend
+docker compose logs -f frontend
 
-# Instalar dependências
-npm install
+# Abrir o Prisma Studio (GUI do banco) em http://localhost:5555
+docker compose exec backend npm run db:studio
 
-# Copiar variáveis de ambiente
-cp .env.local.example .env.local
-# Ajuste NEXT_PUBLIC_API_URL se necessário
+# Instalar uma dependência nova
+docker compose exec backend npm install <pacote>
+docker compose exec frontend npm install <pacote>
 
-# Rodar em desenvolvimento
-npm run dev
+# Parar tudo
+docker compose down
+
+# Parar e APAGAR o banco (volumes)
+docker compose down -v
 ```
-
-Site disponível em `http://localhost:3000`
-Painel admin em `http://localhost:3000/admin`
 
 ---
 
@@ -149,9 +145,9 @@ Painel admin em `http://localhost:3000/admin`
 | POST    | `/api/especificacoes`                 | ✓   | Criar especificação global                |
 | PUT     | `/api/especificacoes/:id`             | ✓   | Editar nome da especificação              |
 | DELETE  | `/api/especificacoes/:id`             | ✓   | Excluir especificação (e suas variações)   |
-| POST    | `/api/especificacoes/:id/variações`      | ✓   | Adicionar variação à especificação        |
-| PATCH   | `/api/especificacoes/variações/:opcaoId` | ✓   | Editar variação                       |
-| DELETE  | `/api/especificacoes/variações/:opcaoId` | ✓   | Excluir variação                      |
+| POST    | `/api/especificacoes/:id/variacoes`      | ✓   | Adicionar variação à especificação        |
+| PATCH   | `/api/especificacoes/variacoes/:variacaoId` | ✓   | Editar variação                       |
+| DELETE  | `/api/especificacoes/variacoes/:variacaoId` | ✓   | Excluir variação                      |
 
 ### Modelos
 
@@ -163,43 +159,51 @@ Painel admin em `http://localhost:3000/admin`
 | PUT     | `/api/modelos/:id`                 | ✓   | Editar modelo                                            |
 | PATCH   | `/api/modelos/:id/toggle`          | ✓   | Ativar / desativar                                        |
 | DELETE  | `/api/modelos/:id`                 | ✓   | Excluir modelo                                           |
-| GET     | `/api/modelos/:id/especificações`       | —   | Especificações do modelo com variações habilitadas             |
-| POST    | `/api/modelos/:id/especificações`       | ✓   | Associar especificação global ao modelo                       |
-| PUT     | `/api/modelos/:id/especificações/:paId` | ✓   | Atualizar variações habilitadas / obrigatoriedade          |
-| DELETE  | `/api/modelos/:id/especificações/:paId` | ✓   | Remover especificação do modelo                               |
+| GET     | `/api/modelos/:id/especificacoes`       | —   | Especificações do modelo com variações habilitadas             |
+| POST    | `/api/modelos/:id/especificacoes`       | ✓   | Associar especificação global ao modelo                       |
+| PUT     | `/api/modelos/:id/especificacoes/:meId` | ✓   | Atualizar variações habilitadas / obrigatoriedade          |
+| DELETE  | `/api/modelos/:id/especificacoes/:meId` | ✓   | Remover especificação do modelo                               |
+| POST    | `/api/modelos/:id/especificacoes/copiar` | ✓  | Copiar especificações de outro modelo                          |
 
 ### Orçamentos
 
 | Método | Rota                                   | Auth | Descrição                               |
 | ------- | -------------------------------------- | ---- | ----------------------------------------- |
 | POST    | `/api/orcamentos`                    | —   | Criar orçamento (público)               |
-| GET     | `/api/orcamentos/acompanhar/:numero` | —   | Consulta pública por número             |
+| POST    | `/api/orcamentos/acompanhar`         | —   | Consulta pública (número + e-mail)      |
 | GET     | `/api/orcamentos`                    | ✓   | Listar orçamentos (filtros, paginação) |
 | GET     | `/api/orcamentos/:id`                | ✓   | Detalhes completos                        |
 | PATCH   | `/api/orcamentos/:id/status`         | ✓   | Atualizar status                          |
+| PATCH   | `/api/orcamentos/:id/valor`          | ✓   | Definir valor                             |
+| PUT     | `/api/orcamentos/:id/layout-final`   | ✓   | Upload do layout final aprovado           |
 
 ### Produção
 
-| Método | Rota                         | Auth | Descrição                    |
-| ------- | ---------------------------- | ---- | ------------------------------ |
-| GET     | `/api/producao`            | ✓   | Orçamentos em produção      |
-| PATCH   | `/api/producao/:id/status` | ✓   | Atualizar status de produção |
+| Método | Rota                            | Auth | Descrição                    |
+| ------- | ------------------------------- | ---- | ------------------------------ |
+| GET     | `/api/producao`               | ✓   | Orçamentos em produção      |
+| GET     | `/api/producao/:id/historico` | ✓   | Linha do tempo de status       |
 
 ### Admin
 
-| Método | Rota                        | Auth        | Descrição          |
-| ------- | --------------------------- | ----------- | -------------------- |
-| GET     | `/api/admin/dashboard`    | ✓          | Estatísticas gerais |
-| GET     | `/api/admin/usuarios`     | admin+      | Listar usuários     |
-| POST    | `/api/admin/usuarios`     | super_admin | Criar usuário       |
-| PATCH   | `/api/admin/usuarios/:id` | admin+      | Editar usuário      |
-| DELETE  | `/api/admin/usuarios/:id` | super_admin | Excluir usuário     |
+| Método | Rota                              | Auth        | Descrição          |
+| ------- | --------------------------------- | ----------- | -------------------- |
+| GET     | `/api/admin/dashboard`          | ✓          | Estatísticas gerais |
+| GET     | `/api/admin/usuarios`           | admin+      | Listar usuários     |
+| POST    | `/api/admin/usuarios`           | super_admin | Criar usuário       |
+| PUT     | `/api/admin/usuarios/:id`       | super_admin | Editar usuário      |
+| PATCH   | `/api/admin/usuarios/:id/senha` | super_admin | Redefinir senha      |
+| PATCH   | `/api/admin/usuarios/:id/toggle`| super_admin | Ativar / desativar   |
+| DELETE  | `/api/admin/usuarios/:id`       | super_admin | Excluir usuário     |
 
 ---
 
 ## Observações Importantes
 
-- O número WhatsApp `5517981322215` em `Footer.tsx` é **temporário para testes** — substituir pelo oficial antes do deploy
-- A pasta `backend/uploads/` armazena imagens localmente — configurar CDN ou S3 em produção
-- `database/schema.sql` é apenas **referência** — não usar para criar o banco manualmente
-- Em produção, use `prisma migrate deploy` (não `db push`) para aplicar o schema com histórico controlado
+- O número WhatsApp em `frontend/src/lib/whatsapp.ts` (`WHATSAPP_NUMBER`) é
+  **temporário para testes** — substituir pelo oficial antes do deploy
+  (ver [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md)).
+- A pasta `backend/uploads/` armazena imagens localmente (volume Docker em dev).
+  Em produção, considerar CDN ou bucket externo.
+- Em **produção** o deploy é nativo (PM2 na VM Ubuntu) — Docker é usado apenas em
+  desenvolvimento. Ver [`docs/2-deploy.md`](docs/2-deploy.md).

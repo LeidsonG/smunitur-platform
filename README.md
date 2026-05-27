@@ -12,6 +12,10 @@ Sistema web completo para a empresa **SM Unitur**, especializada em confecção 
 1. [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md) — itens obrigatórios antes de subir o sistema para o cliente
 2. [`docs/2-deploy.md`](docs/2-deploy.md) — guia passo a passo de deploy na Oracle Cloud (Linux)
 3. [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md) — funcionalidades planejadas para depois da versão atual
+4. [`docs/DOCKER.md`](docs/DOCKER.md) — ambiente de desenvolvimento com Docker + WSL2
+
+> **Desenvolvimento:** o ambiente local roda em **Docker + WSL2** (MySQL, backend
+> e frontend em containers). Comece pelo [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ---
 
@@ -43,8 +47,8 @@ Plataforma web que permite:
 
 - **Node.js + Express**
 - **TypeScript**
-- **Prisma ORM** (schema gerenciado via `prisma db push` em dev / `prisma migrate deploy` em produção)
-- **MySQL** (via XAMPP local)
+- **Prisma ORM** (migrations versionadas: `migrate dev` em desenvolvimento / `migrate deploy` em produção)
+- **MySQL 8** (em container Docker no desenvolvimento; nativo na VM em produção)
 - **Multer** (upload de arquivos com validação por magic bytes)
 - **JWT** (autenticação stateless)
 - **Bcryptjs** (hash de senhas)
@@ -56,7 +60,7 @@ Plataforma web que permite:
 ## Estrutura do Projeto
 
 ```
-web-system-unitur/
+smunitur-platform/
 ├── frontend/               # Next.js App
 │   └── src/
 │       ├── app/
@@ -140,7 +144,7 @@ Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básic
 ## Decisões de Arquitetura
 
 - **Next.js App Router** para SSR/SSG e melhor SEO
-- **Prisma `db push`** em desenvolvimento local (sem histórico de migrations); `migrate deploy` em produção
+- **Migrations Prisma versionadas** (`migrate dev` em dev, `migrate deploy` em produção) — mesmo schema aplicado em todos os ambientes, com histórico rastreável
 - **Especificações globais** reutilizáveis por modelo para evitar duplicação de dados
 - **JWT em localStorage** (painel admin interno — sem dados sensíveis expostos publicamente)
 - **Multer + magic bytes** para validar uploads de imagem no servidor
@@ -163,4 +167,4 @@ Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básic
 
 Veja [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md) — checklist completo dos itens que precisam ser definidos antes de subir para o cliente (WhatsApp oficial, JWT_SECRET, senha do admin, domínio, etc).
 
-Para próximas funcionalidades (cliente como entidade, notificação por e-mail, anexo de layout final) veja [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md).
+Para próximas funcionalidades (cliente como entidade, notificação por e-mail, FK forte de modelo/linha) veja [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md).
