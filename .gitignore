@@ -46,3 +46,13 @@ backend/uploads/*
 
 # TypeScript
 *.tsbuildinfo
+frontend/next-env.d.ts
+
+# Certificados
+*.pem
+
+# Cobertura de testes
+frontend/coverage/
+
+# Vercel
+frontend/.vercel
