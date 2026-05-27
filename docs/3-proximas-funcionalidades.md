@@ -79,27 +79,16 @@ A versão atual foca em estabilidade, segurança e operação. As próximas traz
 
 ---
 
-## R11 — Anexar layout final + visualização pelo cliente
+## R11 — Anexar layout final + visualização pelo cliente ✅ ENTREGUE
 
-**Hoje**: admin não consegue subir um arquivo de aprovação para um orçamento. Aprovação rola pelo WhatsApp solto.
+Implementado na versão atual (abordagem semi-automática de 1 clique):
+- Campo `Orcamento.layoutFinal` no schema + rota `PUT /api/orcamentos/:id/layout-final`
+  (upload com validação de magic bytes + resize via sharp).
+- Em `/admin/orcamentos`, o admin sobe o layout e dispara um link `wa.me` pré-formatado.
+- Em `/#acompanhar`, o cliente visualiza o layout final aprovado pela equipe.
 
-**Decisão tomada**: começar com **abordagem semi-automática (1-clique)** — sistema gera link wa.me pronto, admin clica e envia. WhatsApp Business API fica para v3 se valer a pena.
-
-**Proposta**:
-- Nova tabela `OrcamentoAnexo` (id, orcamentoId, url, descricao, createdAt)
-- Em `/admin/orcamentos`, modal de detalhe ganha seção "Anexar layout/contrato"
-  - Upload com validação de magic bytes (imagem) + PDF (validar `%PDF-` header)
-  - Apaga arquivo do disco se a entrada for removida
-- Em `/acompanhar/:numero` (público), cliente vê lista de anexos disponíveis
-- Botão "Enviar layout via WhatsApp" gera link wa.me com mensagem pronta + URL absoluta do anexo
-
-**Perguntas para a SM Unitur**:
-- [ ] Quais tipos de arquivos preciso aceitar? PDF, JPG, PNG, AI?
-- [ ] Quantos anexos por orçamento, em média?
-- [ ] Cliente precisa **aprovar/rejeitar** o layout pelo sistema (com botão), ou só visualizar?
-- [ ] Se aprovar/rejeitar: deve gerar mudança automática de status?
-
-**Tamanho estimado**: M
+**Evoluções possíveis (não implementadas)**: múltiplos anexos por orçamento, suporte a
+PDF/AI, e botão de aprovar/rejeitar pelo próprio sistema (com mudança automática de status).
 
 ---
 
@@ -134,7 +123,8 @@ A versão atual foca em estabilidade, segurança e operação. As próximas traz
 1. **R10** (FK modelo/linha) — pequeno, abre caminho para métricas reais no dashboard
 2. **R2** (prazo de entrega) — alto valor para a operação, pequeno esforço
 3. **R9** (notificação por e-mail) — alto valor para a experiência do cliente, esforço médio
-4. **R11** (anexo de layout) — alto valor para fluxo de aprovação, esforço médio
-5. **R1** (Cliente como entidade) — grande mudança de modelo, deixar por último ou só fazer quando justificar pelo volume
+4. **R1** (Cliente como entidade) — grande mudança de modelo, deixar por último ou só fazer quando justificar pelo volume
+
+> **R11** (anexo de layout final) já foi entregue na versão atual — ver seção acima.
 
 Cada um cabe em uma branch separada e merge incremental — não precisa esperar tudo ficar pronto.
