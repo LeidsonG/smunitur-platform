@@ -553,7 +553,7 @@ export default function ModelosPage() {
                                     </button>
                                   ))}
                                 {especificaçõesGlobais.filter(ag => !(especificaçõesPorModelo[p.id] ?? []).some(pa => pa.especificacaoId === ag.id)).length === 0 && (
-                                  <p className="text-xs text-gray-400">Todos os especificacoes já estão associados a este modelo.</p>
+                                  <p className="text-xs text-gray-400">Todas as especificações já estão associadas a este modelo.</p>
                                 )}
                               </div>
 
