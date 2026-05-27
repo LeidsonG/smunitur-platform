@@ -14,7 +14,7 @@
  */
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
-import { StatusOrcamento } from '@prisma/client';
+import { StatusOrcamento, Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../utils/upload';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
@@ -63,25 +63,41 @@ router.post(
       const imagemReferencia = arquivos.length > 0
         ? arquivos.map(f => `/uploads/${f.filename}`).join(',')
         : null;
-      const numero = await gerarNumeroOrcamento();
 
-      const orcamento = await prisma.orcamento.create({
-        data: {
-          numero,
-          nomeCliente: nome_cliente,
-          emailCliente: email_cliente,
-          telefoneCliente: telefone_cliente,
-          cpfCnpj: cpf_cnpj || null,
-          modeloDesejado: modelo_desejado,
-          quantidade: parseInt(quantidade),
-          tamanhos: tamanhos || null,
-          cores: cores || null,
-          detalhes: detalhes || null,
-          observacoes: observacoes || null,
-          imagemReferencia,
-          status: 'recebido',
-        },
-      });
+      const dadosBase = {
+        nomeCliente: nome_cliente,
+        emailCliente: email_cliente,
+        telefoneCliente: telefone_cliente,
+        cpfCnpj: cpf_cnpj || null,
+        modeloDesejado: modelo_desejado,
+        quantidade: parseInt(quantidade),
+        tamanhos: tamanhos || null,
+        cores: cores || null,
+        detalhes: detalhes || null,
+        observacoes: observacoes || null,
+        imagemReferencia,
+        status: 'recebido' as const,
+      };
+
+      // O número é gerado pela aplicação (não pelo banco) para ser amigável ao
+      // cliente. Como dois envios simultâneos podem ler o mesmo "último + 1",
+      // tentamos novamente em caso de colisão no índice único (P2002).
+      let orcamento;
+      for (let tentativa = 0; tentativa < 5; tentativa++) {
+        const numero = await gerarNumeroOrcamento();
+        try {
+          orcamento = await prisma.orcamento.create({ data: { numero, ...dadosBase } });
+          break;
+        } catch (err) {
+          const colisaoNumero =
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2002' &&
+            (err.meta?.target as string[] | undefined)?.includes('numero');
+          if (colisaoNumero && tentativa < 4) continue;
+          throw err;
+        }
+      }
+      if (!orcamento) throw new Error('Não foi possível gerar número de orçamento');
 
       // Salva especificações selecionadas (opcional)
       const especificacoesRaw = req.body.especificacoes;
