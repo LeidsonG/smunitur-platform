@@ -51,7 +51,7 @@ Ver [`2-deploy.md`](2-deploy.md) passo-a-passo. Itens-chave:
 
 | Item | Comando de verificação | Status |
 |------|------------------------|--------|
-| Node 20 LTS | `node --version` | [ ] |
+| Node 22 LTS | `node --version` | [ ] |
 | MySQL 8 rodando | `sudo systemctl status mysql` | [ ] |
 | Banco `smunitur` criado | `mysql -u smunitur -p -e "USE smunitur; SHOW TABLES;"` | [ ] |
 | Nginx rodando | `sudo systemctl status nginx` | [ ] |

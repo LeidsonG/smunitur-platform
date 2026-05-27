@@ -2,6 +2,10 @@
 
 Guia passo a passo para subir o sistema do zero na **Oracle Cloud Infrastructure (OCI)**, usando uma VM **Always Free** com Linux. Tempo estimado: 2–3 horas para quem faz pela primeira vez.
 
+> **Produção é nativa (Node + PM2 + MySQL na VM).** O Docker é usado apenas em
+> desenvolvimento (ver [`DOCKER.md`](DOCKER.md) e [`../CONTRIBUTING.md`](../CONTRIBUTING.md)) —
+> em produção optamos por execução nativa para economizar memória da VM.
+
 ---
 
 ## 0. Antes de começar — checklist de pré-requisitos
@@ -100,7 +104,7 @@ sudo systemctl restart ssh
 
 ---
 
-## 6. Instalar stack: Node 20, MySQL 8, Nginx, Certbot, PM2
+## 6. Instalar stack: Node 22, MySQL 8, Nginx, Certbot, PM2
 
 ```bash
 # Node.js 22 LTS via NodeSource (mínimo obrigatório: Node 20 — versões anteriores quebram sharp/thread-stream)
@@ -175,7 +179,7 @@ sudo chown -R ubuntu:ubuntu /var/www/smunitur
 cd /var/www/smunitur
 
 # Clone (use HTTPS, ou configure deploy key se preferir SSH)
-git clone https://github.com/SEU_USUARIO/web-system-unitur.git .
+git clone https://github.com/SEU_USUARIO/smunitur-platform.git .
 git checkout main
 
 # Diretório separado para uploads (sobrevive a deploys/pull --force)
