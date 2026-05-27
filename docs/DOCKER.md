@@ -1,94 +1,52 @@
-# Guia Docker + WSL2 — SM Unitur
+# Referência Docker + WSL2 — SM Unitur
 
-Ambiente de desenvolvimento completo rodando no Ubuntu via WSL2 + Docker Desktop.
-
----
-
-## Pré-requisitos
-
-| Ferramenta | Versão mínima | Notas |
-|---|---|---|
-| Docker Desktop | 4.x | Habilitar integração WSL2 nas configurações |
-| WSL2 | Ubuntu 22.04+ | Recomendado: manter o código no filesystem WSL2 (`~/`) |
+Referência avançada do ambiente Docker. Para o guia completo de primeiro setup (pré-requisitos, passo a passo, troubleshooting) veja o [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 
 ---
 
 ## Serviços
 
-| Container | Porta | Descrição |
+| Container | Porta | Imagem | Descrição |
+|---|---|---|---|
+| `smunitur_db` | 3306 | mysql:8.0 | MySQL — dados em volume `db_data` |
+| `smunitur_backend` | 3001 | node:22-slim | API Express + Prisma (hot reload via ts-node-dev) |
+| `smunitur_frontend` | 3000 | node:22-slim | Next.js dev server (hot reload) |
+
+### Volumes
+
+| Volume | Montado em | Finalidade |
 |---|---|---|
-| `smunitur_db` | 3306 | MySQL 8.0 |
-| `smunitur_backend` | 3001 | API Node.js/Express (hot reload) |
-| `smunitur_frontend` | 3000 | Next.js dev server (hot reload) |
-
----
-
-## Primeiro uso
-
-### 1. Configure as variáveis de ambiente
-
-```bash
-# Na raiz do projeto
-cp .env.docker.example .env
-```
-
-Edite o `.env` criado e preencha:
-- `DB_ROOT_PASSWORD` — senha root do MySQL (uso interno)
-- `DB_PASSWORD` — senha do usuário da aplicação
-- `JWT_SECRET` — gere com o comando abaixo:
-
-```bash
-node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
-```
-
-### 2. Suba os containers
-
-```bash
-docker compose up -d
-```
-
-Na primeira execução o Docker vai:
-1. Baixar as imagens base (node:22-slim, mysql:8.0)
-2. Instalar as dependências npm dentro dos containers
-3. Gerar o cliente Prisma
-4. Aguardar o MySQL ficar pronto (healthcheck)
-5. Rodar as migrations automaticamente
-
-### 3. Verifique se está tudo rodando
-
-```bash
-docker compose ps
-```
-
-Acesse:
-- **Frontend** → http://localhost:3000
-- **API** → http://localhost:3001/api/health
-- **Admin** → http://localhost:3000/admin/login
+| `db_data` | `/var/lib/mysql` | Dados do MySQL (persistidos entre `down/up`) |
+| `backend_modules` | `/app/node_modules` | Módulos Linux do backend (isolados do host Windows) |
+| `frontend_modules` | `/app/node_modules` | Módulos Linux do frontend |
+| `frontend_next` | `/app/.next` | Cache de build do Next.js |
+| `uploads` | `/app/uploads` | Imagens enviadas pelos usuários |
 
 ---
 
 ## Comandos do dia a dia
 
 ```bash
-# Subir em background
+# Subir em background (containers já existentes)
 docker compose up -d
 
-# Ver logs em tempo real (todos os serviços)
-docker compose logs -f
+# Subir e reconstruir as imagens (após alterar Dockerfile ou instalar deps)
+docker compose up -d --build
 
-# Ver logs de um serviço específico
-docker compose logs -f backend
-docker compose logs -f frontend
+# Ver status dos containers
+docker compose ps
 
-# Parar tudo
+# Ver logs em tempo real
+docker compose logs -f              # todos
+docker compose logs -f backend      # só backend
+docker compose logs -f frontend     # só frontend
+docker compose logs -f db           # só MySQL
+
+# Parar tudo (volumes preservados)
 docker compose down
 
-# Parar e remover volumes (APAGA O BANCO)
+# Parar e APAGAR o banco (volumes removidos — uso em reset completo)
 docker compose down -v
-
-# Rebuild de um serviço (após instalar nova dependência npm)
-docker compose build backend
-docker compose build frontend
 ```
 
 ---
@@ -96,122 +54,95 @@ docker compose build frontend
 ## Banco de dados
 
 ```bash
-# Rodar migrations manualmente
-docker compose exec backend npx prisma migrate deploy
+# Aplicar migrations pendentes
+docker compose exec backend npm run db:migrate:deploy
 
-# Abrir o Prisma Studio (GUI do banco)
-docker compose exec backend npx prisma studio
+# Criar nova migration após editar o schema.prisma
+docker compose exec backend npm run db:migrate:dev -- --name nome-da-mudanca
 
-# Popular banco com dados de exemplo
-docker compose exec backend npm run db:seed:demo
+# Ver status das migrations
+docker compose exec backend npm run db:migrate:status
 
-# Popular banco com seed inicial (admin)
+# Abrir o Prisma Studio (GUI em http://localhost:5555)
+docker compose exec backend npm run db:studio
+
+# Seed: criar admin inicial
 docker compose exec backend npm run db:seed
 
-# Conectar ao MySQL direto
+# Seed: popular com dados de demonstração
+docker compose exec backend npm run db:seed:demo
+
+# Conectar ao MySQL via CLI
 docker compose exec db mysql -u smunitur -p smunitur
 ```
 
 ---
 
-## Instalar nova dependência npm
+## Gerenciando dependências npm
 
 ```bash
-# Backend
+# Instalar pacote no backend
 docker compose exec backend npm install <pacote>
 
-# Frontend
-docker compose exec frontend npm install <pacote>
+# Instalar pacote de dev no frontend
+docker compose exec frontend npm install -D <pacote>
 
-# Depois rebuild para atualizar a imagem (opcional mas recomendado)
+# Rebuild após instalar (garante que a imagem reflete o lock file)
 docker compose build backend
+docker compose build frontend
 ```
+
+> Os `node_modules` ficam em volumes nomeados separados do host. Isso evita que
+> binários compilados para Linux (ex.: `sharp`, `bcrypt`) sejam substituídos por
+> versões Windows quando o projeto é editado pelo Windows Explorer.
 
 ---
 
-## Performance — WSL2
+## Performance — WSL2 vs Windows
 
-> **Dica importante**: a performance de bind mounts é muito melhor quando o
-> código está no filesystem do WSL2 (`~/projetos/`) e não no Windows (`/mnt/c/`).
+O desempenho do bind mount (código fonte ↔ container) depende de **onde o repositório está clonado**:
 
-### Cenário ideal (máxima performance)
+| Localização do repo | Hot reload | Recomendado? |
+|---|---|---|
+| `~/projetos/` (filesystem WSL2) | Rápido (inotify nativo) | ✅ Sim |
+| `C:\projetos\` (filesystem Windows) | Lento (polling) | ⚠️ Evitar |
 
-```bash
-# Dentro do terminal WSL2 (Ubuntu)
-cd ~/projetos
-git clone <repo> web-system-unitur
-cd web-system-unitur
-docker compose up -d
-```
+Quando o código está no Windows, o polling compensa a detecção de mudanças — mas consome mais CPU e tem latência maior. As variáveis `CHOKIDAR_USEPOLLING=true` e `WATCHPACK_POLLING=true` estão habilitadas por padrão no `docker-compose.yml` para esse cenário.
 
-### Cenário atual (código em C:\...)
-
-Funciona, mas o hot reload é via **polling** (mais lento).
-Os flags `WATCHPACK_POLLING=true` e `CHOKIDAR_USEPOLLING=true` estão
-habilitados por padrão no `docker-compose.yml` para garantir que mudanças
-de arquivo sejam detectadas mesmo através da barreira WSL2 ↔ Windows.
-
-Para **desativar o polling** (quando no filesystem WSL2):
+**Se o repositório estiver no WSL2**, você pode desativar o polling:
 
 ```yaml
-# docker-compose.yml — na seção environment do backend/frontend
+# docker-compose.yml — seção environment do backend e do frontend
 CHOKIDAR_USEPOLLING: "false"
-WATCHPACK_POLLING: "false"
+WATCHPACK_POLLING:   "false"
 ```
 
 ---
 
-## Produção
+## Build de produção
 
 ```bash
-# Build e subida em modo produção
+# Sobe em modo produção (Next.js compilado, sem hot reload)
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-Antes de rodar em produção, defina no `.env`:
-```
+Antes de rodar, defina no `.env`:
+```env
 NEXT_PUBLIC_API_URL_PROD=https://SEU_DOMINIO.com.br/api
 ```
 
+> O deploy oficial é feito de forma nativa na VM (PM2 + Nginx), **não** com
+> Docker em produção. Veja [`docs/2-deploy.md`](2-deploy.md).
+
 ---
 
-## Solução de problemas
+## Reset completo
 
-### Container do backend não inicia
-
-Verifique se o MySQL está saudável:
-```bash
-docker compose ps db
-docker compose logs db
-```
-
-### Erro `EACCES` nos uploads
-
-O volume `uploads` precisa de permissão de escrita:
-```bash
-docker compose exec backend chmod -R 777 /app/uploads
-```
-
-### Hot reload não funciona
-
-Se os arquivos estão em `C:\...` (Windows), confirme que o polling está ativo:
-```bash
-docker compose exec frontend env | grep POLLING
-docker compose exec backend env | grep POLLING
-```
-
-### Rebuild limpo (quando algo estiver muito errado)
+Use quando algo estiver quebrado e nenhum troubleshooting resolver:
 
 ```bash
-docker compose down -v           # remove volumes também
-docker compose build --no-cache  # rebuild sem cache
-docker compose up -d
-```
-
-### sharp / node-gyp falhou no build
-
-O `Dockerfile` usa `node:22-slim` (Debian) e instala `python3 make g++`
-para compilar binários nativos. Se o build falhar, rode:
-```bash
-docker compose build --no-cache backend
+docker compose down -v           # para tudo e remove os volumes (banco incluído)
+docker compose build --no-cache  # reconstrói as imagens sem cache
+docker compose up -d             # sobe tudo do zero
+docker compose exec backend npm run db:seed   # recria o admin
 ```

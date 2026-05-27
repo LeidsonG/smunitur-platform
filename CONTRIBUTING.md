@@ -1,209 +1,352 @@
-# Como Rodar o Projeto — SM Unitur
+# Contribuindo com o SM Unitur
 
-O ambiente de desenvolvimento roda em **Docker + WSL2 (Ubuntu)**. Todos os
-serviços (MySQL, backend e frontend) sobem em containers — não é preciso
-instalar MySQL nem XAMPP na máquina.
+Guia completo para rodar o projeto localmente e contribuir com o código. Segue o passo a passo mesmo que você nunca tenha mexido com Docker ou WSL2 antes.
 
-> Guia detalhado de Docker (comandos, performance no WSL2, troubleshooting):
-> [`docs/DOCKER.md`](docs/DOCKER.md).
+> **Já tem Docker Desktop com WSL2 configurado?** Pule direto para o [Passo 3](#passo-3--clone-o-repositório-dentro-do-wsl2).
 
 ---
 
-## Pré-requisitos
+## O que vai rodar na sua máquina
 
-- **Docker Desktop** com integração **WSL2** habilitada (Settings → Resources → WSL Integration).
-- **Ubuntu no WSL2** (recomendado: clonar o repositório dentro do filesystem do
-  Ubuntu, em `~/projetos/`, para hot reload rápido — ver `docs/DOCKER.md`).
-- **Node.js 22 LTS** no host (opcional): só é necessário para rodar ferramentas
-  fora do container (ex.: lint no editor). A versão está fixada em [`.nvmrc`](.nvmrc).
+Três containers Docker, sem instalar MySQL ou Node na máquina host:
 
-> **Verificar a versão do Node no host:** `node -v`
-> **Trocar com nvm:** `nvm install 22 && nvm use 22` (o `.nvmrc` permite só `nvm use`).
-> Baixe o nvm: [nvm.sh](https://github.com/nvm-sh/nvm) (Linux/WSL2).
+| Container | URL | Descrição |
+|---|---|---|
+| `smunitur_frontend` | http://localhost:3000 | Next.js (site + painel admin) |
+| `smunitur_backend` | http://localhost:3001 | API Express + Prisma |
+| `smunitur_db` | localhost:3306 | MySQL 8.0 |
 
 ---
 
-## Setup rápido (Docker)
+## Passo 1 — Habilite o WSL2 no Windows
 
-```bash
-# 1. Na raiz do projeto, crie o .env a partir do modelo
-cp .env.docker.example .env
+> Se você já usa WSL2 com Ubuntu, pule para o [Passo 2](#passo-2--instale-o-docker-desktop).
 
-# 2. Edite o .env e preencha as senhas e o JWT_SECRET
-#    Gere um JWT_SECRET forte com:
-#    node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+Abra o **PowerShell como administrador** e rode:
 
-# 3. Suba todos os serviços
-docker compose up -d
+```powershell
+wsl --install
 ```
 
-Na primeira execução o Docker instala as dependências, gera o cliente Prisma e
-aplica as migrations automaticamente (via `docker-entrypoint.sh`). Quando os
-containers estiverem de pé:
+Isso instala o WSL2 com Ubuntu automaticamente. **Reinicie o Windows** quando pedido.
 
-- **Site:** http://localhost:3000
-- **Painel admin:** http://localhost:3000/admin
-- **API:** http://localhost:3001 — health em http://localhost:3001/api/health
+Na primeira vez que o Ubuntu abrir, defina um nome de usuário e senha (pode ser simples, é só para o ambiente local).
 
-Para popular dados iniciais (admin padrão + linhas):
+> **Documentação oficial:** https://learn.microsoft.com/pt-br/windows/wsl/install
+
+---
+
+## Passo 2 — Instale o Docker Desktop
+
+1. Baixe em **https://www.docker.com/products/docker-desktop**
+2. Instale normalmente (Next → Next → Finish)
+3. Abra o Docker Desktop e aguarde o ícone da baleia ficar verde na bandeja do sistema
+
+**Habilite a integração com o WSL2:**
+
+- Abra o Docker Desktop
+- Vá em **Settings → Resources → WSL Integration**
+- Marque a opção **"Enable integration with my default WSL distro"**
+- Marque também a distribuição **Ubuntu** se ela aparecer na lista
+- Clique em **Apply & Restart**
+
+**Verifique a instalação** no terminal do Ubuntu (abra pelo menu Iniciar ou digite `ubuntu` no PowerShell):
+
+```bash
+docker --version
+docker compose version
+```
+
+Você deve ver algo como `Docker version 27.x.x` e `Docker Compose version v2.x.x`.
+
+---
+
+## Passo 3 — Clone o repositório dentro do WSL2
+
+⚠️ **Importante:** clone o projeto **dentro do filesystem do Ubuntu** (em `~/`), não em `C:\`. Isso garante hot reload rápido e evita problemas de permissão.
+
+No terminal do **Ubuntu** (não no PowerShell do Windows):
+
+```bash
+# Crie a pasta de projetos (se não existir) e clone
+mkdir -p ~/projetos
+cd ~/projetos
+git clone https://github.com/<org>/smunitur-platform.git
+cd smunitur-platform
+```
+
+> Para acessar essa pasta pelo VSCode no Windows: abra o VSCode, pressione `Ctrl+Shift+P`, escolha **"WSL: Open Folder in WSL"** e navegue até `~/projetos/smunitur-platform`.
+
+---
+
+## Passo 4 — Configure as variáveis de ambiente
+
+Ainda dentro do Ubuntu, na raiz do projeto:
+
+```bash
+cp .env.docker.example .env
+```
+
+Abra o `.env` com qualquer editor (ex.: `nano .env` ou via VSCode) e preencha os três campos marcados:
+
+```env
+# Senha interna do MySQL — pode ser qualquer valor forte
+DB_ROOT_PASSWORD=coloque_uma_senha_aqui
+
+# Senha do usuário da aplicação — sem caracteres especiais de URL (@, /, ?, #)
+DB_PASSWORD=coloque_outra_senha_aqui
+
+# Chave JWT — OBRIGATÓRIO gerar um valor aleatório com o comando abaixo
+JWT_SECRET=cole_aqui_o_resultado_do_comando_abaixo
+```
+
+**Gere o `JWT_SECRET`** (rode no terminal e cole o resultado no `.env`):
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+O resultado vai ser uma string longa com letras e números — é isso que você cola em `JWT_SECRET`.
+
+> ⚠️ O `.env` já está no `.gitignore`. **Nunca commite esse arquivo** — ele contém senhas reais.
+
+---
+
+## Passo 5 — Suba os containers
+
+```bash
+docker compose up -d --build
+```
+
+**Na primeira vez, isso vai demorar entre 3 e 8 minutos** — o Docker precisa baixar as imagens base (Node 22, MySQL 8) e instalar todas as dependências npm dentro dos containers. Nas próximas vezes, sobe em segundos.
+
+O que acontece automaticamente no primeiro boot:
+1. MySQL sobe e fica pronto (healthcheck)
+2. O backend gera o cliente Prisma e aplica as migrations no banco
+3. Frontend e backend ficam com hot reload ativo
+
+Acompanhe o progresso (opcional):
+
+```bash
+docker compose logs -f
+```
+
+Quando aparecer `ready - started server on 0.0.0.0:3000` e `Server running on port 3001`, está tudo no ar.
+
+Para confirmar que os três containers estão rodando:
+
+```bash
+docker compose ps
+```
+
+Todos devem estar com status `running` (ou `healthy` para o banco).
+
+---
+
+## Passo 6 — Crie o admin inicial
 
 ```bash
 docker compose exec backend npm run db:seed
 ```
 
-### Credenciais padrão do admin
+Você vai ver:
+```
+[seed] Usuário admin criado: admin@smunitur.com.br
+[seed] AVISO: usando senha padrão "admin123" — TROQUE imediatamente.
+```
 
-| Campo  | Valor                   |
-| ------ | ----------------------- |
+**Credenciais padrão:**
+
+| Campo | Valor |
+|---|---|
 | E-mail | `admin@smunitur.com.br` |
-| Senha  | `admin123`              |
+| Senha | `admin123` |
 
-> **Altere a senha após o primeiro acesso** (em `/admin/perfil`). Em produção,
-> defina `SEED_ADMIN_PASSWORD` no `.env` — o sistema recusa subir com senha fraca.
-
----
-
-## Migrations (Prisma)
-
-O projeto usa **migrations versionadas** (commitadas em
-`backend/prisma/migrations/`). Não usamos `prisma db push`.
-
-| Situação | Comando | O que faz |
-| --- | --- | --- |
-| Criar uma migration após mudar o `schema.prisma` | `docker compose exec backend npm run db:migrate:dev -- --name descricao` | Gera o SQL versionado e aplica no banco de dev |
-| Aplicar migrations existentes (dev recém-clonado / produção) | `docker compose exec backend npm run db:migrate:deploy` | Aplica as migrations pendentes em ordem |
-| Conferir o estado | `docker compose exec backend npm run db:migrate:status` | Mostra migrations aplicadas/pendentes |
+> Troque a senha em `/admin/perfil` assim que logar.
 
 ---
 
-## Comandos úteis
+## Passo 7 — Verifique que está tudo funcionando
+
+Abra no navegador:
+
+| O que testar | URL | Resultado esperado |
+|---|---|---|
+| Site público | http://localhost:3000 | Landing page da SM Unitur |
+| Saúde da API | http://localhost:3001/api/health | `{"status":"ok"}` |
+| Painel admin | http://localhost:3000/admin/login | Tela de login |
+
+Faça login com `admin@smunitur.com.br` / `admin123`. Se entrar no dashboard, o ambiente está 100% funcionando. ✅
+
+---
+
+## Fluxo de trabalho diário
+
+### Subir o ambiente
 
 ```bash
-# Logs em tempo real
-docker compose logs -f backend
-docker compose logs -f frontend
+# Na raiz do projeto, no terminal Ubuntu
+docker compose up -d
+```
 
-# Abrir o Prisma Studio (GUI do banco) em http://localhost:5555
-docker compose exec backend npm run db:studio
+### Parar o ambiente
 
-# Instalar uma dependência nova
+```bash
+docker compose down
+```
+
+### Ver logs em tempo real
+
+```bash
+docker compose logs -f           # todos os serviços
+docker compose logs -f backend   # só o backend
+docker compose logs -f frontend  # só o frontend
+```
+
+### Instalar uma nova dependência npm
+
+```bash
+# Instala dentro do container (não usa o npm do host)
 docker compose exec backend npm install <pacote>
 docker compose exec frontend npm install <pacote>
+```
 
-# Parar tudo
-docker compose down
+### Abrir o Prisma Studio (interface visual do banco)
 
-# Parar e APAGAR o banco (volumes)
-docker compose down -v
+```bash
+docker compose exec backend npm run db:studio
+# Acesse: http://localhost:5555
 ```
 
 ---
 
-## Estrutura de Rotas (Frontend)
+## Convenções de commit
 
-| Rota                  | Descrição                                                      |
-| --------------------- | ---------------------------------------------------------------- |
-| `/`                 | Landing page (Hero, Sobre, Modelos, Serviços, FAQ, Orçamento) |
-| `/#orcamento`       | Formulário de orçamento (3 etapas)                             |
-| `/#acompanhar`      | Acompanhamento de produção por número                         |
-| `/admin/login`      | Login do painel                                                  |
-| `/admin/dashboard`  | Dashboard com estatísticas                                      |
-| `/admin/orcamentos` | Gestão de orçamentos                                           |
-| `/admin/producao`   | Painel de produção                                             |
-| `/admin/linhas` | CRUD de linhas                                               |
-| `/admin/especificacoes`  | Biblioteca global de especificações e variações                        |
-| `/admin/modelos`   | CRUD de modelos + associação de especificações                     |
-| `/admin/usuarios`   | Gestão de usuários admin                                       |
-| `/admin/perfil`     | Perfil, senha e foto do usuário logado                          |
+Este projeto usa **Conventional Commits em português**.
 
----
+**Formato:**
+```
+tipo(escopo): descrição curta no imperativo
 
-## API Endpoints
+Corpo opcional explicando o porquê da mudança
+(não o quê — o diff já mostra isso).
+```
 
-### Autenticação
+**Tipos aceitos:**
 
-| Método | Rota                          | Auth | Descrição                            |
-| ------- | ----------------------------- | ---- | -------------------------------------- |
-| POST    | `/api/auth/login`           | —   | Login, retorna JWT                     |
-| GET     | `/api/auth/me`              | ✓   | Dados do usuário logado (inclui foto) |
-| PATCH   | `/api/auth/change-password` | ✓   | Trocar senha                           |
-| PUT     | `/api/auth/me/foto`         | ✓   | Upload de foto de perfil               |
+| Tipo | Quando usar |
+|---|---|
+| `feat` | Nova funcionalidade |
+| `fix` | Correção de bug |
+| `refactor` | Refatoração sem mudar comportamento |
+| `style` | Formatação, espaçamento (sem lógica) |
+| `docs` | Documentação |
+| `chore` | Configuração, dependências, build |
+| `test` | Testes |
 
-### Linhas
+**Exemplos:**
+```
+feat(orcamentos): adicionar filtro por data de criação
 
-| Método | Rota                    | Auth | Descrição                                                          |
-| ------- | ----------------------- | ---- | -------------------------------------------------------------------- |
-| GET     | `/api/linhas`     | —   | Linhas com modelos ativos.`?todos=true` retorna todas (admin) |
-| POST    | `/api/linhas`     | ✓   | Criar linha                                                      |
-| PUT     | `/api/linhas/:id` | ✓   | Editar nome/slug/ativo                                               |
+fix(auth): corrigir expiração do token JWT no logout
 
-### Especificações (biblioteca global)
+docs(contributing): adicionar guia de setup com Docker
+```
 
-| Método | Rota                               | Auth | Descrição                          |
-| ------- | ---------------------------------- | ---- | ------------------------------------ |
-| GET     | `/api/especificacoes`                 | —   | Todos as especificações com suas variações |
-| POST    | `/api/especificacoes`                 | ✓   | Criar especificação global                |
-| PUT     | `/api/especificacoes/:id`             | ✓   | Editar nome da especificação              |
-| DELETE  | `/api/especificacoes/:id`             | ✓   | Excluir especificação (e suas variações)   |
-| POST    | `/api/especificacoes/:id/variacoes`      | ✓   | Adicionar variação à especificação        |
-| PATCH   | `/api/especificacoes/variacoes/:variacaoId` | ✓   | Editar variação                       |
-| DELETE  | `/api/especificacoes/variacoes/:variacaoId` | ✓   | Excluir variação                      |
-
-### Modelos
-
-| Método | Rota                                  | Auth | Descrição                                               |
-| ------- | ------------------------------------- | ---- | --------------------------------------------------------- |
-| GET     | `/api/modelos`                     | —   | Listar modelos ativos.`?apenasAtivos=false` para admin |
-| GET     | `/api/modelos/:id`                 | —   | Detalhes do modelo                                       |
-| POST    | `/api/modelos`                     | ✓   | Criar modelo (multipart/form-data)                       |
-| PUT     | `/api/modelos/:id`                 | ✓   | Editar modelo                                            |
-| PATCH   | `/api/modelos/:id/toggle`          | ✓   | Ativar / desativar                                        |
-| DELETE  | `/api/modelos/:id`                 | ✓   | Excluir modelo                                           |
-| GET     | `/api/modelos/:id/especificacoes`       | —   | Especificações do modelo com variações habilitadas             |
-| POST    | `/api/modelos/:id/especificacoes`       | ✓   | Associar especificação global ao modelo                       |
-| PUT     | `/api/modelos/:id/especificacoes/:meId` | ✓   | Atualizar variações habilitadas / obrigatoriedade          |
-| DELETE  | `/api/modelos/:id/especificacoes/:meId` | ✓   | Remover especificação do modelo                               |
-| POST    | `/api/modelos/:id/especificacoes/copiar` | ✓  | Copiar especificações de outro modelo                          |
-
-### Orçamentos
-
-| Método | Rota                                   | Auth | Descrição                               |
-| ------- | -------------------------------------- | ---- | ----------------------------------------- |
-| POST    | `/api/orcamentos`                    | —   | Criar orçamento (público)               |
-| POST    | `/api/orcamentos/acompanhar`         | —   | Consulta pública (número + e-mail)      |
-| GET     | `/api/orcamentos`                    | ✓   | Listar orçamentos (filtros, paginação) |
-| GET     | `/api/orcamentos/:id`                | ✓   | Detalhes completos                        |
-| PATCH   | `/api/orcamentos/:id/status`         | ✓   | Atualizar status                          |
-| PATCH   | `/api/orcamentos/:id/valor`          | ✓   | Definir valor                             |
-| PUT     | `/api/orcamentos/:id/layout-final`   | ✓   | Upload do layout final aprovado           |
-
-### Produção
-
-| Método | Rota                            | Auth | Descrição                    |
-| ------- | ------------------------------- | ---- | ------------------------------ |
-| GET     | `/api/producao`               | ✓   | Orçamentos em produção      |
-| GET     | `/api/producao/:id/historico` | ✓   | Linha do tempo de status       |
-
-### Admin
-
-| Método | Rota                              | Auth        | Descrição          |
-| ------- | --------------------------------- | ----------- | -------------------- |
-| GET     | `/api/admin/dashboard`          | ✓          | Estatísticas gerais |
-| GET     | `/api/admin/usuarios`           | admin+      | Listar usuários     |
-| POST    | `/api/admin/usuarios`           | super_admin | Criar usuário       |
-| PUT     | `/api/admin/usuarios/:id`       | super_admin | Editar usuário      |
-| PATCH   | `/api/admin/usuarios/:id/senha` | super_admin | Redefinir senha      |
-| PATCH   | `/api/admin/usuarios/:id/toggle`| super_admin | Ativar / desativar   |
-| DELETE  | `/api/admin/usuarios/:id`       | super_admin | Excluir usuário     |
+> Não inclua `Co-Authored-By` de IA nas mensagens de commit.
 
 ---
 
-## Observações Importantes
+## Trabalhando com o banco de dados
 
-- O número WhatsApp em `frontend/src/lib/whatsapp.ts` (`WHATSAPP_NUMBER`) é
-  **temporário para testes** — substituir pelo oficial antes do deploy
-  (ver [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md)).
-- A pasta `backend/uploads/` armazena imagens localmente (volume Docker em dev).
-  Em produção, considerar CDN ou bucket externo.
-- Em **produção** o deploy é nativo (PM2 na VM Ubuntu) — Docker é usado apenas em
-  desenvolvimento. Ver [`docs/2-deploy.md`](docs/2-deploy.md).
+O projeto usa **migrations versionadas** do Prisma (arquivos em `backend/prisma/migrations/`, commitados no repositório). Não use `prisma db push`.
+
+### Fluxo para alterar o schema
+
+1. Edite `backend/prisma/schema.prisma`
+2. Crie a migration:
+   ```bash
+   docker compose exec backend npm run db:migrate:dev -- --name descricao-da-mudanca
+   ```
+3. Commite o arquivo de migration gerado junto com as alterações de código
+
+### Outros comandos úteis
+
+```bash
+# Ver status das migrations (quais foram aplicadas)
+docker compose exec backend npm run db:migrate:status
+
+# Popular com dados de demonstração (linhas, modelos de exemplo)
+docker compose exec backend npm run db:seed:demo
+
+# Resetar o banco (APAGA TUDO e recria)
+docker compose down -v   # remove o volume do banco
+docker compose up -d     # sobe tudo do zero
+docker compose exec backend npm run db:seed
+```
+
+---
+
+## Solução de problemas
+
+### Os containers não sobem / ficam reiniciando
+
+```bash
+# Veja o que está dando errado
+docker compose logs backend
+docker compose logs db
+```
+
+### O backend não conecta ao banco
+
+O backend aguarda o MySQL ficar saudável antes de iniciar (healthcheck de 30s). Se o erro for `ECONNREFUSED` ou `Access denied`:
+
+1. Confirme que o `.env` tem `DB_USER=smunitur` e `DB_NAME=smunitur`
+2. Confirme que `DB_PASSWORD` no `.env` não tem caracteres especiais de URL (`@`, `/`, `?`, `#`)
+3. Tente um reset limpo:
+   ```bash
+   docker compose down -v
+   docker compose up -d
+   ```
+
+### Hot reload não funciona (arquivo editado mas não recarrega)
+
+Se o código está no filesystem do Windows (`/mnt/c/...`), o polling pode não estar funcionando. Confirme:
+```bash
+docker compose exec frontend env | grep POLLING
+docker compose exec backend env | grep POLLING
+```
+Ambos devem mostrar `WATCHPACK_POLLING=true` / `CHOKIDAR_USEPOLLING=true`.
+
+A solução definitiva é mover o repositório para dentro do WSL2 (`~/projetos/`).
+
+### Erro de permissão nos uploads
+
+```bash
+docker compose exec backend chmod -R 777 /app/uploads
+```
+
+### Rebuild limpo (quando algo estiver muito quebrado)
+
+```bash
+docker compose down -v            # para tudo e remove volumes
+docker compose build --no-cache   # reconstrói as imagens do zero
+docker compose up -d
+docker compose exec backend npm run db:seed
+```
+
+### `sharp` / `node-gyp` falhou no build
+
+O Dockerfile já instala `python3 make g++` para compilar binários nativos. Se falhar assim mesmo:
+```bash
+docker compose build --no-cache backend
+```
+
+---
+
+## Referências
+
+- [`docs/DOCKER.md`](docs/DOCKER.md) — comandos Docker avançados, performance WSL2, produção
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — visão geral da arquitetura e modelo de dados
+- [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md) — checklist antes de ir para produção
+- [Conventional Commits](https://www.conventionalcommits.org/pt-br/) — especificação completa

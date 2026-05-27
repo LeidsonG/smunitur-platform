@@ -4,18 +4,19 @@ Sistema web completo para a empresa **SM Unitur**, especializada em confecção 
 
 ## Documentação
 
-**Na raiz** (documentos principais):
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — como rodar o projeto localmente
-- [`ARCHITECTURE.md`](ARCHITECTURE.md) — visão arquitetural, modelo de dados, fluxos
+**Comece aqui:**
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — **setup passo a passo** do ambiente local (Docker + WSL2), fluxo de trabalho e convenções de commit
 
-**Em [`docs/`](docs/)** (operacional e roadmap, na ordem de leitura sugerida):
-1. [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md) — itens obrigatórios antes de subir o sistema para o cliente
+**Referência técnica:**
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — visão arquitetural, modelo de dados, fluxos
+- [`docs/DOCKER.md`](docs/DOCKER.md) — referência completa de comandos Docker, volumes, performance WSL2
+
+**Operacional e roadmap:**
+1. [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md) — itens obrigatórios antes de subir para o cliente
 2. [`docs/2-deploy.md`](docs/2-deploy.md) — guia passo a passo de deploy na Oracle Cloud (Linux)
 3. [`docs/3-proximas-funcionalidades.md`](docs/3-proximas-funcionalidades.md) — funcionalidades planejadas para depois da versão atual
-4. [`docs/DOCKER.md`](docs/DOCKER.md) — ambiente de desenvolvimento com Docker + WSL2
 
-> **Desenvolvimento:** o ambiente local roda em **Docker + WSL2** (MySQL, backend
-> e frontend em containers). Comece pelo [`CONTRIBUTING.md`](CONTRIBUTING.md).
+> **Primeira vez no projeto?** Siga o [`CONTRIBUTING.md`](CONTRIBUTING.md) — cobre desde a instalação do WSL2 até o sistema rodando no browser.
 
 ---
 
