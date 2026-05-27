@@ -1,0 +1,22 @@
+# EditorConfig — padroniza o estilo entre editores e sistemas operacionais.
+# Complementa o .gitattributes (que força LF no repositório). Garante que
+# o mesmo arquivo editado no Windows ou no Ubuntu/WSL2 fique idêntico.
+# https://editorconfig.org
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Markdown: espaços no fim de linha podem ser quebra de linha intencional
+[*.md]
+trim_trailing_whitespace = false
+
+# Makefile exige tabs
+[Makefile]
+indent_style = tab
