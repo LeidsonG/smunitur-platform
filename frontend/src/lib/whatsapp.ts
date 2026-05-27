@@ -92,14 +92,14 @@ export function gerarLinkWhatsApp(dados: DadosOrcamento): string {
  */
 export function gerarLinkWhatsAppOutros(): string {
   const texto = [
-    `Olá, SM Unitur! 😊`,
+    `Olá, SM Unitur!`,
     ``,
     `Gostaria de solicitar um orçamento para um produto que não encontrei entre os modelos disponíveis no site.`,
     ``,
-    `*Tipo de produto:* _(descreva aqui o que você precisa)_`,
-    `*Quantidade aproximada:* _(ex: 50 peças)_`,
-    `*Cores / detalhes:* _(ex: azul marinho com logo bordada)_`,
-    `*Observações:* _(qualquer informação adicional)_`,
+    `*Tipo de produto:* "descreva aqui o que você precisa"`,
+    `*Quantidade aproximada:* "ex: 50 peças"`,
+    `*Observações:* `,
+    `Vocês trabalham com esse tipo?`,
     ``,
     `Aguardo o retorno. Obrigado(a)!`,
   ].join('\n');
