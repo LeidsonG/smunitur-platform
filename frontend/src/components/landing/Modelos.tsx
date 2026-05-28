@@ -90,6 +90,10 @@ export default function Modelos() {
     let rafId: number;
     let lastTime: number | null = null;
     let returning = false; // true durante a animação de retorno ao início
+    // Acumula a fração de pixel a aplicar. iOS Safari arredonda scrollLeft para
+    // inteiro, então `scrollLeft += 0.72` ficaria preso em 0 para sempre.
+    // Acumulamos e só aplicamos quando há ao menos 1px inteiro.
+    let acumulado = 0;
 
     const tick = (now: number) => {
       if (!pausado.current && !returning) {
@@ -101,6 +105,7 @@ export default function Modelos() {
             if (t.scrollLeft >= max - 2) {
               // Chegou ao fim → volta suavemente ao início
               returning = true;
+              acumulado = 0;
               t.scrollTo({ left: 0, behavior: 'smooth' });
               const aguardar = () => {
                 if ((trackRef.current?.scrollLeft ?? 999) <= 4) {
@@ -111,7 +116,12 @@ export default function Modelos() {
               };
               requestAnimationFrame(aguardar);
             } else {
-              t.scrollLeft += SCROLL_PX_S * dt;
+              acumulado += SCROLL_PX_S * dt;
+              const inteiro = Math.floor(acumulado);
+              if (inteiro >= 1) {
+                t.scrollLeft += inteiro;
+                acumulado -= inteiro;
+              }
             }
           }
         }
@@ -232,9 +242,10 @@ export default function Modelos() {
         ) : modelosOrdenados.length === 0 ? null : (
           <div
             className="relative"
-            // Pausa o auto-scroll enquanto o ponteiro está sobre o carrossel
-            onMouseEnter={() => { pausado.current = true; }}
-            onMouseLeave={() => { if (!isDragging.current) pausado.current = false; }}
+            // onPointerEnter/Leave têm pointerType — ignoram toque (iOS) e só
+            // pausam no hover com mouse real (pointer: fine)
+            onPointerEnter={(e) => { if (e.pointerType !== 'touch') pausado.current = true; }}
+            onPointerLeave={(e) => { if (e.pointerType !== 'touch' && !isDragging.current) pausado.current = false; }}
             onFocusCapture={() => { pausado.current = true; }}
             onBlurCapture={() => { if (!isDragging.current) pausado.current = false; }}
           >
