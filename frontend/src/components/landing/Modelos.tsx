@@ -32,6 +32,7 @@ export default function Modelos() {
   const [loading, setLoading] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [modalModelo, setModalModelo] = useState<Modelo | null>(null);
 
   const trackRef = useRef<HTMLDivElement>(null);
   // Pausa o scroll automático enquanto o usuário interage (hover / drag / foco)
@@ -40,6 +41,8 @@ export default function Modelos() {
   const isDragging = useRef(false);
   const dragStartX = useRef(0);
   const dragScrollLeft = useRef(0);
+  // Detecta se o usuário arrastou (> 5px) para não confundir drag com clique
+  const dragMoved = useRef(false);
 
   useEffect(() => {
     api.get('/modelos')
@@ -132,22 +135,35 @@ export default function Modelos() {
   };
 
   // ── Drag com mouse (toque é nativo via overflow-x: auto) ──────────────────
+  const handleOrcamento = (modelo: Modelo) => {
+    setModalModelo(null);
+    sessionStorage.setItem('smunitur_preselect', JSON.stringify({
+      linhaId: modelo.linha.id,
+      modeloId: modelo.id,
+    }));
+    window.dispatchEvent(new CustomEvent('smunitur:preselect', {
+      detail: { linhaId: modelo.linha.id, modeloId: modelo.id },
+    }));
+    document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Ignora clique com botão que não o principal
     if (e.button !== 0) return;
     const t = trackRef.current;
     if (!t) return;
     isDragging.current = true;
+    dragMoved.current = false;
     pausado.current = true;
     dragStartX.current = e.clientX;
     dragScrollLeft.current = t.scrollLeft;
     t.style.cursor = 'grabbing';
-    e.preventDefault(); // evita seleção de texto durante o drag
+    e.preventDefault();
   };
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       if (!isDragging.current || !trackRef.current) return;
+      if (Math.abs(e.clientX - dragStartX.current) > 5) dragMoved.current = true;
       trackRef.current.scrollLeft =
         dragScrollLeft.current - (e.clientX - dragStartX.current);
     };
@@ -245,6 +261,9 @@ export default function Modelos() {
                     modelo={m}
                     indice={i + 1}
                     total={modelosOrdenados.length}
+                    onOrcamento={(modelo) => {
+                      if (!dragMoved.current) setModalModelo(modelo);
+                    }}
                   />
                 ))}
               </ul>
@@ -276,6 +295,48 @@ export default function Modelos() {
           </Reveal>
         )}
       </div>
+
+      {/* Modal de confirmação de orçamento */}
+      {modalModelo && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setModalModelo(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+            onClick={(e: { stopPropagation: () => void }) => e.stopPropagation()}
+          >
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(0,94,213,0.08)' }}>
+              {(() => { const I = iconePorNome(modalModelo.linha.icone); return <I size={28} style={{ color: '#005ED5' }} />; })()}
+            </div>
+            <h3 className="text-xl font-black text-gray-900 text-center mb-1">
+              Gostou desse modelo?
+            </h3>
+            <p className="text-gray-500 text-sm text-center mb-5">
+              Quer solicitar um orçamento para <strong className="text-gray-700">{modalModelo.nome}</strong>?
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setModalModelo(null)}
+                className="flex-1 py-2.5 rounded-full border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+              >
+                Agora não
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOrcamento(modalModelo)}
+                className="flex-1 py-2.5 rounded-full text-white font-bold text-sm transition-all hover:scale-105 shadow-md"
+                style={{ background: 'linear-gradient(135deg, #005ED5, #0047A8)' }}
+              >
+                Quero orçamento!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -334,10 +395,12 @@ function ModeloCard({
   modelo,
   indice,
   total,
+  onOrcamento,
 }: {
   modelo: Modelo;
   indice: number;
   total: number;
+  onOrcamento: (m: Modelo) => void;
 }) {
   const Icon = iconePorNome(modelo.linha.icone);
   const cor = modelo.linha.cor ?? COR_PADRAO;
@@ -350,7 +413,8 @@ function ModeloCard({
       role="group"
       aria-roledescription="slide"
       aria-label={`${indice} de ${total}: ${modelo.nome}`}
-      className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 group border border-gray-100 overflow-hidden flex-shrink-0 w-60 sm:w-64 lg:w-72"
+      onClick={() => onOrcamento(modelo)}
+      className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 group border border-gray-100 overflow-hidden flex-shrink-0 w-60 sm:w-64 lg:w-72 cursor-pointer"
     >
       {/* Imagem / placeholder */}
       <div

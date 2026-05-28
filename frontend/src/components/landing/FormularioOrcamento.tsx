@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -69,6 +69,8 @@ export default function FormularioOrcamento() {
   const [erroQtd, setErroQtd] = useState('');
   const [imagemFiles, setImagemFiles] = useState<File[]>([]);
   const [estado, setEstado] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const scrollToSpecsRef = useRef(false);
+  const preselectModeloIdRef = useRef<number | null>(null);
   const [resultado, setResultado] = useState<{ numero: number; linkWhatsApp: string } | null>(null);
 
   const { register, handleSubmit, setValue, trigger, formState: { errors } } = useForm<FormData>({
@@ -87,9 +89,48 @@ export default function FormularioOrcamento() {
     },
   });
 
+  // Carrega linhas. Se vier do carrossel via sessionStorage, aplica preselect.
   useEffect(() => {
-    api.get('/linhas').then(r => setLinhas(r.data.linhas)).catch(() => {});
-  }, []);
+    api.get('/linhas').then(r => {
+      const lista: Linha[] = r.data.linhas;
+      setLinhas(lista);
+
+      const raw = sessionStorage.getItem('smunitur_preselect');
+      if (raw) {
+        sessionStorage.removeItem('smunitur_preselect');
+        try {
+          const { linhaId, modeloId } = JSON.parse(raw);
+          const linha = lista.find((l: Linha) => l.id === linhaId);
+          if (linha) {
+            scrollToSpecsRef.current = true;
+            preselectModeloIdRef.current = modeloId;
+            setCatSelecionada(linha);
+            setValue('modelo_desejado', linha.nome);
+          }
+        } catch {}
+      }
+    }).catch(() => {});
+  }, [setValue]);
+
+  // Escuta evento do carrossel (quando o formulário já está montado e linhas carregadas)
+  useEffect(() => {
+    const onPreselect = (e: Event) => {
+      const { linhaId, modeloId } = (e as CustomEvent).detail;
+      setLinhas(current => {
+        const linha = current.find(l => l.id === linhaId);
+        if (linha) {
+          scrollToSpecsRef.current = true;
+          preselectModeloIdRef.current = modeloId;
+          setCatSelecionada(linha);
+          setValue('modelo_desejado', linha.nome);
+        }
+        return current;
+      });
+    };
+
+    window.addEventListener('smunitur:preselect', onPreselect);
+    return () => window.removeEventListener('smunitur:preselect', onPreselect);
+  }, [setValue]);
 
   // Busca modelos quando uma linha é selecionada
   useEffect(() => {
@@ -99,12 +140,24 @@ export default function FormularioOrcamento() {
     setEspecificaçãoErrors({});
     if (catSelecionada) {
       api.get(`/modelos?linha=${catSelecionada.id}`)
-        .then(r => setModelos(r.data.modelos))
+        .then(r => {
+          const lista: Modelo[] = r.data.modelos;
+          setModelos(lista);
+          const modeloId = preselectModeloIdRef.current;
+          if (modeloId !== null) {
+            preselectModeloIdRef.current = null;
+            const modelo = lista.find(m => m.id === modeloId);
+            if (modelo) {
+              setModeloSelecionado(modelo);
+              setValue('modelo_desejado', modelo.nome);
+            }
+          }
+        })
         .catch(() => setModelos([]));
     } else {
       setModelos([]);
     }
-  }, [catSelecionada]);
+  }, [catSelecionada, setValue]);
 
   // Busca especificacoes quando um modelo é selecionado
   useEffect(() => {
@@ -112,7 +165,15 @@ export default function FormularioOrcamento() {
     setEspecificaçãoErrors({});
     if (modeloSelecionado) {
       api.get(`/modelos/${modeloSelecionado.id}/especificacoes`)
-        .then(r => setEspecificações(r.data.especificacoes))
+        .then(r => {
+          setEspecificações(r.data.especificacoes);
+          if (scrollToSpecsRef.current) {
+            scrollToSpecsRef.current = false;
+            setTimeout(() => {
+              document.getElementById('form-especificacoes')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 300);
+          }
+        })
         .catch(() => setEspecificações([]));
     } else {
       setEspecificações([]);
