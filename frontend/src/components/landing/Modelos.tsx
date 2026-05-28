@@ -149,6 +149,9 @@ export default function Modelos() {
 
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
+    // Touch events are handled natively by the browser (overflow-x: auto).
+    // Calling preventDefault here would block iOS touch scrolling.
+    if ((e.nativeEvent as PointerEvent).pointerType === 'touch') return;
     const t = trackRef.current;
     if (!t) return;
     isDragging.current = true;
