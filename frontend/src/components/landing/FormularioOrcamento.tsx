@@ -518,7 +518,8 @@ function Etapa1({ linhas, catSelecionada, onSelectCat, modelos, modeloSelecionad
           AnimatePresence interna estava interceptando os primeiros cliques
           enquanto a animação de entrada terminava. */}
       {especificacoes.length > 0 && (
-        <div className="space-y-4 border-t border-gray-100 pt-4">
+        <div id="form-especificacoes" className="space-y-4 border-t border-gray-100 pt-4">
+          <p className="text-[11px] text-gray-400"><span className="text-red-500">*</span> Campo obrigatório</p>
           {especificacoes.map(especificacao => (
             <div key={especificacao.id}>
               <p className="text-sm font-semibold text-gray-700 mb-2">
@@ -532,7 +533,12 @@ function Etapa1({ linhas, catSelecionada, onSelectCat, modelos, modeloSelecionad
                     return (
                       <button key={variacao.id} type="button"
                         onClick={() => {
-                          setEspecificaçãoValues(p => ({ ...p, [especificacao.id]: String(variacao.id) }));
+                          setEspecificaçãoValues(p => {
+                            if (p[especificacao.id] === String(variacao.id)) {
+                              const n = { ...p }; delete n[especificacao.id]; return n;
+                            }
+                            return { ...p, [especificacao.id]: String(variacao.id) };
+                          });
                           setEspecificaçãoErrors(p => { const n = { ...p }; delete n[especificacao.id]; return n; });
                         }}
                         className="relative flex flex-col rounded-xl border-2 overflow-hidden transition-all duration-150 hover:shadow-md"
@@ -570,7 +576,12 @@ function Etapa1({ linhas, catSelecionada, onSelectCat, modelos, modeloSelecionad
                     return (
                       <button key={variacao.id} type="button"
                         onClick={() => {
-                          setEspecificaçãoValues(p => ({ ...p, [especificacao.id]: String(variacao.id) }));
+                          setEspecificaçãoValues(p => {
+                            if (p[especificacao.id] === String(variacao.id)) {
+                              const n = { ...p }; delete n[especificacao.id]; return n;
+                            }
+                            return { ...p, [especificacao.id]: String(variacao.id) };
+                          });
                           setEspecificaçãoErrors(p => { const n = { ...p }; delete n[especificacao.id]; return n; });
                         }}
                         className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
