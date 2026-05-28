@@ -70,6 +70,7 @@ export default function FormularioOrcamento() {
   const [imagemFiles, setImagemFiles] = useState<File[]>([]);
   const [estado, setEstado] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const scrollToSpecsRef = useRef(false);
+  const scrollToModelsRef = useRef(false);
   const preselectModeloIdRef = useRef<number | null>(null);
   const [resultado, setResultado] = useState<{ numero: number; linkWhatsApp: string } | null>(null);
 
@@ -143,6 +144,12 @@ export default function FormularioOrcamento() {
         .then(r => {
           const lista: Modelo[] = r.data.modelos;
           setModelos(lista);
+          if (scrollToModelsRef.current) {
+            scrollToModelsRef.current = false;
+            setTimeout(() => {
+              document.getElementById('form-modelos')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 150);
+          }
           const modeloId = preselectModeloIdRef.current;
           if (modeloId !== null) {
             preselectModeloIdRef.current = null;
@@ -183,11 +190,13 @@ export default function FormularioOrcamento() {
   const selecionarLinha = (cat: Linha | null) => {
     setCatSelecionada(cat);
     setValue('modelo_desejado', cat ? cat.nome : 'Outros (especificar nos detalhes)');
+    if (cat) scrollToModelsRef.current = true;
   };
 
   const selecionarModelo = (modelo: Modelo) => {
     setModeloSelecionado(modelo);
     setValue('modelo_desejado', modelo.nome);
+    scrollToSpecsRef.current = true;
   };
 
   // Limpa o erro de quantidade assim que o cliente seleciona algum tamanho.
