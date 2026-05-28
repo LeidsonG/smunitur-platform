@@ -18,7 +18,7 @@ const TAMANHOS_PADRAO = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 interface Linha { id: number; nome: string; slug: string }
-interface Modelo { id: number; nome: string; descricao?: string }
+interface Modelo { id: number; nome: string; descricao?: string; imagem?: string | null }
 interface Variacao { id: number; valor: string; imagem?: string | null }
 interface Especificacao { id: number; nome: string; obrigatorio: boolean; variacoes: Variacao[] }
 
@@ -471,20 +471,42 @@ function Etapa1({ linhas, catSelecionada, onSelectCat, modelos, modeloSelecionad
           camada de animação aqui causava cliques perdidos durante o
           fade-in dos botões. */}
       {catSelecionada && modelos.length > 0 && (
-        <div className="border-t border-gray-100 pt-4 mb-4">
-          <p className="text-sm font-semibold text-gray-600 mb-2">Qual modelo?</p>
-          <div className="flex flex-wrap gap-2">
+        <div id="form-modelos" className="border-t border-gray-100 pt-4 mb-4">
+          <p className="text-sm font-semibold text-gray-600 mb-3">Qual modelo?</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {modelos.map(modelo => {
               const sel = modeloSelecionado?.id === modelo.id;
+              const LinhaIcon = ICONE_CATEGORIA[catSelecionada.slug] ?? Package;
               return (
                 <button key={modelo.id} type="button" onClick={() => onSelectModelo(modelo)}
-                  className="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-150"
+                  className="flex flex-col rounded-2xl border-2 overflow-hidden text-left transition-all duration-150 hover:shadow-md"
                   style={{
                     borderColor: sel ? '#005ED5' : '#E5E7EB',
-                    background: sel ? '#005ED5' : '#fff',
-                    color: sel ? '#fff' : '#374151',
+                    background: sel ? 'rgba(0,94,213,0.04)' : '#fff',
                   }}>
-                  {modelo.nome}
+                  <div className="w-full h-24 bg-gray-50 flex items-center justify-center overflow-hidden">
+                    {modelo.imagem
+                      // eslint-disable-next-line @next/next/no-img-element
+                      ? <img src={`${API_BASE}${modelo.imagem}`} alt={modelo.nome} className="w-full h-full object-cover" />
+                      : <LinhaIcon size={28} className="text-gray-300" />}
+                  </div>
+                  <div className="px-2.5 py-2">
+                    <p className="text-xs font-bold line-clamp-2 leading-tight" style={{ color: sel ? '#005ED5' : '#374151' }}>
+                      {modelo.nome}
+                    </p>
+                    {modelo.descricao && (
+                      <p className="text-[10px] text-gray-400 mt-0.5 line-clamp-2 leading-tight">
+                        {modelo.descricao}
+                      </p>
+                    )}
+                  </div>
+                  {sel && (
+                    <div className="px-2.5 pb-2">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold" style={{ color: '#005ED5' }}>
+                        <Check size={10} /> Selecionado
+                      </span>
+                    </div>
+                  )}
                 </button>
               );
             })}
