@@ -147,7 +147,7 @@ export default function FormularioOrcamento() {
           if (scrollToModelsRef.current) {
             scrollToModelsRef.current = false;
             setTimeout(() => {
-              document.getElementById('form-modelos')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              document.getElementById('form-modelos')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 150);
           }
           const modeloId = preselectModeloIdRef.current;
@@ -177,7 +177,7 @@ export default function FormularioOrcamento() {
           if (scrollToSpecsRef.current) {
             scrollToSpecsRef.current = false;
             setTimeout(() => {
-              document.getElementById('form-especificacoes')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              document.getElementById('form-especificacoes')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 300);
           }
         })
@@ -541,7 +541,7 @@ function Etapa1({ linhas, catSelecionada, onSelectCat, modelos, modeloSelecionad
           camada de animação aqui causava cliques perdidos durante o
           fade-in dos botões. */}
       {catSelecionada && modelos.length > 0 && (
-        <div id="form-modelos" className="border-t border-gray-100 pt-4 mb-4">
+        <div id="form-modelos" className="border-t border-gray-100 pt-4 mb-4" style={{ scrollMarginTop: '80px' }}>
           <p className="text-sm font-semibold text-gray-600 mb-3">Qual modelo?</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {modelos.map(modelo => {
@@ -588,7 +588,7 @@ function Etapa1({ linhas, catSelecionada, onSelectCat, modelos, modeloSelecionad
           AnimatePresence interna estava interceptando os primeiros cliques
           enquanto a animação de entrada terminava. */}
       {especificacoes.length > 0 && (
-        <div id="form-especificacoes" className="space-y-4 border-t border-gray-100 pt-4">
+        <div id="form-especificacoes" className="space-y-4 border-t border-gray-100 pt-4" style={{ scrollMarginTop: '80px' }}>
           <p className="text-[11px] text-gray-400"><span className="text-red-500">*</span> Campo obrigatório</p>
           {especificacoes.map(especificacao => (
             <div key={especificacao.id}>
