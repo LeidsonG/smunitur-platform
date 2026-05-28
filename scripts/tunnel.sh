@@ -1,6 +1,6 @@
 #!/bin/bash
 # Expõe o projeto via Cloudflare Tunnel com um único comando.
-# Uso: ./tunnel.sh
+# Uso: ./scripts/tunnel.sh
 
 set -e
 
