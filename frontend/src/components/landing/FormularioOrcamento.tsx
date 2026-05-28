@@ -715,7 +715,18 @@ function Etapa2({ setQuantidade, register, setValue, imagemFiles, setImagemFiles
                       type="number"
                       min={1}
                       value={qtd || ''}
-                      onChange={e => setTamQtd(p => ({ ...p, [tam]: Math.max(1, parseInt(e.target.value) || 1) }))}
+                      onChange={e => {
+                        const val = e.target.value;
+                        if (val === '' || val === '0') {
+                          setTamQtd(p => ({ ...p, [tam]: 0 }));
+                        } else {
+                          setTamQtd(p => ({ ...p, [tam]: Math.max(1, parseInt(val) || 1) }));
+                        }
+                      }}
+                      onBlur={e => {
+                        const val = parseInt(e.target.value);
+                        if (!val || val < 1) setTamQtd(p => ({ ...p, [tam]: 1 }));
+                      }}
                       className="w-14 h-8 text-center text-sm font-bold outline-none rounded-lg border border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
                       style={{ color: '#005ED5' }}
                       aria-label={`Quantidade ${tam}`}
