@@ -167,7 +167,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
       </nav>
 
       {/* Ver site + Logout */}
-      <div className="px-3 pb-6 space-y-1">
+      <div className="px-3 pb-4 space-y-1">
         <a
           href="/"
           target="_blank"
@@ -184,6 +184,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
           <LogOut size={18} />
           Sair
         </button>
+      </div>
+
+      {/* Versão */}
+      <div className="px-6 pb-4">
+        <p className="text-[10px] text-gray-700 font-mono">v1.0.0</p>
       </div>
     </>
   );
