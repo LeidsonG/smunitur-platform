@@ -68,6 +68,7 @@ Ponto de entrada da API. Responsável por:
 | Arquivo | O que faz |
 |---|---|
 | `auth.ts` | Middleware JWT. Extrai o token do header `Authorization`, verifica assinatura e expiry, consulta `tokenVersion` no banco (invalida tokens antigos após troca de senha). Injeta `req.admin` para uso nas rotas. |
+| `upload.ts` | Pipeline de upload de imagens em três etapas: (1) `upload` — middleware Multer (salva no disco, limita a 10 MB); (2) `validarMagicBytes` — lê os primeiros 12 bytes do arquivo e rejeita executáveis disfarçados de imagem; (3) `processarImagens` — redimensiona com Sharp para no máximo 2000px no maior lado e corrige orientação EXIF. Também exporta `apagarUpload` para remover imagens antigas ao substituir. |
 
 #### `routes/`
 
@@ -90,8 +91,6 @@ Cada arquivo é um `Router` do Express montado em `/api/<nome>`.
 | `env.ts` | Valida todas as variáveis de ambiente obrigatórias no boot. Se algo faltar ou for inválido (JWT_SECRET fraco, BCRYPT_ROUNDS fora da faixa), o processo aborta com mensagem clara. Exporta o objeto `env` tipado para uso no backend. |
 | `logger.ts` | Instância única do Pino (logger estruturado em JSON). Usada em todos os módulos do backend — nunca usar `console.log` direto. |
 | `prisma.ts` | Instância singleton do PrismaClient. Registra shutdown limpo (fecha conexão com o banco em `SIGTERM`/`SIGINT`). |
-| `upload.ts` | Pipeline de upload de imagens em três etapas: (1) `upload` — middleware Multer (salva no disco, limita a 10 MB); (2) `validarMagicBytes` — lê os primeiros 12 bytes do arquivo e rejeita executáveis disfarçados de imagem; (3) `processarImagens` — redimensiona com Sharp para no máximo 2000px no maior lado e corrige orientação EXIF. Também exporta `apagarUpload` para remover imagens antigas ao substituir. |
-
 #### `uploads/`
 
 Diretório físico onde as imagens enviadas pelos usuários ficam armazenadas. Servido estaticamente em `/uploads/*`. Não commitar conteúdo deste diretório.
@@ -167,14 +166,15 @@ Componentes do painel administrativo.
 
 | Arquivo | O que é |
 |---|---|
-| `Sidebar.tsx` | Menu lateral do admin: links de navegação, ícones, badge de nível do usuário, botão de logout. |
+| `Sidebar.tsx` | Menu lateral do admin: links de navegação agrupados (Principal / Catálogo / Sistema), ícones, badge de nível do usuário, botão de logout. Versão mobile via drawer. |
 | `ConfirmModal.tsx` | Modal de confirmação reutilizável. Usado antes de ações destrutivas (deletar, desativar). |
-| `OrcamentosAdmin.tsx` | Componente principal da página de orçamentos: tabela, filtros por status, modal de detalhes, upload de layout final, botão de compartilhar via WhatsApp. |
-| `ModelosAdmin.tsx` | CRUD de modelos com formulário de criação/edição, upload de imagem, e painel de especificações associadas. |
-| `LinhasAdmin.tsx` | CRUD de linhas com seletor de ícone Lucide e picker de cor. |
-| `EspecificacoesAdmin.tsx` | CRUD de especificações e suas variações (sub-itens com imagem opcional). |
-| `UsuariosAdmin.tsx` | Tabela de usuários admin com ações de criação, ativação/desativação e reset de senha. |
-| `PerfilAdmin.tsx` | Formulário de perfil do usuário logado: foto, nome, troca de senha. |
+| `Toast.tsx` | Componente de notificação temporária (toast). Exibe mensagens de sucesso ou erro por 3,5 segundos no canto inferior direito. Exporta `ToastContainer` e `ToastData`. |
+| `Orcamentos.tsx` | Listagem de orçamentos com filtros por status, data (hoje/semana/mês) e busca por nome, e-mail ou #número. Cards no mobile, tabela no desktop. Modal bottom-sheet com detalhes, copiar telefone, upload de layout final, WhatsApp e atualização de status. Toast de feedback em todas as ações. |
+| `Modelos.tsx` | CRUD de modelos com formulário de criação/edição, upload de imagem, e painel de especificações associadas. |
+| `Linhas.tsx` | CRUD de linhas com seletor de ícone Lucide e picker de cor. |
+| `Especificacoes.tsx` | CRUD de especificações e suas variações (sub-itens com imagem opcional). |
+| `Usuarios.tsx` | Listagem de usuários admin com ações de criação, edição, ativação/desativação e reset de senha. Modais bottom-sheet no mobile. |
+| `Perfil.tsx` | Formulário de perfil do usuário logado: foto, nome, troca de senha. |
 
 ### `src/lib/`
 
