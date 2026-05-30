@@ -11,7 +11,6 @@ import {
   LogOut,
   ChevronRight,
   UserCircle,
-  Menu,
   X,
   SlidersHorizontal,
   ExternalLink,
@@ -33,11 +32,15 @@ const NIVEL_LABEL: Record<AdminInfo['nivel'], string> = {
   super_admin: 'Super Admin', admin: 'Admin', operador: 'Operador',
 };
 
-export default function Sidebar() {
+interface SidebarProps {
+  mobileOpen: boolean;
+  setMobileOpen: (open: boolean) => void;
+}
+
+export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [admin, setAdmin] = useState<AdminInfo | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const carregarAdmin = () => {
@@ -161,15 +164,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Botão hambúrguer (mobile) */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-30 p-2.5 rounded-xl shadow-md bg-white border border-gray-200"
-        aria-label="Abrir menu"
-      >
-        <Menu size={18} className="text-gray-700" />
-      </button>
-
       {/* Sidebar desktop — sticky para não rolar com o conteúdo */}
       <aside
         className="hidden lg:flex flex-col w-64 h-screen sticky top-0 flex-shrink-0"
