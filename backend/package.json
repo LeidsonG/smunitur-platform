@@ -15,7 +15,8 @@
     "db:seed": "ts-node prisma/seed.ts",
     "db:seed:demo": "ts-node prisma/seed-demo.ts",
     "db:studio": "prisma studio",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -49,6 +50,9 @@
     "prisma": "^5.10.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.3",
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "typescript-eslint": "^8.0.0"
   }
 }
