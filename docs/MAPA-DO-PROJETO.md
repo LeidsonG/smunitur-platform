@@ -197,8 +197,8 @@ Documentação operacional do projeto.
 | Arquivo | O que contém |
 |---|---|
 | `1-checklist-pre-producao.md` | Lista de verificação a completar antes de fazer o primeiro deploy em produção (segurança, variáveis, backup, DNS). |
-| `2-deploy.md` | Passo a passo detalhado de deploy em VPS (configuração de Nginx, certbot, PM2/Docker em produção). |
-| `3-proximas-funcionalidades.md` | Roadmap de funcionalidades planejadas e ideias para iterações futuras. |
+| `2-deploy-oracle.md` | Passo a passo detalhado de deploy em VPS (configuração de Nginx, certbot, PM2/Docker em produção). |
+| `4-proximas-funcionalidades.md` | Roadmap de funcionalidades planejadas e ideias para iterações futuras. |
 | `DOCKER.md` | Referência rápida dos comandos Docker mais usados no projeto (subir, parar, ver logs, resetar banco, etc.). |
 
 ---

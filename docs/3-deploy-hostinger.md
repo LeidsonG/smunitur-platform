@@ -1,6 +1,6 @@
 # Deploy — Sistema SM Unitur na Hostinger VPS
 
-Guia passo a passo para subir o sistema em uma **VPS da Hostinger** com Ubuntu 24.04. A stack é idêntica ao guia Oracle ([`2-deploy.md`](2-deploy.md)) — Node.js + PM2 + MySQL + Nginx — mas o processo de provisionar a máquina e configurar o firewall é diferente e mais simples.
+Guia passo a passo para subir o sistema em uma **VPS da Hostinger** com Ubuntu 24.04. A stack é idêntica ao guia Oracle ([`2-deploy-oracle.md`](2-deploy-oracle.md)) — Node.js + PM2 + MySQL + Nginx — mas o processo de provisionar a máquina e configurar o firewall é diferente e mais simples.
 
 > Tempo estimado: 1,5–2,5 horas para quem faz pela primeira vez.
 

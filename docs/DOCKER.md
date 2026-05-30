@@ -132,7 +132,7 @@ NEXT_PUBLIC_API_URL_PROD=https://SEU_DOMINIO.com.br/api
 ```
 
 > O deploy oficial é feito de forma nativa na VM (PM2 + Nginx), **não** com
-> Docker em produção. Veja [`docs/2-deploy.md`](2-deploy.md).
+> Docker em produção. Veja [`docs/2-deploy-oracle.md`](2-deploy-oracle.md).
 
 ---
 

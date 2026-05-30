@@ -15,7 +15,7 @@ Use este arquivo como roteiro de aceite. Marque `[x]` quando concluído.
 | Endereço físico (se for exibir) | `frontend/src/components/landing/Footer.tsx` / `Contato.tsx` | [ ] |
 | Redes sociais (Instagram, Facebook) — links reais | `frontend/src/components/landing/Footer.tsx` | [ ] |
 | Logo da empresa (substituir asset em `/image/`) | conferir referências em components | [ ] |
-| Paleta de cores especial da fábrica (aguardando) | será nova feature numa próxima versão — ver [`3-proximas-funcionalidades.md`](3-proximas-funcionalidades.md) | [ ] |
+| Paleta de cores especial da fábrica (aguardando) | será nova feature numa próxima versão — ver [`4-proximas-funcionalidades.md`](4-proximas-funcionalidades.md) | [ ] |
 
 ---
 
@@ -33,7 +33,7 @@ Use este arquivo como roteiro de aceite. Marque `[x]` quando concluído.
 
 ## 3. Infraestrutura Oracle Cloud
 
-Ver [`2-deploy.md`](2-deploy.md) passo-a-passo. Itens-chave:
+Ver [`2-deploy-oracle.md`](2-deploy-oracle.md) passo-a-passo. Itens-chave:
 
 **Shape recomendado: `VM.Standard.A1.Flex` (Ampere ARM64)**
 - Always Free: 4 OCPUs + 24 GB (gratuito, sem SLA de disponibilidade)
@@ -152,7 +152,7 @@ Ver [`2-deploy.md`](2-deploy.md) passo-a-passo. Itens-chave:
 | Diretório de backup com permissão correta (`/var/backups/smunitur`) | [ ] |
 | Rotação de logs PM2 (`pm2 install pm2-logrotate`) | [ ] |
 | Tags de deploy criadas antes de cada atualização (`git tag deploy-YYYYMMDD-HHMM`) | [ ] |
-| Rollback testado ao menos uma vez (ver seção 17 de `2-deploy.md`) | [ ] |
+| Rollback testado ao menos uma vez (ver seção 17 de `2-deploy-oracle.md`) | [ ] |
 | (Recomendado) Monitor externo (UptimeRobot ou OCI Monitoring) | [ ] |
 | (Recomendado) Backup off-site para Oracle Object Storage | [ ] |
 | Documentação interna entregue ao cliente (este arquivo + 2-deploy.md) | [ ] |
@@ -177,4 +177,4 @@ Comunique o lançamento ao cliente e envie:
 2. URL admin: `https://smunitur.com.br/admin/login`
 3. Credenciais iniciais (e-mail + senha) por canal seguro (não e-mail simples)
 4. Cópia do [`ARCHITECTURE.md`](../ARCHITECTURE.md) para entender o sistema
-5. Cópia de [`2-deploy.md`](2-deploy.md) (para o time de TI, se houver)
+5. Cópia de [`2-deploy-oracle.md`](2-deploy-oracle.md) (para o time de TI, se houver)
