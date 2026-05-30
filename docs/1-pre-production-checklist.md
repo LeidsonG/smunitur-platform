@@ -153,9 +153,45 @@ Ver [`2-deploy-oracle.md`](2-deploy-oracle.md) passo-a-passo. Itens-chave:
 | Rotação de logs PM2 (`pm2 install pm2-logrotate`) | [ ] |
 | Tags de deploy criadas antes de cada atualização (`git tag deploy-YYYYMMDD-HHMM`) | [ ] |
 | Rollback testado ao menos uma vez (ver seção 17 de `2-deploy-oracle.md`) | [ ] |
-| (Recomendado) Monitor externo (UptimeRobot ou OCI Monitoring) | [ ] |
-| (Recomendado) Backup off-site para Oracle Object Storage | [ ] |
-| Documentação interna entregue ao cliente (este arquivo + 2-deploy.md) | [ ] |
+| Documentação interna entregue ao cliente (este arquivo + 2-deploy-oracle.md) | [ ] |
+
+---
+
+## 11. Monitoramento pós-deploy ⚠️ FAZER LOGO APÓS O SITE IR NO AR
+
+### UptimeRobot — monitor de disponibilidade (gratuito, 5 minutos)
+
+Avisa por e-mail/WhatsApp quando o site cair, antes de qualquer cliente reclamar.
+
+1. Crie uma conta em <https://uptimerobot.com>
+2. Clique em **"Add New Monitor"**
+3. Preencha:
+   - Monitor Type: `HTTP(s)`
+   - Friendly Name: `SM Unitur API`
+   - URL: `https://smunitur.com.br/api/health`
+   - Monitoring Interval: `5 minutes`
+4. Em **"Alert Contacts"**, adicione seu e-mail e/ou número de WhatsApp
+5. Salve — pronto
+
+- [ ] UptimeRobot configurado apontando para `/api/health`
+- [ ] Alerta de e-mail ou WhatsApp ativo
+
+---
+
+### Sentry — captura de erros em produção (gratuito até 5k eventos/mês)
+
+Envia e-mail com stack trace completo quando qualquer erro acontece no backend ou frontend — você fica sabendo antes do cliente.
+
+1. Crie conta em <https://sentry.io> e crie um projeto **Node.js** (backend) e outro **Next.js** (frontend)
+2. Copie o DSN de cada projeto e abra uma conversa com o Claude Code:
+   - _"Integre o Sentry no backend com o DSN: `[cole aqui]`"_
+   - _"Integre o Sentry no frontend com o DSN: `[cole aqui]`"_
+3. O Claude adicionará o SDK e configurará a captura automática de erros
+
+- [ ] Conta Sentry criada
+- [ ] DSN do backend anotado
+- [ ] DSN do frontend anotado
+- [ ] Sentry integrado no código (pedir ao Claude com os DSNs)
 
 ---
 
