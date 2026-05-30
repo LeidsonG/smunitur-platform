@@ -186,16 +186,23 @@ router.post(
 
 // GET /api/orcamentos — listagem admin (protegido)
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const { status, busca, pagina = '1', limite = '20' } = req.query;
+  const { status, busca, pagina = '1', limite = '20', dataInicio, dataFim } = req.query;
 
   const where: Record<string, unknown> = {};
   if (status) where.status = status;
   if (busca) {
+    const buscaSemHash = (busca as string).replace(/^#/, '');
     where.OR = [
-      { nomeCliente: { contains: busca as string } },
-      { emailCliente: { contains: busca as string } },
-      { numero: isNaN(parseInt(busca as string)) ? undefined : parseInt(busca as string) },
+      { nomeCliente: { contains: buscaSemHash } },
+      { emailCliente: { contains: buscaSemHash } },
+      { numero: isNaN(parseInt(buscaSemHash)) ? undefined : parseInt(buscaSemHash) },
     ].filter(Boolean);
+  }
+  if (dataInicio || dataFim) {
+    const createdAt: Record<string, Date> = {};
+    if (dataInicio) createdAt.gte = new Date(`${dataInicio}T00:00:00`);
+    if (dataFim) createdAt.lte = new Date(`${dataFim}T23:59:59`);
+    where.createdAt = createdAt;
   }
 
   const skip = (parseInt(pagina as string) - 1) * parseInt(limite as string);

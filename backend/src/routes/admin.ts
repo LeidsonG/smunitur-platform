@@ -12,7 +12,7 @@
  *     tokens JWT já emitidos.
  */
 import { Router, Response } from 'express';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { body, validationResult } from 'express-validator';
 import prisma from '../utils/prisma';
 import { env } from '../utils/env';

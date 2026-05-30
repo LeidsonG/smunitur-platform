@@ -8,7 +8,7 @@
  * - PATCH /change-password   → troca a própria senha (invalida sessões anteriores)
  */
 import { Router, Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
 import { body, validationResult } from 'express-validator';
