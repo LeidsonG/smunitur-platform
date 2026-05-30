@@ -33,7 +33,7 @@ function extrairErro(e: unknown, fallback: string): string {
     || fallback;
 }
 
-export default function UsuariosAdmin() {
+export default function Usuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<Modal>(null);

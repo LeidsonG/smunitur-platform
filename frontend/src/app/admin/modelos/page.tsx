@@ -1,5 +1,5 @@
-import ModelosAdmin from '@/components/admin/ModelosAdmin';
+import Modelos from '@/components/admin/Modelos';
 
 export default function ModelosPage() {
-  return <ModelosAdmin />;
+  return <Modelos />;
 }

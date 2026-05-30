@@ -17,7 +17,7 @@ const NIVEL_LABEL: Record<Admin['nivel'], string> = {
   operador: 'Operador',
 };
 
-export default function PerfilAdmin() {
+export default function Perfil() {
   const [admin, setAdmin] = useState<Admin | null>(null);
   const [loading, setLoading] = useState(true);
 

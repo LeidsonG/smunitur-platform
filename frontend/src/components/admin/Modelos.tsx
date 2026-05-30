@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import api, { API_BASE } from '@/lib/api';
 import ConfirmModal from '@/components/admin/ConfirmModal';
-import LinhasAdmin from '@/components/admin/LinhasAdmin';
+import Linhas from '@/components/admin/Linhas';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 interface Linha { id: number; nome: string; slug: string; ativo: boolean }
@@ -42,7 +42,7 @@ const errMsg = (e: unknown) =>
   (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Erro inesperado.';
 
 // ─── Componente ───────────────────────────────────────────────────────────────
-export default function ModelosAdmin() {
+export default function Modelos() {
   const [modelos, setModelos] = useState<Modelo[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [especificaçõesGlobais, setEspecificaçõesGlobais] = useState<EspecificacaoGlobal[]>([]);
@@ -109,7 +109,7 @@ export default function ModelosAdmin() {
 
   useEffect(() => { carregar(); }, [carregar]);
 
-  // Atualiza linhas ao voltar para a aba Modelos (usuário pode ter editado via LinhasAdmin)
+  // Atualiza linhas ao voltar para a aba Modelos (usuário pode ter editado via Linhas)
   useEffect(() => {
     if (aba === 'modelos') {
       api.get('/linhas?todos=true')
@@ -324,7 +324,7 @@ export default function ModelosAdmin() {
 
       {/* Aba Linhas */}
       {aba === 'linhas' ? (
-        <LinhasAdmin />
+        <Linhas />
       ) : loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 rounded-full border-4 border-blue-200 animate-spin" style={{ borderTopColor: '#005ED5' }} />

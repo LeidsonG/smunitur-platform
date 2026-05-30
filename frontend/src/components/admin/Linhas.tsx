@@ -24,7 +24,7 @@ interface Linha {
 
 const COR_PADRAO = '#005ED5';
 
-export default function LinhasAdmin() {
+export default function Linhas() {
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<'criar' | 'editar' | null>(null);

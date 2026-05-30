@@ -1,5 +1,5 @@
-import OrcamentosAdmin from '@/components/admin/OrcamentosAdmin';
+import Orcamentos from '@/components/admin/Orcamentos';
 
 export default function OrcamentosPage() {
-  return <OrcamentosAdmin />;
+  return <Orcamentos />;
 }

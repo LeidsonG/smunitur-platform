@@ -11,7 +11,7 @@ interface Especificacao { id: number; nome: string; ordem: number; variacoes: Va
 const errMsg = (e: unknown) =>
   (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Erro inesperado.';
 
-export default function EspecificacoesAdmin() {
+export default function Especificacoes() {
   const [especificacoes, setEspecificações] = useState<Especificacao[]>([]);
   const [loading, setLoading] = useState(true);
 

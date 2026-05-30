@@ -23,7 +23,7 @@ interface EspecificacaoOrc {
   valorLivre?: string | null;
 }
 
-export default function OrcamentosAdmin() {
+export default function Orcamentos() {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
   const [total, setTotal] = useState(0);
   const [pagina, setPagina] = useState(1);

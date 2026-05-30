@@ -1,5 +1,5 @@
-import EspecificacoesAdmin from '@/components/admin/EspecificacoesAdmin';
+import Especificacoes from '@/components/admin/Especificacoes';
 
 export default function EspecificacoesPage() {
-  return <EspecificacoesAdmin />;
+  return <Especificacoes />;
 }

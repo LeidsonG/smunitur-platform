@@ -1,5 +1,5 @@
-import UsuariosAdmin from '@/components/admin/UsuariosAdmin';
+import Usuarios from '@/components/admin/Usuarios';
 
 export default function UsuariosPage() {
-  return <UsuariosAdmin />;
+  return <Usuarios />;
 }

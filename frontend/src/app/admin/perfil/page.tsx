@@ -1,5 +1,5 @@
-import PerfilAdmin from '@/components/admin/PerfilAdmin';
+import Perfil from '@/components/admin/Perfil';
 
 export default function PerfilPage() {
-  return <PerfilAdmin />;
+  return <Perfil />;
 }
