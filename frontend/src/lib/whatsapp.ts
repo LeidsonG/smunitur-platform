@@ -1,6 +1,4 @@
-// ATENÇÃO: Número temporário para ambiente de testes.
-// Substituir pelo número oficial da empresa SM Unitur antes de ir para produção.
-export const WHATSAPP_NUMBER = '5517981322215';
+export const WHATSAPP_NUMBER = '5517981345270';
 
 interface DadosOrcamento {
   numero: number;

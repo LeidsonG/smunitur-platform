@@ -2,10 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { MessageCircle, Mail, Lock } from 'lucide-react';
-
-// ATENÇÃO: Número temporário para testes. Substituir pelo número oficial antes de ir para produção.
-const WHATSAPP_NUMBER = '5517981322215';
+import { MessageCircle, Mail, Lock, MapPin } from 'lucide-react';
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -15,7 +13,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8 sm:mb-10">
           {/* Logo + desc */}
-          <div className="lg:col-span-2">
+          <div className="sm:col-span-2 lg:col-span-2">
             <div className="mb-4">
               <Image
                 src="/logo.png"
@@ -29,7 +27,11 @@ export default function Footer() {
               Especialistas em confecção de uniformes, camisetas, moletons e jalecos personalizados
               com qualidade premium e entrega no prazo.
             </p>
-            <div className="flex gap-3 mt-5">
+            <div className="flex items-start gap-2 mt-4 text-xs text-gray-500">
+              <MapPin size={13} className="flex-shrink-0 mt-0.5" style={{ color: '#FF9400' }} />
+              <span>Rua Tenerife, Vila Dias<br />São José do Rio Preto — SP, 15050-120</span>
+            </div>
+            <div className="flex gap-3 mt-4">
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}`}
                 target="_blank"
