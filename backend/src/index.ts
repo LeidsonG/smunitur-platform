@@ -112,7 +112,6 @@ app.use((_req, res) => {
 });
 
 // Error handler global — evita vazar stack em produção.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error & { status?: number; code?: string }, req: Request, res: Response, _next: NextFunction) => {
   const log = (req as Request & { log?: typeof logger }).log ?? logger;
   log.error({ err, code: err.code }, 'erro tratado');
