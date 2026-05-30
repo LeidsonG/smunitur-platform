@@ -214,7 +214,7 @@ function ModalShell({ title, onClose, children }: { title: string; onClose: () =
       style={{ background: 'rgba(0,0,0,0.45)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-100">
           <h2 className="font-bold text-gray-900">{title}</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100">
