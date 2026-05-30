@@ -289,7 +289,7 @@ export default function Linhas() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Ícone</label>
-                <div className="grid grid-cols-8 gap-1.5 max-h-44 overflow-y-auto p-1 border border-gray-100 rounded-xl bg-gray-50">
+                <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-8 gap-1.5 max-h-44 overflow-y-auto p-1 border border-gray-100 rounded-xl bg-gray-50">
                   {LINHA_ICONES.map(({ nome, componente: I, label }) => {
                     const sel = form.icone === nome;
                     return (

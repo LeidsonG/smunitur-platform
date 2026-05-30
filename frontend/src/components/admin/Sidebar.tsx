@@ -187,7 +187,7 @@ export default function Sidebar() {
             onClick={() => setMobileOpen(false)}
           />
           <aside
-            className="lg:hidden fixed top-0 left-0 z-50 flex flex-col w-72 h-full"
+            className="lg:hidden fixed top-0 left-0 z-50 flex flex-col w-[85vw] max-w-72 h-full"
             style={{ background: '#0A1628' }}
           >
             {conteudoSidebar}

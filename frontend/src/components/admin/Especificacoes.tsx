@@ -167,7 +167,7 @@ export default function Especificacoes() {
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex-1 p-6 lg:p-8">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Especificações</h1>

@@ -72,7 +72,7 @@ export default function ProducaoPage() {
   const getStatusInfo = (s: string) => statusInfo(s);
 
   return (
-    <div className="flex-1 p-6 lg:p-8">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Painel de Produção</h1>
         <p className="text-gray-500 text-sm mt-1">Orçamentos em andamento (análise, aprovação e produção)</p>

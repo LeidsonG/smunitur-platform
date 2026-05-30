@@ -127,7 +127,7 @@ export default function Perfil() {
   }
 
   return (
-    <div className="flex-1 p-6 lg:p-8">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Meu Perfil</h1>
         <p className="text-gray-500 text-sm mt-1">Seus dados de acesso ao sistema</p>
