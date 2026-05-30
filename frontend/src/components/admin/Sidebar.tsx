@@ -17,13 +17,28 @@ import {
 } from 'lucide-react';
 import { API_BASE } from '@/lib/api';
 
-const navItems = [
-  { href: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/admin/orcamentos', icon: FileText, label: 'Orçamentos' },
-  { href: '/admin/producao', icon: Factory, label: 'Produção' },
-  { href: '/admin/modelos', icon: Package, label: 'Modelos' },
-  { href: '/admin/especificacoes', icon: SlidersHorizontal, label: 'Especificações', nivel: ['super_admin', 'admin'] as string[] },
-  { href: '/admin/usuarios', icon: Users, label: 'Usuários', nivel: ['super_admin', 'admin'] as string[] },
+const navGroups = [
+  {
+    label: 'Principal',
+    items: [
+      { href: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+      { href: '/admin/orcamentos', icon: FileText, label: 'Orçamentos' },
+      { href: '/admin/producao', icon: Factory, label: 'Produção' },
+    ],
+  },
+  {
+    label: 'Catálogo',
+    items: [
+      { href: '/admin/modelos', icon: Package, label: 'Modelos' },
+      { href: '/admin/especificacoes', icon: SlidersHorizontal, label: 'Especificações', nivel: ['super_admin', 'admin'] as string[] },
+    ],
+  },
+  {
+    label: 'Sistema',
+    items: [
+      { href: '/admin/usuarios', icon: Users, label: 'Usuários', nivel: ['super_admin', 'admin'] as string[] },
+    ],
+  },
 ];
 
 interface AdminInfo { id: number; nome: string; email: string; nivel: 'super_admin' | 'admin' | 'operador'; foto?: string | null }
@@ -68,10 +83,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
     setMobileOpen(false);
   };
 
-  const itensVisiveis = navItems.filter((item) => {
-    if (!item.nivel) return true;
-    return admin && item.nivel.includes(admin.nivel);
-  });
+  const filtrarItens = (items: typeof navGroups[0]['items']) =>
+    items.filter((item) => !item.nivel || (admin && item.nivel.includes(admin.nivel)));
 
   const conteudoSidebar = (
     <>
@@ -118,24 +131,37 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
         </button>
       )}
 
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
-        {itensVisiveis.map(({ href, icon: Icon, label }) => {
-          const active = pathname.startsWith(href);
+      {/* Nav agrupada */}
+      <nav className="flex-1 px-3 py-3 overflow-y-auto space-y-4">
+        {navGroups.map((grupo) => {
+          const itens = filtrarItens(grupo.items);
+          if (itens.length === 0) return null;
           return (
-            <button
-              key={href}
-              onClick={() => irPara(href)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group"
-              style={{
-                background: active ? 'rgba(0,94,213,0.2)' : 'transparent',
-                color: active ? '#005ED5' : '#9CA3AF',
-              }}
-            >
-              <Icon size={18} />
-              <span className="flex-1 text-left">{label}</span>
-              {active && <ChevronRight size={14} style={{ color: '#005ED5' }} />}
-            </button>
+            <div key={grupo.label}>
+              <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-600">
+                {grupo.label}
+              </p>
+              <div className="space-y-0.5">
+                {itens.map(({ href, icon: Icon, label }) => {
+                  const active = pathname.startsWith(href);
+                  return (
+                    <button
+                      key={href}
+                      onClick={() => irPara(href)}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                      style={{
+                        background: active ? 'rgba(0,94,213,0.2)' : 'transparent',
+                        color: active ? '#005ED5' : '#9CA3AF',
+                      }}
+                    >
+                      <Icon size={18} />
+                      <span className="flex-1 text-left">{label}</span>
+                      {active && <ChevronRight size={14} style={{ color: '#005ED5' }} />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </nav>
