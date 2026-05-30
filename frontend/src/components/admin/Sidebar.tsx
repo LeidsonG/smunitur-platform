@@ -70,7 +70,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   }, []);
 
   // Fecha o menu ao trocar de rota
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  useEffect(() => { setMobileOpen(false); }, [pathname, setMobileOpen]);
 
   const handleLogout = () => {
     localStorage.removeItem('smunitur_token');

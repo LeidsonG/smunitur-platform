@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import api from '@/lib/api';
@@ -102,9 +103,9 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 pt-5 border-t border-gray-100">
-            <a href="/" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+            <Link href="/" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
               ← Voltar ao site
-            </a>
+            </Link>
           </div>
         </div>
       </div>

@@ -332,7 +332,7 @@ export default function Modelos() {
       ) : modelos.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
           <p className="text-lg font-semibold mb-2">Nenhum modelo cadastrado</p>
-          <p className="text-sm">Clique em "Novo Modelo" para começar</p>
+          <p className="text-sm">Clique em &quot;Novo Modelo&quot; para começar</p>
         </div>
       ) : (
         <div className="space-y-8">
