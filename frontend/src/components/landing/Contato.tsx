@@ -117,7 +117,7 @@ export default function Contato() {
             <iframe
               src={MAPS_EMBED}
               width="100%"
-              height="420"
+              height="300"
               style={{ border: 0, display: 'block' }}
               allowFullScreen
               loading="lazy"
