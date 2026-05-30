@@ -153,7 +153,35 @@ Ver [`2-deploy-oracle.md`](2-deploy-oracle.md) passo-a-passo. Itens-chave:
 | Rotação de logs PM2 (`pm2 install pm2-logrotate`) | [ ] |
 | Tags de deploy criadas antes de cada atualização (`git tag deploy-YYYYMMDD-HHMM`) | [ ] |
 | Rollback testado ao menos uma vez (ver seção 17 de `2-deploy-oracle.md`) | [ ] |
+| GitHub Actions deploy automático configurado (ver abaixo) | [ ] |
 | Documentação interna entregue ao cliente (este arquivo + 2-deploy-oracle.md) | [ ] |
+
+### GitHub Actions — deploy automático ao fazer push na `main`
+
+O CI (lint + build) já está configurado em `.github/workflows/ci.yml`. O que **falta** é o deploy automático — hoje o deploy ainda é manual via `./scripts/deploy.sh` no servidor.
+
+**Para ativar o deploy automático:**
+
+1. Gere uma chave SSH dedicada para o deploy (na sua máquina local):
+   ```bash
+   ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/smunitur_deploy
+   ```
+
+2. Adicione a chave pública ao servidor:
+   ```bash
+   cat ~/.ssh/smunitur_deploy.pub | ssh ubuntu@SEU_IP "cat >> ~/.ssh/authorized_keys"
+   ```
+
+3. No GitHub → Settings → Secrets and variables → Actions, adicione:
+   - `DEPLOY_HOST` = IP ou domínio do servidor
+   - `DEPLOY_USER` = `ubuntu` (ou o usuário que usa no servidor)
+   - `DEPLOY_KEY` = conteúdo de `~/.ssh/smunitur_deploy` (chave **privada**)
+
+4. Peça ao Claude Code para criar `.github/workflows/deploy.yml` — ele saberá montar o workflow com os secrets acima.
+
+- [ ] Chave SSH de deploy gerada e adicionada ao servidor
+- [ ] Secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_KEY` criados no GitHub
+- [ ] Workflow de deploy automático criado (pedir ao Claude com os secrets prontos)
 
 ---
 
