@@ -50,9 +50,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <Menu size={18} className="text-gray-700" />
           </button>
-          <span className="flex-1 text-sm font-semibold text-gray-800 truncate">
-            {PAGE_TITLES[pathname] ?? 'Admin'}
-          </span>
+          <div className="flex items-center gap-1 flex-1">
+            <span className="text-base font-black" style={{ color: '#005ED5' }}>SM</span>
+            <span className="text-base font-black" style={{ color: '#FF9400' }}>UNITUR</span>
+          </div>
+          {PAGE_TITLES[pathname] && (
+            <span className="text-xs font-medium text-gray-400 truncate max-w-28">
+              {PAGE_TITLES[pathname]}
+            </span>
+          )}
         </header>
         {children}
       </div>
