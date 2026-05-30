@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useSwipeToDismiss } from '@/hooks/useSwipeToDismiss';
 import {
   Plus, ToggleLeft, ToggleRight, X, Loader2,
   Pencil, Key, Trash2, AlertCircle, ShieldAlert, UserCircle,
@@ -208,13 +209,22 @@ export default function Usuarios() {
 // ─── Modais ───────────────────────────────────────────────────────────────────
 
 function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  const { sheetRef, sheetStyle, handlers } = useSwipeToDismiss(onClose);
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
       style={{ background: 'rgba(0,0,0,0.45)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90dvh] overflow-y-auto">
+      <div
+        ref={sheetRef}
+        className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain"
+        style={sheetStyle}
+        {...handlers}
+      >
+        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+          <div className="w-10 h-1 rounded-full bg-gray-200" />
+        </div>
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-100">
           <h2 className="font-bold text-gray-900">{title}</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100">

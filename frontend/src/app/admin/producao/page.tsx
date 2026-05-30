@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useSwipeToDismiss } from '@/hooks/useSwipeToDismiss';
 import { Package, Clock, Eye, X } from 'lucide-react';
 import api from '@/lib/api';
 import { STATUS_LIST, statusInfo } from '@/lib/orcamentoStatus';
@@ -58,6 +59,7 @@ export default function ProducaoPage() {
   };
 
   const fecharModal = () => setSelecionado(null);
+  const { sheetRef, sheetStyle, handlers: sheetHandlers } = useSwipeToDismiss(fecharModal);
 
   const salvarStatus = async () => {
     if (!selecionado) return;
@@ -151,7 +153,15 @@ export default function ProducaoPage() {
           style={{ background: 'rgba(0,0,0,0.45)' }}
           onClick={(e) => { if (e.target === e.currentTarget) fecharModal(); }}
         >
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90dvh] overflow-y-auto">
+          <div
+            ref={sheetRef}
+            className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain"
+            style={sheetStyle}
+            {...sheetHandlers}
+          >
+            <div className="flex justify-center pt-3 pb-1 sm:hidden">
+              <div className="w-10 h-1 rounded-full bg-gray-200" />
+            </div>
             <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-100">
               <div>
                 <h2 className="font-bold text-gray-900">Orçamento #{selecionado.numero}</h2>

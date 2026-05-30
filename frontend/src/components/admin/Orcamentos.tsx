@@ -8,6 +8,7 @@ import {
 import api, { API_BASE } from '@/lib/api';
 import { STATUS_LIST, STATUS_COLOR, STATUS_LABEL } from '@/lib/orcamentoStatus';
 import { ToastContainer, ToastData, ToastType } from '@/components/admin/Toast';
+import { useSwipeToDismiss } from '@/hooks/useSwipeToDismiss';
 
 const FILTRO_STATUS = [{ value: '', label: 'Todos' }, ...STATUS_LIST];
 
@@ -79,6 +80,7 @@ export default function Orcamentos() {
     if (temMudancas && !confirm('Há alterações não salvas. Deseja fechar mesmo assim?')) return;
     setSelecionado(null);
   };
+  const { sheetRef: modalSheetRef, sheetStyle: modalSheetStyle, handlers: modalHandlers } = useSwipeToDismiss(fecharModal);
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -373,7 +375,15 @@ export default function Orcamentos() {
           style={{ background: 'rgba(0,0,0,0.5)' }}
           onClick={(e) => { if (e.target === e.currentTarget) fecharModal(); }}
         >
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg max-h-[92vh] overflow-y-auto">
+          <div
+            ref={modalSheetRef}
+            className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto overscroll-contain"
+            style={modalSheetStyle}
+            {...modalHandlers}
+          >
+            <div className="flex justify-center pt-3 pb-1 sm:hidden">
+              <div className="w-10 h-1 rounded-full bg-gray-200" />
+            </div>
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
               <div>
                 <h2 className="font-bold text-gray-900">Orçamento #{selecionado.numero}</h2>
