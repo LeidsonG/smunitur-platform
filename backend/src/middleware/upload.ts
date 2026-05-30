@@ -24,7 +24,7 @@ import crypto from 'crypto';
 import fs from 'fs/promises';
 import sharp from 'sharp';
 import { Request, Response, NextFunction } from 'express';
-import logger from './logger';
+import logger from '../utils/logger';
 
 // Diretório físico onde tudo é gravado (espelha a montagem estática em index.ts).
 export const UPLOADS_DIR = path.join(__dirname, '..', '..', 'uploads');
