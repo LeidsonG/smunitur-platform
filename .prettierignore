@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+.next
+coverage
+*.sql
+*.sql.gz
+package-lock.json
+frontend/next-env.d.ts
