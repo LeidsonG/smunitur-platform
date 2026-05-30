@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu } from 'lucide-react';
+import { Menu, UserCircle } from 'lucide-react';
 import Sidebar from '@/components/admin/Sidebar';
+import { API_BASE } from '@/lib/api';
 
 const PAGE_TITLES: Record<string, string> = {
   '/admin/dashboard':     'Dashboard',
@@ -20,6 +21,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [ok, setOk] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [adminFoto, setAdminFoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('smunitur_admin');
+      if (raw) setAdminFoto(JSON.parse(raw).foto ?? null);
+    } catch { /* ignore */ }
+    const handler = () => {
+      try {
+        const raw = localStorage.getItem('smunitur_admin');
+        if (raw) setAdminFoto(JSON.parse(raw).foto ?? null);
+      } catch { /* ignore */ }
+    };
+    window.addEventListener('admin-atualizado', handler);
+    return () => window.removeEventListener('admin-atualizado', handler);
+  }, []);
 
   useEffect(() => {
     if (pathname === '/admin/login') {
@@ -55,10 +72,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="text-base font-black" style={{ color: '#FF9400' }}>UNITUR</span>
           </div>
           {PAGE_TITLES[pathname] && (
-            <span className="text-xs font-medium text-gray-400 truncate max-w-28">
+            <span className="text-xs font-medium text-gray-400 truncate max-w-24">
               {PAGE_TITLES[pathname]}
             </span>
           )}
+          <button
+            onClick={() => router.push('/admin/perfil')}
+            className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex items-center justify-center"
+            style={{ background: 'rgba(0,94,213,0.08)' }}
+            aria-label="Meu perfil"
+          >
+            {adminFoto
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={`${API_BASE}${adminFoto}`} alt="Perfil" className="w-full h-full object-cover" />
+              : <UserCircle size={18} style={{ color: '#005ED5' }} />}
+          </button>
         </header>
         {children}
       </div>

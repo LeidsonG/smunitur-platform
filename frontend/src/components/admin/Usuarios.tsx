@@ -73,17 +73,17 @@ export default function Usuarios() {
 
   return (
     <div className="flex-1 p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Usuários Administrativos</h1>
-          <p className="text-gray-500 text-sm mt-1">{usuarios.length} usuário{usuarios.length !== 1 ? 's' : ''}</p>
+      <div className="flex items-center justify-between mb-4 sm:mb-6 gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">Usuários</h1>
+          <p className="text-gray-500 text-sm mt-0.5">{usuarios.length} usuário{usuarios.length !== 1 ? 's' : ''}</p>
         </div>
         <button
           onClick={() => setModal({ type: 'criar' })}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white text-sm transition-all hover:scale-105"
+          className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl font-semibold text-white text-sm transition-all hover:scale-105 flex-shrink-0"
           style={{ background: '#005ED5' }}
         >
-          <Plus size={18} /> Novo Usuário
+          <Plus size={16} /> <span className="hidden sm:inline">Novo</span> Usuário
         </button>
       </div>
 
@@ -97,7 +97,7 @@ export default function Usuarios() {
             {usuarios.map((u) => {
               const ehVoce = u.id === meuId;
               return (
-                <div key={u.id} className={`flex flex-wrap items-center gap-3 px-6 py-4 ${!u.ativo ? 'opacity-50' : ''}`}>
+                <div key={u.id} className={`flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 ${!u.ativo ? 'opacity-50' : ''}`}>
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
                     style={{ background: `${NIVEL_COLOR[u.nivel]}18` }}
@@ -128,36 +128,24 @@ export default function Usuarios() {
                     {new Date(u.createdAt).toLocaleDateString('pt-BR')}
                   </span>
 
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <button
-                      onClick={() => setModal({ type: 'editar', usuario: u })}
-                      title="Editar dados"
-                      className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
-                    >
+                  <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ml-auto">
+                    <button onClick={() => setModal({ type: 'editar', usuario: u })} title="Editar"
+                      className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
                       <Pencil size={14} />
                     </button>
-                    <button
-                      onClick={() => setModal({ type: 'senha', usuario: u })}
-                      title="Redefinir senha"
-                      className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
-                    >
+                    <button onClick={() => setModal({ type: 'senha', usuario: u })} title="Redefinir senha"
+                      className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
                       <Key size={14} />
                     </button>
-                    <button
-                      onClick={() => toggleAtivo(u)}
-                      title={u.ativo ? 'Desativar' : 'Ativar'}
+                    <button onClick={() => toggleAtivo(u)} title={u.ativo ? 'Desativar' : 'Ativar'}
                       disabled={ehVoce}
-                      className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      style={{ color: u.ativo ? '#10B981' : '#EF4444' }}
-                    >
+                      className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      style={{ color: u.ativo ? '#10B981' : '#EF4444' }}>
                       {u.ativo ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
                     </button>
-                    <button
-                      onClick={() => setModal({ type: 'excluir', usuario: u })}
-                      title="Excluir"
+                    <button onClick={() => setModal({ type: 'excluir', usuario: u })} title="Excluir"
                       disabled={ehVoce}
-                      className="p-2 rounded-lg hover:bg-red-50 text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    >
+                      className="p-1.5 sm:p-2 rounded-lg hover:bg-red-50 text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -203,15 +191,19 @@ function ModalShell({
   title, onClose, children,
 }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
-          <h2 className="font-bold text-gray-900">{title}</h2>
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
+      style={{ background: 'rgba(0,0,0,0.4)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-100">
+          <h2 className="font-bold text-gray-900 text-sm sm:text-base">{title}</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100">
             <X size={18} />
           </button>
         </div>
-        <div className="p-5 space-y-4">{children}</div>
+        <div className="p-4 sm:p-5 space-y-4">{children}</div>
       </div>
     </div>
   );
