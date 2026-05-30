@@ -65,7 +65,18 @@ if [ "$WITH_DEMO" = true ]; then
   docker compose exec backend npm run db:seed:demo
 fi
 
-# ── 6. Resultado ────────────────────────────────────────────────────────────
+# ── 6. Instalar dependências no host (para ESLint funcionar no VSCode) ───────
+echo ""
+echo "Instalando dependências no host para o ESLint do VSCode..."
+
+for dir in backend frontend; do
+  if [ -d "$dir/node_modules" ]; then
+    sudo chown -R "$(whoami):$(whoami)" "$dir/node_modules" 2>/dev/null || true
+  fi
+  (cd "$dir" && npm ci --silent 2>/dev/null) && echo "  ✓ $dir" || echo "  ✗ $dir — rode 'cd $dir && npm ci' manualmente"
+done
+
+# ── 7. Resultado ────────────────────────────────────────────────────────────
 echo ""
 echo "========================================="
 echo " Ambiente pronto!"
