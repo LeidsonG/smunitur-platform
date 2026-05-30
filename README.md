@@ -12,10 +12,10 @@ Sistema web completo para a empresa **SM Unitur**, especializada em confecção 
 - [`docs/DOCKER.md`](docs/DOCKER.md) — referência completa de comandos Docker, volumes, performance WSL2
 
 **Operacional e roadmap:**
-1. [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md) — itens obrigatórios antes de subir para o cliente
+1. [`docs/1-pre-production-checklist.md`](docs/1-pre-production-checklist.md) — itens obrigatórios antes de subir para o cliente
 2. [`docs/2-deploy-oracle.md`](docs/2-deploy-oracle.md) — deploy na Oracle Cloud (VM A1 Flex, ARM)
 3. [`docs/3-deploy-hostinger.md`](docs/3-deploy-hostinger.md) — deploy alternativo na Hostinger VPS (mais barato)
-4. [`docs/4-proximas-funcionalidades.md`](docs/4-proximas-funcionalidades.md) — funcionalidades planejadas para depois da versão atual
+4. [`docs/4-roadmap.md`](docs/4-roadmap.md) — funcionalidades planejadas para depois da versão atual
 
 > **Primeira vez no projeto?** Siga o [`CONTRIBUTING.md`](CONTRIBUTING.md) — cobre desde a instalação do WSL2 até o sistema rodando no browser.
 
@@ -167,6 +167,6 @@ Isso permite criar "Gola" uma vez e reutilizar em Camiseta Polo, Camiseta Básic
 
 ## Pendências
 
-Veja [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md) — checklist completo dos itens que precisam ser definidos antes de subir para o cliente (WhatsApp oficial, JWT_SECRET, senha do admin, domínio, etc).
+Veja [`docs/1-pre-production-checklist.md`](docs/1-pre-production-checklist.md) — checklist completo dos itens que precisam ser definidos antes de subir para o cliente (WhatsApp oficial, JWT_SECRET, senha do admin, domínio, etc).
 
-Para próximas funcionalidades (cliente como entidade, notificação por e-mail, FK forte de modelo/linha) veja [`docs/4-proximas-funcionalidades.md`](docs/4-proximas-funcionalidades.md).
+Para próximas funcionalidades (cliente como entidade, notificação por e-mail, FK forte de modelo/linha) veja [`docs/4-roadmap.md`](docs/4-roadmap.md).

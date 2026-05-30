@@ -135,7 +135,7 @@ erDiagram
 
 - **Especificações globais reutilizáveis**: "Tipo de Gola" é cadastrado uma vez e associado a Camiseta Polo, Camiseta Básica etc. Cada modelo escolhe **quais variações** daquele especificação expõe ao cliente (via `ModeloEspecificacaoVariacao`).
 - **`OrcamentoEspecificacao` com FKs em `SetNull`**: se uma variação for excluída no futuro, o orçamento antigo perde a referência mas o registro permanece — auditoria preservada. Use o campo `valorLivre` como snapshot textual quando precisar dessa garantia.
-- **Sem entidade Cliente**: nome/e-mail/telefone são copiados em cada orçamento. Trade-off conhecido — virou item para uma próxima versão (ver [`docs/4-proximas-funcionalidades.md`](docs/4-proximas-funcionalidades.md)).
+- **Sem entidade Cliente**: nome/e-mail/telefone são copiados em cada orçamento. Trade-off conhecido — virou item para uma próxima versão (ver [`docs/4-roadmap.md`](docs/4-roadmap.md)).
 - **`Orcamento.numero`**: começa em 100, auto-incrementado pela aplicação (não pelo banco), para gerar IDs amigáveis ao cliente.
 - **`Orcamento.tamanhos`** e **`Orcamento.cores`**: strings concatenadas (`"PP: 5, P: 10"`). O frontend já estrutura no momento da entrada — normalizar isso virou item para uma próxima versão.
 - **`UsuarioAdmin.tokenVersion`**: incrementa em troca de senha, desativação, ou reset administrativo. O middleware compara com o `tv` do JWT — token desatualizado = 401. Substitui a necessidade de uma blacklist de tokens.
@@ -225,7 +225,7 @@ Ver [`docs/2-deploy-oracle.md`](docs/2-deploy-oracle.md) para procedimento compl
 
 ## O que NÃO está implementado (intencional)
 
-Decisões registradas em [`docs/4-proximas-funcionalidades.md`](docs/4-proximas-funcionalidades.md):
+Decisões registradas em [`docs/4-roadmap.md`](docs/4-roadmap.md):
 
 - Cliente como entidade própria (sem deduplicação)
 - Prazo de entrega no orçamento

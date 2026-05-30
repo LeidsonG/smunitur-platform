@@ -392,5 +392,5 @@ docker compose build --no-cache backend
 
 - [`docs/DOCKER.md`](docs/DOCKER.md) — comandos Docker avançados, performance WSL2, produção
 - [`ARCHITECTURE.md`](ARCHITECTURE.md) — visão geral da arquitetura e modelo de dados
-- [`docs/1-checklist-pre-producao.md`](docs/1-checklist-pre-producao.md) — checklist antes de ir para produção
+- [`docs/1-pre-production-checklist.md`](docs/1-pre-production-checklist.md) — checklist antes de ir para produção
 - [Conventional Commits](https://www.conventionalcommits.org/pt-br/) — especificação completa

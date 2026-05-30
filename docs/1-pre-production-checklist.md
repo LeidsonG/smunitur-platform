@@ -15,7 +15,7 @@ Use este arquivo como roteiro de aceite. Marque `[x]` quando concluído.
 | Endereço físico (se for exibir) | `frontend/src/components/landing/Footer.tsx` / `Contato.tsx` | [ ] |
 | Redes sociais (Instagram, Facebook) — links reais | `frontend/src/components/landing/Footer.tsx` | [ ] |
 | Logo da empresa (substituir asset em `/image/`) | conferir referências em components | [ ] |
-| Paleta de cores especial da fábrica (aguardando) | será nova feature numa próxima versão — ver [`4-proximas-funcionalidades.md`](4-proximas-funcionalidades.md) | [ ] |
+| Paleta de cores especial da fábrica (aguardando) | será nova feature numa próxima versão — ver [`4-roadmap.md`](4-roadmap.md) | [ ] |
 
 ---
 

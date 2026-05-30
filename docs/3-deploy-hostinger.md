@@ -25,7 +25,7 @@ Guia passo a passo para subir o sistema em uma **VPS da Hostinger** com Ubuntu 2
 - [ ] Conta criada na Hostinger (<https://hostinger.com.br>)
 - [ ] Domínio comprado (pode ser na própria Hostinger ou em outro registrador)
 - [ ] Acesso SSH no seu computador
-- [ ] Arquivo [`1-checklist-pre-producao.md`](1-checklist-pre-producao.md) preenchido com os valores reais
+- [ ] Arquivo [`1-pre-production-checklist.md`](1-pre-production-checklist.md) preenchido com os valores reais
 
 ---
 
