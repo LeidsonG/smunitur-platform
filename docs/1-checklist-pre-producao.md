@@ -35,15 +35,32 @@ Use este arquivo como roteiro de aceite. Marque `[x]` quando concluído.
 
 Ver [`2-deploy.md`](2-deploy.md) passo-a-passo. Itens-chave:
 
+**Shape recomendado: `VM.Standard.A1.Flex` (Ampere ARM64)**
+- Always Free: 4 OCPUs + 24 GB (gratuito, sem SLA de disponibilidade)
+- Conta paga recomendada: 2 OCPUs + 8 GB (~$23/mês, SLA 99.9%)
+
 | Item | Status |
 |------|--------|
 | Conta Oracle Cloud criada + MFA ativado | [ ] |
-| VM Always Free A1 provisionada em região BR | [ ] |
+| VM A1.Flex provisionada em região BR (São Paulo ou Vinhedo) | [ ] |
+| Shape configurado: Always Free (4 OCPU/24 GB) ou Pago (2 OCPU/8 GB) | [ ] |
+| Boot volume: 200 GB (free) ou 100 GB (pago) | [ ] |
 | Chave SSH `.key` salva em local seguro (backup!) | [ ] |
-| Security List liberando portas 80 e 443 | [ ] |
+| Security List liberando portas 80 e 443 (não expor 3000/3001/3306) | [ ] |
 | `iptables` na VM liberando 80/443 (`netfilter-persistent save`) | [ ] |
+| Swap de 2 GB configurado (obrigatório se usar 2 GB RAM, recomendado em qualquer caso) | [ ] |
 | Fail2ban instalado para SSH | [ ] |
 | Login SSH por senha desabilitado | [ ] |
+
+**Se migrou de Free Tier para conta paga:**
+
+| Item | Status |
+|------|--------|
+| Dump MySQL transferido e restaurado na nova VM | [ ] |
+| Uploads (`/var/smunitur/uploads/`) copiados para nova VM | [ ] |
+| Sistema verificado via IP da nova VM antes de mudar DNS | [ ] |
+| DNS atualizado para novo IP | [ ] |
+| Instância antiga desligada (não deletar por 48h) | [ ] |
 
 ---
 
@@ -134,6 +151,8 @@ Ver [`2-deploy.md`](2-deploy.md) passo-a-passo. Itens-chave:
 | Backup diário do MySQL configurado (`crontab -l`) | [ ] |
 | Diretório de backup com permissão correta (`/var/backups/smunitur`) | [ ] |
 | Rotação de logs PM2 (`pm2 install pm2-logrotate`) | [ ] |
+| Tags de deploy criadas antes de cada atualização (`git tag deploy-YYYYMMDD-HHMM`) | [ ] |
+| Rollback testado ao menos uma vez (ver seção 17 de `2-deploy.md`) | [ ] |
 | (Recomendado) Monitor externo (UptimeRobot ou OCI Monitoring) | [ ] |
 | (Recomendado) Backup off-site para Oracle Object Storage | [ ] |
 | Documentação interna entregue ao cliente (este arquivo + 2-deploy.md) | [ ] |
