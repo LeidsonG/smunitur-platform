@@ -15,7 +15,7 @@ import { body, validationResult } from 'express-validator';
 import prisma from '../utils/prisma';
 import { env } from '../utils/env';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../utils/upload';
+import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../middleware/upload';
 
 const router = Router();
 

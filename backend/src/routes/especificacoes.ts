@@ -2,7 +2,7 @@ import { Router, Response } from 'express';
 import { Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../utils/upload';
+import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../middleware/upload';
 
 const router = Router();
 

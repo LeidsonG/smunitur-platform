@@ -16,7 +16,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 import { StatusOrcamento, Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
-import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../utils/upload';
+import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../middleware/upload';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();

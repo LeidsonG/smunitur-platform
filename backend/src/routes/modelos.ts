@@ -3,7 +3,7 @@ import { body, validationResult } from 'express-validator';
 import { Prisma } from '@prisma/client';
 
 import prisma from '../utils/prisma';
-import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../utils/upload';
+import { upload, validarMagicBytes, processarImagens, apagarUpload } from '../middleware/upload';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
